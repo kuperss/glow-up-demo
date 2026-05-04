@@ -26,6 +26,13 @@ service cloud.firestore {
       allow create, update, delete: if isManagerOrSuper();
     }
 
+    // ===== Site Content (CMS) =====
+    // 任何登入者都能讀（前端套用覆蓋值）；只有主管能寫
+    match /siteContent/{contentId} {
+      allow read: if isSignedIn();
+      allow create, update, delete: if isManagerOrSuper();
+    }
+
     // ===== Users =====
     // 任何人都能讀自己；主管能讀全部
     // 創建/更新自己的 user doc 是被允許的（但只能寫自己的 uid）

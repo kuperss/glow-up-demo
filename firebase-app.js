@@ -186,7 +186,11 @@ export function requireAuth(opts = {}) {
         onUsersUpdate(cb) { cb([guestDoc]); return () => {}; },
         onAllowlistUpdate(cb) { cb([]); return () => {}; },
         async getStuckPointAnalysis() { return []; },
-        async markWizardSeen() { guestDoc.wizardSeen = true; }
+        async markWizardSeen() { guestDoc.wizardSeen = true; },
+        async listSiteContent() { return []; },
+        async saveContentValue() { alert('訪客模式：無法儲存內容變更'); },
+        onSiteContentUpdate(cb) { cb([]); return () => {}; },
+        async applySiteContent() { /* no-op for guest */ }
       };
       document.dispatchEvent(new CustomEvent('glow-firebase-ready', { detail: { user: currentUser, doc: guestDoc } }));
       resolve({ user: currentUser, doc: guestDoc });
@@ -218,8 +222,11 @@ export function requireAuth(opts = {}) {
         getCurrentUser, signOutUser, markWizardSeen,
         listAllowlist, addToAllowlist, removeFromAllowlist,
         listAllUsers, getUserProgressDetail,
-        onUsersUpdate, onAllowlistUpdate, getStuckPointAnalysis
+        onUsersUpdate, onAllowlistUpdate, getStuckPointAnalysis,
+        listSiteContent, saveContentValue, onSiteContentUpdate, applySiteContent
       };
+      // 自動套用 siteContent 覆蓋
+      applySiteContent();
       // Dispatch ready event for inline scripts that need to wait
       document.dispatchEvent(new CustomEvent('glow-firebase-ready', {
         detail: { user, doc: currentUserDoc }
@@ -459,6 +466,52 @@ export async function getUserProgressDetail(uid) {
     scenariosCompleted: scenarios.length,
     totalCompleted: progress.length + scenarios.length
   };
+}
+
+// ========== 內容模組化（siteContent CMS）==========
+// 在 HTML 中：<h1 data-content-id="home.hero.title">預設文字</h1>
+// 主管在 admin.html 編輯後，所有頁面下次載入會抓到 Firestore 上的覆蓋值
+// 若 Firestore 沒值就保留 HTML 原文（fallback 安全）
+
+export async function listSiteContent() {
+  const snap = await getDocs(collection(db, 'siteContent'));
+  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+}
+
+export async function saveContentValue(id, value, meta = {}) {
+  await setDoc(doc(db, 'siteContent', id), {
+    id, value,
+    page: meta.page || '',
+    label: meta.label || '',
+    type: meta.type || 'text',
+    updatedAt: serverTimestamp()
+  }, { merge: true });
+}
+
+export function onSiteContentUpdate(cb) {
+  return onSnapshot(collection(db, 'siteContent'), snap => {
+    const list = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    cb(list);
+  }, err => console.warn('siteContent onSnapshot err', err));
+}
+
+// 套用：把 Firestore 上的覆蓋值套到 [data-content-id] 元素
+export async function applySiteContent() {
+  const elements = document.querySelectorAll('[data-content-id]');
+  if (elements.length === 0) return;
+  try {
+    const list = await listSiteContent();
+    const map = {};
+    list.forEach(item => { map[item.id] = item.value; });
+    elements.forEach(el => {
+      const id = el.dataset.contentId;
+      if (map[id] != null && map[id] !== '') {
+        const type = el.dataset.contentType || 'text';
+        if (type === 'html') el.innerHTML = map[id];
+        else el.textContent = map[id];
+      }
+    });
+  } catch(e) { console.warn('applySiteContent failed', e); }
 }
 
 // 重新匯出常用 Firestore primitives 供頁面直接使用
