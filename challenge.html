@@ -1139,102 +1139,98 @@
   }, { threshold: 0.12 });
   reveals.forEach(r => io.observe(r));
 
-  // === Quiz Logic ===
+  // === Quiz Logic (Firestore-backed) ===
   const TOTAL_QUIZ_COUNT = 12 + 5 + 5; // 12 (Stage1-3) + 5 AI scenarios + 5 HR (Stage5)
-  const STORAGE_KEY = 'glow-quiz-progress-v1';
   let totalScore = 0;
   let completedCount = 0;
   let completedQuizIds = new Set();   // q1, q2, ...
+  let _savedProgress = null;           // 給後段 Stage4 初始化用
 
-  // ---- localStorage persistence ----
-  function loadProgress() {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return null;
-      const data = JSON.parse(raw);
-      totalScore = data.score || 0;
-      completedCount = data.completed || 0;
-      completedQuizIds = new Set(data.quizIds || []);
-      return data;
-    } catch (e) { return null; }
-  }
-  function saveProgress() {
-    const data = {
-      score: totalScore,
-      completed: completedCount,
-      quizIds: Array.from(completedQuizIds),
-      scenarios: (typeof completedScenarios !== 'undefined') ? Array.from(completedScenarios) : [],
-      total: TOTAL_QUIZ_COUNT,
-      ts: Date.now()
-    };
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch(e) {}
-  }
   function refreshUI() {
     const ts = document.getElementById('totalScore'); if (ts) ts.textContent = totalScore;
     const cp = document.getElementById('completed'); if (cp) cp.textContent = completedCount;
     const tp = document.getElementById('totalProgress'); if (tp) tp.style.width = ((completedCount / TOTAL_QUIZ_COUNT) * 100) + '%';
   }
-  // Expose for the reset button + completedScenarios restoration after Stage4 init
+
+  // 重設按鈕：呼叫 Firebase helper 刪除 server 端的所有進度，再 reload
   window.glowProgress = {
-    reset() {
-      try { localStorage.removeItem(STORAGE_KEY); } catch(e) {}
-      location.reload();
-    },
-    save: saveProgress
+    async reset() {
+      if (!window.glowFirebase) { alert('系統還沒準備好，請稍候再試。'); return; }
+      try {
+        await window.glowFirebase.resetMyProgress();
+        location.reload();
+      } catch(e) {
+        console.error(e);
+        alert('重設失敗：' + (e.message || e));
+      }
+    }
   };
 
-  function updateScore(points, quizId) {
+  async function updateScore(points, quizId, isCorrect = true) {
     if (quizId && completedQuizIds.has(quizId)) return;
-    totalScore += points;
+    if (isCorrect) totalScore += points;
     completedCount++;
     if (quizId) completedQuizIds.add(quizId);
     refreshUI();
-    saveProgress();
+    if (window.glowFirebase) {
+      try {
+        if (quizId && quizId.startsWith('scenario:')) {
+          // 由 scenario 完成路徑呼叫，已在外部處理
+        } else if (quizId) {
+          await window.glowFirebase.recordQuizAttempt(quizId, isCorrect, points);
+        }
+      } catch(e) { console.warn('記錄進度失敗', e); }
+    }
   }
 
-  // Restore on load
-  const _savedProgress = loadProgress();
-  refreshUI();
+  function attachQuizHandlers() {
+    document.querySelectorAll('.quiz-block').forEach(block => {
+      const opts = block.querySelectorAll('.opt');
+      const feedback = block.querySelector('.feedback');
+      const points = parseInt(block.dataset.points || '10');
+      const quizId = block.dataset.quiz;
+      let answered = false;
 
-  document.querySelectorAll('.quiz-block').forEach(block => {
-    const opts = block.querySelectorAll('.opt');
-    const feedback = block.querySelector('.feedback');
-    const points = parseInt(block.dataset.points || '10');
-    const quizId = block.dataset.quiz;
-    let answered = false;
-
-    // Restore previously-answered state
-    if (quizId && completedQuizIds.has(quizId)) {
-      opts.forEach(o => { if (o.dataset.correct === 'true') o.classList.add('correct'); });
-      if (feedback) feedback.classList.add('show');
-      block.classList.add('completed');
-      answered = true;
-    }
-
-    opts.forEach(opt => {
-      opt.addEventListener('click', () => {
-        if (answered) return;
-        const isCorrect = opt.dataset.correct === 'true';
-        opts.forEach(o => {
-          if (o.dataset.correct === 'true') o.classList.add('correct');
-        });
-        if (!isCorrect) opt.classList.add('wrong');
+      // 從 Firestore 還原已答狀態
+      if (quizId && completedQuizIds.has(quizId)) {
+        opts.forEach(o => { if (o.dataset.correct === 'true') o.classList.add('correct'); });
         if (feedback) feedback.classList.add('show');
-        if (isCorrect) {
-          updateScore(points, quizId);
-          block.classList.add('completed');
-        } else {
-          // Wrong attempt still locks the question (no retry, no points)
-          if (quizId && !completedQuizIds.has(quizId)) {
-            completedCount++;
-            completedQuizIds.add(quizId);
-            refreshUI();
-            saveProgress();
-          }
-        }
+        block.classList.add('completed');
         answered = true;
+      }
+
+      opts.forEach(opt => {
+        opt.addEventListener('click', async () => {
+          if (answered) return;
+          answered = true;
+          const isCorrect = opt.dataset.correct === 'true';
+          opts.forEach(o => {
+            if (o.dataset.correct === 'true') o.classList.add('correct');
+          });
+          if (!isCorrect) opt.classList.add('wrong');
+          if (feedback) feedback.classList.add('show');
+          if (isCorrect) block.classList.add('completed');
+          await updateScore(points, quizId, isCorrect);
+        });
       });
     });
+  }
+
+  // 等 firebase ready 之後再讀進度 + 綁 click handler
+  document.addEventListener('glow-firebase-ready', async () => {
+    try {
+      _savedProgress = await window.glowFirebase.loadProgress() || { score:0, completed:0, quizIds:[], scenarios:[] };
+      totalScore = _savedProgress.score || 0;
+      completedCount = _savedProgress.completed || 0;
+      completedQuizIds = new Set(_savedProgress.quizIds || []);
+    } catch(e) {
+      console.warn('讀取進度失敗', e);
+      _savedProgress = { score:0, completed:0, quizIds:[], scenarios:[] };
+    }
+    refreshUI();
+    attachQuizHandlers();
+    // 通知 Stage 4 場景初始化（在下方）
+    document.dispatchEvent(new Event('glow-quiz-state-ready'));
   });
 
   // === Stage 4: 5 Scenarios driven AI Chat ===
@@ -1383,7 +1379,7 @@
   let activeScenarioKey = 'dealer';
   let currentRound = 0;
   let scenarioToken = 0;
-  const completedScenarios = new Set((_savedProgress && _savedProgress.scenarios) || []);
+  let completedScenarios = new Set();   // 等 firebase ready 後才填
 
   const chatWindow = document.getElementById('chatWindow');
   const replyArea = document.getElementById('replyArea');
@@ -1392,13 +1388,6 @@
   const chatActiveSubtitle = document.getElementById('chatActiveSubtitle');
   const chatActiveTag = document.getElementById('chatActiveTag');
   const scenariosCompletedEl = document.getElementById('scenariosCompleted');
-
-  // Restore completed scenario tab marks on load
-  if (scenariosCompletedEl) scenariosCompletedEl.textContent = completedScenarios.size;
-  completedScenarios.forEach(k => {
-    const t = document.querySelector('.scenario-tab[data-scenario="' + k + '"]');
-    if (t) t.classList.add('completed');
-  });
 
   function appendBubble({ type, text, actorLabel }) {
     if (actorLabel) {
@@ -1414,7 +1403,7 @@
     chatWindow.scrollTop = chatWindow.scrollHeight;
   }
 
-  function renderReplies() {
+  async function renderReplies() {
     const myToken = scenarioToken;
     replyArea.innerHTML = '';
     const scenario = scenarios[activeScenarioKey];
@@ -1424,13 +1413,19 @@
       done.innerHTML = '<div class="text-orange-300 font-bold mb-1">✓ 對話完成！+50 光點</div><div class="text-xs text-gray-400">' + scenario.finishMessage + '</div>';
       replyArea.appendChild(done);
       if (!completedScenarios.has(activeScenarioKey)) {
-        completedScenarios.add(activeScenarioKey);
+        const finishedKey = activeScenarioKey;
+        completedScenarios.add(finishedKey);
         scenariosCompletedEl.textContent = completedScenarios.size;
-        const tab = document.querySelector('.scenario-tab[data-scenario="' + activeScenarioKey + '"]');
+        const tab = document.querySelector('.scenario-tab[data-scenario="' + finishedKey + '"]');
         if (tab) tab.classList.add('completed');
-        updateScore(50, 'scenario:' + activeScenarioKey);
-      } else {
-        saveProgress();
+        // 寫入 Firestore + 加分 (50 光點)
+        totalScore += 50;
+        completedCount++;
+        refreshUI();
+        if (window.glowFirebase) {
+          try { await window.glowFirebase.recordScenarioCompletion(finishedKey, 50); }
+          catch(e) { console.warn('場景進度寫入失敗', e); }
+        }
       }
       return;
     }
@@ -1497,7 +1492,24 @@
     });
   });
 
-  setTimeout(() => loadScenario('dealer'), 1000);
+  // 等 quiz state ready（已從 Firestore 抓到 _savedProgress）→ 還原已完成場景 + 載入第一個情境
+  document.addEventListener('glow-quiz-state-ready', () => {
+    completedScenarios = new Set((_savedProgress && _savedProgress.scenarios) || []);
+    if (scenariosCompletedEl) scenariosCompletedEl.textContent = completedScenarios.size;
+    completedScenarios.forEach(k => {
+      const t = document.querySelector('.scenario-tab[data-scenario="' + k + '"]');
+      if (t) t.classList.add('completed');
+    });
+    setTimeout(() => loadScenario('dealer'), 600);
+  });
+</script>
+
+
+<!-- ===== Firebase Auth Guard ===== -->
+<script type="module">
+  import { requireAuth, injectUserPill } from './firebase-app.js';
+  await requireAuth();
+  injectUserPill();
 </script>
 
 </body>

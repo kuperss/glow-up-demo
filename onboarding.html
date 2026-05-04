@@ -721,5 +721,13 @@
   document.querySelectorAll('.reveal').forEach(el => io.observe(el));
 </script>
 
+
+<!-- ===== Firebase Auth Guard ===== -->
+<script type="module">
+  import { requireAuth, injectUserPill } from './firebase-app.js';
+  await requireAuth();
+  injectUserPill();
+</script>
+
 </body>
 </html>

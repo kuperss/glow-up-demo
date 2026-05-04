@@ -1,0 +1,56 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ===== Helper functions =====
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    function isSuperAdmin() {
+      return isSignedIn() && request.auth.token.email == 'jerryloveyoux@gmail.com';
+    }
+    function isManager() {
+      return isSignedIn() &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'manager';
+    }
+    function isManagerOrSuper() {
+      return isSuperAdmin() || isManager();
+    }
+
+    // ===== Allowlist =====
+    // 任何登入者都需要能讀自己這筆（系統自動檢查），主管能讀全部
+    // 只有主管能新增/移除
+    match /allowlist/{allowKey} {
+      allow read: if isSignedIn();
+      allow create, update, delete: if isManagerOrSuper();
+    }
+
+    // ===== Users =====
+    // 任何人都能讀自己；主管能讀全部
+    // 創建/更新自己的 user doc 是被允許的（但只能寫自己的 uid）
+    // 主管可以更新任何人（用來改 role）
+    match /users/{userId} {
+      allow read: if isSignedIn() && (request.auth.uid == userId || isManagerOrSuper());
+      allow create: if isSignedIn() && request.auth.uid == userId;
+      allow update: if isSignedIn() && (request.auth.uid == userId || isManagerOrSuper());
+      allow delete: if isManagerOrSuper();
+
+      // ----- progress / scenarios subcollections -----
+      // 學員寫自己的進度；主管能讀任何人
+      match /progress/{quizId} {
+        allow read: if isSignedIn() && (request.auth.uid == userId || isManagerOrSuper());
+        allow write: if isSignedIn() && request.auth.uid == userId;
+      }
+      match /scenarios/{scenarioId} {
+        allow read: if isSignedIn() && (request.auth.uid == userId || isManagerOrSuper());
+        allow write: if isSignedIn() && request.auth.uid == userId;
+      }
+    }
+
+    // 預設拒絕所有其他存取
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -1,0 +1,356 @@
+// === firebase-app.js ===
+// 舞光戰將點燈計劃 · 共用 Firebase 模組
+// 由所有 HTML 頁面 import 使用，提供 auth、progress、admin helper。
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+import {
+  getAuth, GoogleAuthProvider, signInWithPopup, signOut,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+import {
+  getFirestore, doc, setDoc, getDoc, getDocs, collection, query, where,
+  onSnapshot, serverTimestamp, deleteDoc, updateDoc
+} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDQZayWR7PzfvCjVIUKmXFnqcLQif7P3TE",
+  authDomain: "dancelight-training.firebaseapp.com",
+  projectId: "dancelight-training",
+  storageBucket: "dancelight-training.firebasestorage.app",
+  messagingSenderId: "552728708137",
+  appId: "1:552728708137:web:67900fee79393a61b0c838"
+};
+
+// 超級管理員 — 第一次登入會自動建立 manager 帳號
+// 想新增其他主管時，超管在 admin.html 把對方加進白名單並設 role=manager 即可
+export const SUPER_ADMIN_EMAIL = "jerryloveyoux@gmail.com";
+
+export const app = initializeApp(firebaseConfig);
+export const auth = getAuth(app);
+export const db = getFirestore(app);
+const provider = new GoogleAuthProvider();
+
+let currentUser = null;
+let currentUserDoc = null;
+
+// ========== 工具：把 email 轉成可作為 doc id 的字串 ==========
+function emailKey(email) {
+  return email.toLowerCase().replace(/[.#$/\[\]]/g, '_');
+}
+
+// ========== Auth 監聽 ==========
+export function onAuth(callback) {
+  return onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      const profile = await ensureUserProfile(user);
+      if (!profile.authorized) {
+        await signOut(auth);
+        currentUser = null;
+        currentUserDoc = null;
+        callback(null, { reason: profile.reason });
+        return;
+      }
+      currentUser = user;
+      currentUserDoc = profile.doc;
+      callback(user, { doc: profile.doc });
+    } else {
+      currentUser = null;
+      currentUserDoc = null;
+      callback(null);
+    }
+  });
+}
+
+export async function signInWithGoogle() {
+  return signInWithPopup(auth, provider);
+}
+
+export async function signOutUser() {
+  await signOut(auth);
+  location.href = 'login.html';
+}
+
+export function getCurrentUser() {
+  return currentUser ? { auth: currentUser, doc: currentUserDoc } : null;
+}
+
+// ========== 確認用戶在白名單，沒有就拒絕；有就建/更 user doc ==========
+async function ensureUserProfile(user) {
+  const isSuper = user.email === SUPER_ADMIN_EMAIL;
+  const userRef = doc(db, 'users', user.uid);
+
+  // 先讀現有 user doc（已登入過的人）
+  const userSnap = await getDoc(userRef);
+  let profile;
+
+  if (userSnap.exists()) {
+    profile = userSnap.data();
+    // 持續寫一筆 lastSeen 不會 fail（更新自己永遠 OK）
+    try {
+      await updateDoc(userRef, {
+        lastSeen: serverTimestamp(),
+        photoURL: user.photoURL || profile.photoURL || null
+      });
+    } catch(e) { /* ignore */ }
+    return { authorized: true, doc: profile };
+  }
+
+  // 第一次登入：超管 OR 在 allowlist 才放行
+  if (isSuper) {
+    profile = {
+      uid: user.uid,
+      email: user.email,
+      name: user.displayName || '超級管理員',
+      empId: 'SUPER_ADMIN',
+      role: 'manager',
+      photoURL: user.photoURL || null,
+      joinedAt: serverTimestamp(),
+      lastSeen: serverTimestamp()
+    };
+    await setDoc(userRef, profile);
+    return { authorized: true, doc: profile };
+  }
+
+  // 一般人：查 allowlist
+  const allowRef = doc(db, 'allowlist', emailKey(user.email));
+  const allowSnap = await getDoc(allowRef);
+  if (!allowSnap.exists()) {
+    return { authorized: false, reason: 'EMAIL_NOT_IN_ALLOWLIST' };
+  }
+  const allowData = allowSnap.data();
+
+  profile = {
+    uid: user.uid,
+    email: user.email,
+    name: allowData.name || user.displayName || user.email,
+    empId: allowData.empId || '',
+    role: allowData.role || 'trainee',
+    photoURL: user.photoURL || null,
+    joinedAt: serverTimestamp(),
+    lastSeen: serverTimestamp()
+  };
+  await setDoc(userRef, profile);
+  return { authorized: true, doc: profile };
+}
+
+// ========== 頁面守門員 ==========
+export function requireAuth(opts = {}) {
+  return new Promise((resolve) => {
+    onAuth((user, info) => {
+      if (!user) {
+        const reason = info && info.reason;
+        if (reason === 'EMAIL_NOT_IN_ALLOWLIST') {
+          location.href = 'login.html?notallowed=1';
+        } else {
+          // 避免 login.html 自己又跳到 login.html
+          if (!location.pathname.endsWith('login.html')) {
+            location.href = 'login.html';
+          }
+        }
+        return;
+      }
+      // 角色限制（admin.html 用）
+      if (opts.requireManager && currentUserDoc.role !== 'manager') {
+        location.href = 'index.html?denied=manager';
+        return;
+      }
+      // Expose Firestore helpers globally so non-module inline scripts can use them
+      window.glowFirebase = {
+        recordQuizAttempt, recordScenarioCompletion, loadProgress, resetMyProgress,
+        getCurrentUser, signOutUser,
+        listAllowlist, addToAllowlist, removeFromAllowlist,
+        listAllUsers, getUserProgressDetail
+      };
+      // Dispatch ready event for inline scripts that need to wait
+      document.dispatchEvent(new CustomEvent('glow-firebase-ready', {
+        detail: { user, doc: currentUserDoc }
+      }));
+      resolve({ user, doc: currentUserDoc });
+    });
+  });
+}
+
+// ========== Quiz 進度寫入 ==========
+export async function recordQuizAttempt(quizId, isCorrect, points) {
+  if (!currentUser) return;
+  const ref = doc(db, 'users', currentUser.uid, 'progress', quizId);
+  await setDoc(ref, {
+    quizId,
+    correct: !!isCorrect,
+    points: isCorrect ? points : 0,
+    answeredAt: serverTimestamp()
+  }, { merge: false });
+}
+
+export async function recordScenarioCompletion(scenarioKey, points = 50) {
+  if (!currentUser) return;
+  const ref = doc(db, 'users', currentUser.uid, 'scenarios', scenarioKey);
+  await setDoc(ref, {
+    scenarioKey,
+    completed: true,
+    points,
+    completedAt: serverTimestamp()
+  }, { merge: false });
+}
+
+export async function resetMyProgress() {
+  if (!currentUser) return;
+  const uid = currentUser.uid;
+  const [progSnap, scenSnap] = await Promise.all([
+    getDocs(collection(db, 'users', uid, 'progress')),
+    getDocs(collection(db, 'users', uid, 'scenarios'))
+  ]);
+  const dels = [];
+  progSnap.forEach(d => dels.push(deleteDoc(d.ref)));
+  scenSnap.forEach(d => dels.push(deleteDoc(d.ref)));
+  await Promise.all(dels);
+}
+
+export async function loadProgress() {
+  if (!currentUser) return null;
+  const uid = currentUser.uid;
+  const [progSnap, scenSnap] = await Promise.all([
+    getDocs(collection(db, 'users', uid, 'progress')),
+    getDocs(collection(db, 'users', uid, 'scenarios'))
+  ]);
+  const quizIds = [];
+  let score = 0;
+  progSnap.forEach(d => {
+    const data = d.data();
+    quizIds.push(data.quizId);
+    score += data.points || 0;
+  });
+  const scenarios = [];
+  scenSnap.forEach(d => {
+    const data = d.data();
+    scenarios.push(data.scenarioKey);
+    score += data.points || 0;
+  });
+  return {
+    score,
+    completed: quizIds.length + scenarios.length,
+    quizIds,
+    scenarios
+  };
+}
+
+// ========== Nav 上的用戶 pill ==========
+export function injectUserPill() {
+  if (!currentUserDoc) return;
+  const nav = document.querySelector('nav');
+  if (!nav) return;
+
+  // nav 結構：左 LOGO + 中央 nav-link + 右側 (一個 link 或一個 user pill)
+  // 找最右邊那個 child 替換掉
+  const flexRow = nav.querySelector('.flex.items-center.justify-between, .max-w-7xl > .flex');
+  if (!flexRow) return;
+
+  // 移除舊的 pill（若有）
+  const old = nav.querySelector('#userPillWrapper');
+  if (old) old.remove();
+
+  const lastChild = flexRow.lastElementChild;
+  // 只替換在 LOGO 和中央 nav-link 之後的最右側元素（通常是「下一章 →」link 或主管後台 link）
+  // 但不能替換中央 nav-link 容器
+  if (lastChild && lastChild.classList.contains('flex') && lastChild.querySelectorAll('.nav-link').length > 0) {
+    // 如果 last child 是中央 nav 容器，則 append 一個新的
+    // 不替換，append
+  }
+
+  const wrapper = document.createElement('div');
+  wrapper.id = 'userPillWrapper';
+  wrapper.className = 'relative flex-shrink-0';
+  const initial = (currentUserDoc.name || currentUserDoc.email || '?').charAt(0).toUpperCase();
+  wrapper.innerHTML = `
+    <button id="userPillBtn" class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-orange-500/10 border border-orange-500/30 text-sm text-orange-200 hover:bg-orange-500/15 transition-colors whitespace-nowrap">
+      ${currentUserDoc.photoURL
+        ? `<img src="${currentUserDoc.photoURL}" referrerpolicy="no-referrer" class="w-6 h-6 rounded-full" alt="">`
+        : `<div class="w-6 h-6 rounded-full bg-orange-500/30 flex items-center justify-center text-xs font-bold">${initial}</div>`}
+      <span class="hidden sm:inline">${currentUserDoc.name || currentUserDoc.email}</span>
+      ${currentUserDoc.role === 'manager' ? '<span class="text-[10px] px-1.5 py-0.5 rounded bg-orange-500/25 ml-1">主管</span>' : ''}
+    </button>
+    <div id="userPillMenu" class="hidden absolute right-0 top-full mt-2 w-60 rounded-xl bg-[#131316] border border-orange-500/20 shadow-2xl shadow-orange-500/10 overflow-hidden z-50">
+      <div class="px-4 py-3 border-b border-gray-800/60">
+        <div class="text-sm font-semibold text-white">${currentUserDoc.name || ''}</div>
+        ${currentUserDoc.empId ? `<div class="text-xs text-gray-500">員編 ${currentUserDoc.empId}</div>` : ''}
+        <div class="text-xs text-gray-600 mt-1 truncate">${currentUserDoc.email}</div>
+        ${currentUserDoc.role === 'manager' ? '<div class="text-[10px] text-orange-400 mt-1">★ 主管權限</div>' : ''}
+      </div>
+      ${currentUserDoc.role === 'manager' ? '<a href="admin.html" class="block px-4 py-3 text-sm text-orange-300 hover:bg-orange-500/10 transition-colors border-b border-gray-800/60">主管後台 →</a>' : ''}
+      <button id="signOutBtn" class="w-full px-4 py-3 text-left text-sm text-gray-300 hover:bg-orange-500/10 hover:text-orange-300 transition-colors">登出</button>
+    </div>
+  `;
+
+  if (lastChild) {
+    lastChild.replaceWith(wrapper);
+  } else {
+    flexRow.appendChild(wrapper);
+  }
+
+  document.getElementById('userPillBtn').addEventListener('click', (e) => {
+    e.stopPropagation();
+    document.getElementById('userPillMenu').classList.toggle('hidden');
+  });
+  document.addEventListener('click', () => {
+    const m = document.getElementById('userPillMenu');
+    if (m) m.classList.add('hidden');
+  });
+  document.getElementById('signOutBtn').addEventListener('click', async () => {
+    await signOutUser();
+  });
+}
+
+// ========== Allowlist 管理（主管在 admin.html 用） ==========
+export async function listAllowlist() {
+  const snap = await getDocs(collection(db, 'allowlist'));
+  const out = [];
+  snap.forEach(d => out.push({ id: d.id, ...d.data() }));
+  return out;
+}
+
+export async function addToAllowlist({ email, empId, name, role = 'trainee' }) {
+  const key = emailKey(email);
+  await setDoc(doc(db, 'allowlist', key), {
+    email: email.toLowerCase(),
+    empId: empId || '',
+    name: name || '',
+    role,
+    addedAt: serverTimestamp()
+  });
+}
+
+export async function removeFromAllowlist(allowKey) {
+  await deleteDoc(doc(db, 'allowlist', allowKey));
+}
+
+// ========== 學員列表（主管讀全部） ==========
+export async function listAllUsers() {
+  const snap = await getDocs(collection(db, 'users'));
+  const out = [];
+  snap.forEach(d => out.push({ uid: d.id, ...d.data() }));
+  return out;
+}
+
+export async function getUserProgressDetail(uid) {
+  const [progSnap, scenSnap] = await Promise.all([
+    getDocs(collection(db, 'users', uid, 'progress')),
+    getDocs(collection(db, 'users', uid, 'scenarios'))
+  ]);
+  const progress = [];
+  let score = 0;
+  progSnap.forEach(d => { progress.push(d.data()); score += d.data().points || 0; });
+  const scenarios = [];
+  scenSnap.forEach(d => { scenarios.push(d.data()); score += d.data().points || 0; });
+  return {
+    progress, scenarios, score,
+    quizCompleted: progress.length,
+    scenariosCompleted: scenarios.length,
+    totalCompleted: progress.length + scenarios.length
+  };
+}
+
+// 重新匯出常用 Firestore primitives 供頁面直接使用
+export {
+  doc, setDoc, getDoc, getDocs, collection, query, where,
+  onSnapshot, serverTimestamp, deleteDoc, updateDoc
+};

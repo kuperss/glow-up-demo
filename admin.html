@@ -656,166 +656,90 @@
         <div class="flex items-center justify-between mb-6">
           <div>
             <h2 class="text-2xl font-bold mb-1">學員管理</h2>
-            <div class="text-sm text-gray-500">查看每位學員的完成進度與光點</div>
+            <div class="text-sm text-gray-500">已登入過系統的學員 · 即時 Firestore 進度</div>
           </div>
           <div class="flex gap-2">
-            <button class="btn btn-ghost">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-              匯出
-            </button>
-            <button class="btn btn-primary">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-              新增學員
+            <button class="btn btn-ghost" id="refreshTraineesBtn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+              重新整理
             </button>
           </div>
         </div>
 
+        <div class="panel mb-6">
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <div class="panel-title">已登入學員</div>
+              <div class="panel-subtitle" id="traineesSummary">載入中…</div>
+            </div>
+            <input id="traineesSearch" class="form-input" placeholder="搜尋姓名 / 員編 / Email..." style="max-width:280px;">
+          </div>
+          <div class="table-wrap">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>學員</th>
+                  <th>員編</th>
+                  <th>進度</th>
+                  <th>光點</th>
+                  <th>角色</th>
+                  <th>最近上線</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="traineesTbody">
+                <tr><td colspan="7" class="text-center text-gray-500 py-8">載入中…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 白名單管理 -->
         <div class="panel">
-          <div class="flex items-center gap-3 mb-4">
-            <input class="form-input flex-1" placeholder="搜尋學員姓名或編號..." style="max-width:300px;">
-            <select class="form-input" style="width:auto;">
-              <option>全部章節</option>
-              <option>CH 00 入職須知</option>
-              <option>CH 01 品牌之光</option>
-              <option>CH 02 產品實驗室</option>
-              <option>CH 03 業務學院</option>
-              <option>CH 04 闖關挑戰</option>
-              <option>CH 05 數位行銷整合</option>
-              <option>CH 06 職涯地圖</option>
-            </select>
-            <select class="form-input" style="width:auto;">
-              <option>全部等級</option>
-              <option>畢業</option>
-              <option>進階中</option>
-              <option>入門中</option>
-              <option>未開始</option>
-            </select>
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <div class="panel-title">登入白名單</div>
+              <div class="panel-subtitle">只有名單上的 Email 才能用 Google 登入；員工尚未登入過時也會列在這裡</div>
+            </div>
+            <button class="btn btn-primary" id="openAddAllowBtn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              新增授權
+            </button>
+          </div>
+
+          <!-- 新增授權表單（預設隱藏） -->
+          <div id="addAllowForm" class="hidden mb-4 p-4 rounded-lg bg-orange-500/5 border border-orange-500/20">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+              <input id="allowEmailInput" class="form-input" placeholder="Email *" type="email">
+              <input id="allowNameInput" class="form-input" placeholder="姓名 *">
+              <input id="allowEmpIdInput" class="form-input" placeholder="員工編號">
+              <select id="allowRoleInput" class="form-input">
+                <option value="trainee">學員</option>
+                <option value="manager">主管</option>
+              </select>
+            </div>
+            <div class="flex items-center gap-2 mt-3">
+              <button class="btn btn-primary" id="confirmAddAllowBtn">儲存</button>
+              <button class="btn btn-ghost" id="cancelAddAllowBtn">取消</button>
+              <span id="allowFormMsg" class="text-xs text-red-300 ml-2"></span>
+            </div>
           </div>
 
           <div class="table-wrap">
             <table class="table">
               <thead>
                 <tr>
-                  <th>學員</th>
-                  <th>進度</th>
-                  <th>當前章節</th>
-                  <th>光點</th>
-                  <th>等級</th>
-                  <th>最近活動</th>
+                  <th>Email</th>
+                  <th>姓名</th>
+                  <th>員編</th>
+                  <th>角色</th>
+                  <th>狀態</th>
+                  <th>新增時間</th>
                   <th></th>
                 </tr>
               </thead>
-              <tbody>
-                <tr>
-                  <td>
-                    <div class="flex items-center gap-3">
-                      <div class="w-8 h-8 rounded-full bg-gradient-to-br from-orange-300 to-orange-600 flex items-center justify-center text-black font-bold text-xs">陳</div>
-                      <div>
-                        <div class="font-medium">陳柏翰</div>
-                        <div class="text-xs text-gray-500">EMP-2026001</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td>
-                    <div class="flex items-center gap-2">
-                      <div class="pbar"><div class="pbar-fill" style="width: 95%"></div></div>
-                      <span class="text-xs">95%</span>
-                    </div>
-                  </td>
-                  <td>CH 04 · 闖關挑戰</td>
-                  <td><span class="text-orange-300 font-bold">980</span></td>
-                  <td><span class="pill pill-orange">畢業</span></td>
-                  <td class="text-gray-500 text-xs">10 分鐘前</td>
-                  <td><button class="btn btn-ghost text-xs">查看</button></td>
-                </tr>
-                <tr>
-                  <td>
-                    <div class="flex items-center gap-3">
-                      <div class="w-8 h-8 rounded-full bg-gradient-to-br from-orange-300 to-orange-600 flex items-center justify-center text-black font-bold text-xs">林</div>
-                      <div>
-                        <div class="font-medium">林雅婷</div>
-                        <div class="text-xs text-gray-500">EMP-2026002</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td>
-                    <div class="flex items-center gap-2">
-                      <div class="pbar"><div class="pbar-fill" style="width: 72%"></div></div>
-                      <span class="text-xs">72%</span>
-                    </div>
-                  </td>
-                  <td>CH 03 · 業務學院</td>
-                  <td><span class="text-orange-300 font-bold">685</span></td>
-                  <td><span class="pill pill-green">進階中</span></td>
-                  <td class="text-gray-500 text-xs">1 小時前</td>
-                  <td><button class="btn btn-ghost text-xs">查看</button></td>
-                </tr>
-                <tr>
-                  <td>
-                    <div class="flex items-center gap-3">
-                      <div class="w-8 h-8 rounded-full bg-gradient-to-br from-orange-300 to-orange-600 flex items-center justify-center text-black font-bold text-xs">王</div>
-                      <div>
-                        <div class="font-medium">王子豪</div>
-                        <div class="text-xs text-gray-500">EMP-2026003</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td>
-                    <div class="flex items-center gap-2">
-                      <div class="pbar"><div class="pbar-fill" style="width: 58%"></div></div>
-                      <span class="text-xs">58%</span>
-                    </div>
-                  </td>
-                  <td>CH 04 · 闖關挑戰</td>
-                  <td><span class="text-orange-300 font-bold">540</span></td>
-                  <td><span class="pill pill-green">進階中</span></td>
-                  <td class="text-gray-500 text-xs">2 小時前 · 卡關中</td>
-                  <td><button class="btn btn-ghost text-xs">查看</button></td>
-                </tr>
-                <tr>
-                  <td>
-                    <div class="flex items-center gap-3">
-                      <div class="w-8 h-8 rounded-full bg-gradient-to-br from-orange-300 to-orange-600 flex items-center justify-center text-black font-bold text-xs">張</div>
-                      <div>
-                        <div class="font-medium">張詠丞</div>
-                        <div class="text-xs text-gray-500">EMP-2026004</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td>
-                    <div class="flex items-center gap-2">
-                      <div class="pbar"><div class="pbar-fill" style="width: 8%"></div></div>
-                      <span class="text-xs">8%</span>
-                    </div>
-                  </td>
-                  <td>CH 01 · 品牌之光</td>
-                  <td><span class="text-orange-300 font-bold">75</span></td>
-                  <td><span class="pill pill-gray">入門中</span></td>
-                  <td class="text-gray-500 text-xs">昨天加入</td>
-                  <td><button class="btn btn-ghost text-xs">查看</button></td>
-                </tr>
-                <tr>
-                  <td>
-                    <div class="flex items-center gap-3">
-                      <div class="w-8 h-8 rounded-full bg-gradient-to-br from-orange-300 to-orange-600 flex items-center justify-center text-black font-bold text-xs">黃</div>
-                      <div>
-                        <div class="font-medium">黃心如</div>
-                        <div class="text-xs text-gray-500">EMP-2026005</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td>
-                    <div class="flex items-center gap-2">
-                      <div class="pbar"><div class="pbar-fill" style="width: 0%"></div></div>
-                      <span class="text-xs">0%</span>
-                    </div>
-                  </td>
-                  <td>—</td>
-                  <td><span class="text-gray-500">0</span></td>
-                  <td><span class="pill pill-gray">未開始</span></td>
-                  <td class="text-gray-500 text-xs">3 天前加入</td>
-                  <td><button class="btn btn-ghost text-xs">提醒</button></td>
-                </tr>
+              <tbody id="allowlistTbody">
+                <tr><td colspan="7" class="text-center text-gray-500 py-8">載入中…</td></tr>
               </tbody>
             </table>
           </div>
@@ -1597,6 +1521,207 @@
   // === Initial render ===
   renderChapters();
   renderQuiz();
+</script>
+
+
+<!-- ===== Firebase Auth Guard (Manager only) ===== -->
+<script type="module">
+  import { requireAuth, injectUserPill } from './firebase-app.js';
+  await requireAuth({ requireManager: true });
+  injectUserPill();
+</script>
+
+<!-- ===== Admin Firestore Logic ===== -->
+<script>
+  document.addEventListener('glow-firebase-ready', async () => {
+    const fb = window.glowFirebase;
+    if (!fb) return;
+    const TOTAL = 22;
+
+    function fmtTime(ts) {
+      if (!ts) return '—';
+      const d = ts.toDate ? ts.toDate() : new Date(ts);
+      const diff = Date.now() - d.getTime();
+      const min = Math.floor(diff / 60000);
+      if (min < 1) return '剛才';
+      if (min < 60) return min + ' 分鐘前';
+      const hr = Math.floor(min / 60);
+      if (hr < 24) return hr + ' 小時前';
+      const day = Math.floor(hr / 24);
+      if (day < 30) return day + ' 天前';
+      return d.toLocaleDateString('zh-TW');
+    }
+    function escapeHtml(s) {
+      return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    }
+    function levelPill(pct) {
+      if (pct >= 100) return '<span class="pill pill-orange">畢業</span>';
+      if (pct >= 50) return '<span class="pill pill-green">進階中</span>';
+      if (pct > 0) return '<span class="pill pill-gray">入門中</span>';
+      return '<span class="pill pill-gray">未開始</span>';
+    }
+    function rolePill(r) {
+      if (r === 'manager') return '<span class="pill pill-orange">主管</span>';
+      return '<span class="pill pill-gray">學員</span>';
+    }
+
+    let allUsers = [];
+    let allowlist = [];
+
+    async function loadTrainees() {
+      const tbody = document.getElementById('traineesTbody');
+      const summary = document.getElementById('traineesSummary');
+      tbody.innerHTML = '<tr><td colspan="7" class="text-center text-gray-500 py-8">載入中…</td></tr>';
+      try {
+        allUsers = await fb.listAllUsers();
+        // 拉每個使用者的進度（並行）
+        const progresses = await Promise.all(allUsers.map(u => fb.getUserProgressDetail(u.uid).catch(()=>({score:0,totalCompleted:0}))));
+        renderTrainees(allUsers, progresses);
+        const total = allUsers.length;
+        const trainees = allUsers.filter(u => u.role !== 'manager').length;
+        summary.textContent = `共 ${total} 位（學員 ${trainees} 位 · 主管 ${total-trainees} 位）`;
+      } catch (e) {
+        console.error(e);
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center text-red-300 py-8">讀取失敗：' + escapeHtml(e.message || e) + '</td></tr>';
+      }
+    }
+
+    function renderTrainees(users, progresses) {
+      const tbody = document.getElementById('traineesTbody');
+      const search = (document.getElementById('traineesSearch').value || '').toLowerCase();
+      const rows = users.map((u, i) => {
+        const p = progresses[i] || { score: 0, totalCompleted: 0 };
+        const pct = Math.min(100, Math.round((p.totalCompleted / TOTAL) * 100));
+        const matchesSearch = !search ||
+          (u.name || '').toLowerCase().includes(search) ||
+          (u.empId || '').toLowerCase().includes(search) ||
+          (u.email || '').toLowerCase().includes(search);
+        if (!matchesSearch) return '';
+        const initial = (u.name || u.email || '?').charAt(0);
+        return `<tr>
+          <td>
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-full bg-gradient-to-br from-orange-300 to-orange-600 flex items-center justify-center text-black font-bold text-xs">${escapeHtml(initial)}</div>
+              <div>
+                <div class="font-medium">${escapeHtml(u.name || u.email)}</div>
+                <div class="text-xs text-gray-500">${escapeHtml(u.email || '')}</div>
+              </div>
+            </div>
+          </td>
+          <td class="text-xs text-gray-400">${escapeHtml(u.empId || '—')}</td>
+          <td>
+            <div class="flex items-center gap-2">
+              <div class="pbar"><div class="pbar-fill" style="width:${pct}%"></div></div>
+              <span class="text-xs whitespace-nowrap">${p.totalCompleted}/${TOTAL} · ${pct}%</span>
+            </div>
+          </td>
+          <td><span class="text-orange-300 font-bold">${p.score}</span></td>
+          <td>${rolePill(u.role)}</td>
+          <td class="text-gray-500 text-xs">${fmtTime(u.lastSeen)}</td>
+          <td>${levelPill(pct)}</td>
+        </tr>`;
+      }).filter(Boolean).join('');
+      tbody.innerHTML = rows || '<tr><td colspan="7" class="text-center text-gray-500 py-8">尚未有學員登入過</td></tr>';
+    }
+
+    async function loadAllowlist() {
+      const tbody = document.getElementById('allowlistTbody');
+      tbody.innerHTML = '<tr><td colspan="7" class="text-center text-gray-500 py-8">載入中…</td></tr>';
+      try {
+        allowlist = await fb.listAllowlist();
+        renderAllowlist();
+      } catch (e) {
+        console.error(e);
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center text-red-300 py-8">讀取失敗：' + escapeHtml(e.message || e) + '</td></tr>';
+      }
+    }
+
+    function renderAllowlist() {
+      const tbody = document.getElementById('allowlistTbody');
+      // 對應已登入用戶判斷狀態
+      const loggedInEmails = new Set(allUsers.map(u => (u.email || '').toLowerCase()));
+      const rows = allowlist.map(a => {
+        const status = loggedInEmails.has((a.email || '').toLowerCase())
+          ? '<span class="pill pill-green">已登入</span>'
+          : '<span class="pill pill-gray">尚未登入</span>';
+        return `<tr>
+          <td class="text-sm">${escapeHtml(a.email)}</td>
+          <td>${escapeHtml(a.name || '')}</td>
+          <td class="text-xs text-gray-400">${escapeHtml(a.empId || '—')}</td>
+          <td>${rolePill(a.role)}</td>
+          <td>${status}</td>
+          <td class="text-gray-500 text-xs">${fmtTime(a.addedAt)}</td>
+          <td><button class="btn btn-ghost text-xs hover:text-red-300" data-remove-allow="${escapeHtml(a.id)}" data-email="${escapeHtml(a.email)}">移除</button></td>
+        </tr>`;
+      }).join('');
+      tbody.innerHTML = rows || '<tr><td colspan="7" class="text-center text-gray-500 py-8">尚未新增任何授權，點右上「新增授權」開始</td></tr>';
+
+      tbody.querySelectorAll('[data-remove-allow]').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const id = btn.dataset.removeAllow;
+          const email = btn.dataset.email;
+          if (!confirm('確定移除「' + email + '」的登入授權？\n\n（已登入的學員不會立即被踢出，但下次登入會被拒絕。學員的進度紀錄不會被刪除。）')) return;
+          btn.disabled = true;
+          try {
+            await fb.removeFromAllowlist(id);
+            await loadAllowlist();
+          } catch(e) {
+            alert('移除失敗：' + (e.message || e));
+            btn.disabled = false;
+          }
+        });
+      });
+    }
+
+    // 新增授權表單
+    const addBtn = document.getElementById('openAddAllowBtn');
+    const form = document.getElementById('addAllowForm');
+    const cancelBtn = document.getElementById('cancelAddAllowBtn');
+    const confirmBtn = document.getElementById('confirmAddAllowBtn');
+    const msg = document.getElementById('allowFormMsg');
+    addBtn.addEventListener('click', () => {
+      form.classList.toggle('hidden');
+      msg.textContent = '';
+    });
+    cancelBtn.addEventListener('click', () => {
+      form.classList.add('hidden');
+      ['allowEmailInput','allowNameInput','allowEmpIdInput'].forEach(id => document.getElementById(id).value = '');
+    });
+    confirmBtn.addEventListener('click', async () => {
+      const email = document.getElementById('allowEmailInput').value.trim().toLowerCase();
+      const name = document.getElementById('allowNameInput').value.trim();
+      const empId = document.getElementById('allowEmpIdInput').value.trim();
+      const role = document.getElementById('allowRoleInput').value;
+      if (!email || !email.includes('@')) { msg.textContent = '請填正確 Email'; return; }
+      if (!name) { msg.textContent = '請填姓名'; return; }
+      confirmBtn.disabled = true;
+      msg.textContent = '';
+      try {
+        await fb.addToAllowlist({ email, name, empId, role });
+        ['allowEmailInput','allowNameInput','allowEmpIdInput'].forEach(id => document.getElementById(id).value = '');
+        form.classList.add('hidden');
+        await loadAllowlist();
+      } catch(e) {
+        msg.textContent = '新增失敗：' + (e.message || e);
+      } finally {
+        confirmBtn.disabled = false;
+      }
+    });
+
+    // 重新整理
+    document.getElementById('refreshTraineesBtn').addEventListener('click', async () => {
+      await Promise.all([loadTrainees(), loadAllowlist()]);
+    });
+    // 搜尋
+    document.getElementById('traineesSearch').addEventListener('input', () => {
+      // 重新渲染（使用最近一次的 progresses）
+      Promise.all(allUsers.map(u => fb.getUserProgressDetail(u.uid).catch(()=>({score:0,totalCompleted:0}))))
+        .then(progresses => renderTrainees(allUsers, progresses));
+    });
+
+    // 初次載入
+    await Promise.all([loadTrainees(), loadAllowlist()]);
+  });
 </script>
 
 </body>

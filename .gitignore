@@ -17,6 +17,9 @@
 !admin.html
 !career.html
 !onboarding.html
+!login.html
+!firebase-app.js
+!firestore.rules
 
 # Re-allow assets folder and contents
 !assets/

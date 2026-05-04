@@ -1479,22 +1479,19 @@
     });
   });
 
-  // === Achievement section: read live progress from challenge.html localStorage ===
-  (function renderAchievement(){
-    const STORAGE_KEY = 'glow-quiz-progress-v1';
+  // === Achievement section: read live progress from Firestore ===
+  document.addEventListener('glow-firebase-ready', async () => {
     const TOTAL = 22; // 12 quizzes + 5 AI scenarios + 5 HR (Stage5)
     let data = null;
     try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) data = JSON.parse(raw);
-    } catch(e) {}
+      data = await window.glowFirebase.loadProgress();
+    } catch(e) { console.warn('讀取進度失敗', e); }
 
     const score = (data && data.score) || 0;
     const completed = (data && data.completed) || 0;
     const quizIds = new Set((data && data.quizIds) || []);
     const scenarios = new Set((data && data.scenarios) || []);
 
-    // Update numbers
     const pctEl = document.getElementById('achievementPct');
     const completedEl = document.getElementById('achievementCompleted');
     const pointsEl = document.getElementById('achievementPoints');
@@ -1520,13 +1517,17 @@
       }
     }
 
-    // Reset button
+    // Reset button — 呼叫 Firestore 刪除 server 端進度
     const resetBtn = document.getElementById('achievementReset');
     if (resetBtn) {
-      resetBtn.addEventListener('click', () => {
-        if (confirm('確定要重新開始挑戰嗎？\n\n所有累積的光點與徽章將會清除，下次進入闖關挑戰時可以重新作答。')) {
-          try { localStorage.removeItem(STORAGE_KEY); } catch(e) {}
+      resetBtn.addEventListener('click', async () => {
+        if (!confirm('確定要重新開始挑戰嗎？\n\n所有累積的光點與徽章將會清除，下次進入闖關挑戰時可以重新作答。')) return;
+        try {
+          await window.glowFirebase.resetMyProgress();
           location.reload();
+        } catch(e) {
+          console.error(e);
+          alert('重設失敗：' + (e.message || e));
         }
       });
     }
@@ -1562,7 +1563,15 @@
         }
       }
     });
-  })();
+  });
+</script>
+
+
+<!-- ===== Firebase Auth Guard ===== -->
+<script type="module">
+  import { requireAuth, injectUserPill } from './firebase-app.js';
+  await requireAuth();
+  injectUserPill();
 </script>
 
 </body>
