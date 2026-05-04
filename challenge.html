@@ -309,6 +309,84 @@
   }
   .reply-pick:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
 
+  /* Scenario picker */
+  .scenario-picker {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+    margin-bottom: 1.25rem;
+  }
+  @media (min-width: 640px) {
+    .scenario-picker { grid-template-columns: repeat(5, 1fr); }
+  }
+  .scenario-tab {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.85rem 0.5rem;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--border-subtle);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    text-align: center;
+    color: inherit;
+    font-family: inherit;
+  }
+  .scenario-tab:hover {
+    background: rgba(245,130,32,0.06);
+    border-color: rgba(245,130,32,0.3);
+    transform: translateY(-2px);
+  }
+  .scenario-tab.active {
+    background: rgba(245,130,32,0.1);
+    border-color: rgba(245,130,32,0.55);
+    box-shadow: 0 0 0 1px rgba(245,130,32,0.3), 0 8px 20px -8px rgba(245,130,32,0.45);
+  }
+  .scenario-tab-avatar {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #F58220, #C66510);
+    color: #08080A;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700;
+    font-size: 0.95rem;
+    flex-shrink: 0;
+  }
+  .scenario-tab-name {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    line-height: 1.2;
+  }
+  .scenario-tab-tag {
+    font-size: 0.65rem;
+    color: var(--text-secondary);
+    line-height: 1.2;
+  }
+  .scenario-tab-check {
+    position: absolute;
+    top: 0.4rem; right: 0.4rem;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: #4ade80;
+    color: #08080A;
+    display: none;
+    align-items: center; justify-content: center;
+    font-size: 0.65rem;
+    font-weight: 800;
+  }
+  .scenario-tab.completed .scenario-tab-check { display: flex; }
+  .scenario-tab.completed .scenario-tab-avatar { opacity: 0.55; }
+  .scenario-progress-line {
+    margin-top: 0.85rem;
+    text-align: center;
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+  }
+
   /* Progress bar */
   .progress-bar {
     height: 6px;
@@ -436,7 +514,7 @@
       <div id="totalProgress" class="progress-bar-fill" style="width: 0%;"></div>
     </div>
     <div class="text-xs text-gray-500 font-mono-en tracking-widest hidden sm:block">
-      <span id="completed">0</span> / 15
+      <span id="completed">0</span> / 17
     </div>
   </div>
 </section>
@@ -743,22 +821,57 @@
       </p>
     </div>
 
-    <!-- Chat Window -->
+    <!-- Scenario picker + Chat -->
     <div class="reveal">
-      <div class="flex items-center gap-3 mb-4 px-1">
-        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-orange-500 to-orange-700 flex items-center justify-center text-black font-bold">陳</div>
-        <div>
-          <div class="text-sm font-medium">陳老闆</div>
-          <div class="text-xs text-gray-500">桃園・電料行 · 二代接班 3 年</div>
-        </div>
-        <span class="ml-auto text-xs text-orange-300/70 px-3 py-1 rounded-full bg-orange-500/10 border border-orange-500/30">SCENARIO 已開始</span>
+      <div class="scenario-picker" role="tablist" aria-label="情境選擇">
+        <button type="button" class="scenario-tab active" data-scenario="dealer">
+          <div class="scenario-tab-avatar">陳</div>
+          <div class="scenario-tab-name">陳老闆</div>
+          <div class="scenario-tab-tag">電料行・對手低價</div>
+          <span class="scenario-tab-check">✓</span>
+        </button>
+        <button type="button" class="scenario-tab" data-scenario="designer">
+          <div class="scenario-tab-avatar">林</div>
+          <div class="scenario-tab-name">林設計師</div>
+          <div class="scenario-tab-tag">商空案場</div>
+          <span class="scenario-tab-check">✓</span>
+        </button>
+        <button type="button" class="scenario-tab" data-scenario="builder">
+          <div class="scenario-tab-avatar">張</div>
+          <div class="scenario-tab-name">張總</div>
+          <div class="scenario-tab-tag">建商議價</div>
+          <span class="scenario-tab-check">✓</span>
+        </button>
+        <button type="button" class="scenario-tab" data-scenario="shopkeeper">
+          <div class="scenario-tab-avatar">王</div>
+          <div class="scenario-tab-name">王老闆娘</div>
+          <div class="scenario-tab-tag">老燈飾店</div>
+          <span class="scenario-tab-check">✓</span>
+        </button>
+        <button type="button" class="scenario-tab" data-scenario="complaint">
+          <div class="scenario-tab-avatar">李</div>
+          <div class="scenario-tab-name">李先生</div>
+          <div class="scenario-tab-tag">客訴處理</div>
+          <span class="scenario-tab-check">✓</span>
+        </button>
       </div>
 
-      <div class="chat-window" id="chatWindow">
-        <!-- Initial messages get inserted by JS -->
+      <div class="flex items-center gap-3 mb-4 px-1">
+        <div id="chatActiveAvatar" class="w-10 h-10 rounded-full bg-gradient-to-br from-orange-500 to-orange-700 flex items-center justify-center text-black font-bold">陳</div>
+        <div>
+          <div id="chatActiveName" class="text-sm font-medium">陳老闆</div>
+          <div id="chatActiveSubtitle" class="text-xs text-gray-500">桃園・電料行 · 二代接班 3 年</div>
+        </div>
+        <span id="chatActiveTag" class="ml-auto text-xs text-orange-300/70 px-3 py-1 rounded-full bg-orange-500/10 border border-orange-500/30">對手低價戰</span>
       </div>
+
+      <div class="chat-window" id="chatWindow"></div>
 
       <div id="replyArea" class="mt-4 space-y-2"></div>
+
+      <div class="scenario-progress-line">
+        完成情境：<span id="scenariosCompleted">0</span> / 5　·　每完成一個 +50 光點
+      </div>
     </div>
   </div>
 </section>
@@ -898,7 +1011,7 @@
   reveals.forEach(r => io.observe(r));
 
   // === Quiz Logic ===
-  const TOTAL_QUIZ_COUNT = 12 + 3; // 12 mc + 3 chat rounds
+  const TOTAL_QUIZ_COUNT = 12 + 5; // 12 mc + 5 AI chat scenarios
   let totalScore = 0;
   let completedCount = 0;
 
@@ -935,43 +1048,161 @@
     });
   });
 
-  // === Chat Stage 4 ===
-  const chatScript = [
-    { type: 'narrator', text: '陳老闆走進你的門市，一臉困擾。' },
-    { type: 'customer', text: '我隔壁那家燈飾店最近進了一批超便宜的崁燈，水電師傅都跑去他那邊。我這邊是不是也要進那種貨拼價格？' }
-  ];
+  // === Stage 4: 5 Scenarios driven AI Chat ===
+  const scenarios = {
+    dealer: {
+      avatar: '陳', name: '陳老闆',
+      subtitle: '桃園・電料行 · 二代接班 3 年',
+      tag: '對手低價戰',
+      intro: [
+        { type: 'narrator', text: '陳老闆走進你的門市，一臉困擾。' },
+        { type: 'customer', text: '我隔壁那家燈飾店最近進了一批超便宜的崁燈，水電師傅都跑去他那邊。我這邊是不是也要進那種貨拼價格？' }
+      ],
+      rounds: [
+        { options: [
+          { text: '老闆，您也跟著進就好啦，反正客人只看價格', correct: false, response: { type: 'customer', text: '你這業務也太沒水準了吧⋯連你都這樣想，那我自己想辦法。' }, feedback: '× 跟著對手降價是死路，業務該幫客戶想差異化。' },
+          { text: '老闆別急，那家水電師傅佔比高還是設計師佔比高？我們可以走不同的路', correct: true, response: { type: 'customer', text: '嗯⋯我這邊水電師傅佔七成，設計師兩成。怎麼說？' }, feedback: '✓ 不打價格戰、先了解客戶結構，找出對方佔不到的市場。' },
+          { text: '我們絕對比他便宜！我回去跟主管殺價', correct: false, response: { type: 'customer', text: '欸別這樣，價格戰打下去大家都死。我要解方不是更慘的價格。' }, feedback: '× 客戶都不想打價格戰了，業務還在亂讓價會被瞧不起。' }
+        ]},
+        { options: [
+          { text: '水電師傅愛便宜給他便宜貨；設計師看品質。我們把主推鎖定設計師路線，您店裡多一條客人來源', correct: true, response: { type: 'customer', text: '有道理⋯設計師常問我有沒有 Ra90 的，我都沒貨。怎麼推？' }, feedback: '✓ 把產品線切兩條，比一味降價更賺。' },
+          { text: '都進高階款啦，水電師傅遲早會懂', correct: false, response: { type: 'customer', text: '師傅不會等的⋯他們今天看不到便宜就走別家了。' }, feedback: '× 一刀切沒考慮現實。' },
+          { text: '舞光全系列您都要進，我們才能給您折扣', correct: false, response: { type: 'customer', text: '這樣倉庫塞爆現金壓死了。有沒有別的方案？' }, feedback: '× 把客戶現金鎖死不是好策略。' }
+        ]},
+        { options: [
+          { text: '我安排 30 分鐘「設計師專業推薦」教學，下週帶馬爾、奧丁、拉斐爾來現場示範 Ra90 vs Ra70 差別', correct: true, response: { type: 'customer', text: '好，就這樣！下週二我把太太也叫來。你比上一個業務認真多了。' }, feedback: '✓ 教育訓練+樣品演示，是讓客戶長期依賴你的最強招式。' },
+          { text: '我給您所有產品 PDF 您自己讀', correct: false, response: { type: 'customer', text: 'PDF 我看不下去⋯算了我自己研究。' }, feedback: '× 讓客戶自學等於沒幫到。' },
+          { text: '您先進貨慢慢摸索就會了', correct: false, response: { type: 'customer', text: '我把錢壓進去還要自己摸索⋯你不太行欸。' }, feedback: '× 沒人會自己摸索做生意。' }
+        ]}
+      ],
+      finishMessage: '陳老闆對你印象很好，下個月會主動約你聊新案。'
+    },
 
-  const round1 = {
-    actor: '你',
-    options: [
-      { text: '老闆，您也跟著進就好啦，反正客人只看價格', correct: false, response: { type: 'customer', text: '你這業務也太沒水準了吧，這麼建議...連你都這樣想，那我自己想辦法。' }, feedback: '× 跟著對手降價是死路，業務應該幫客戶想差異化策略。' },
-      { text: '老闆別急，我先問您：那家是水電師傅佔比高還是設計師佔比高？我們可以走不同的路', correct: true, response: { type: 'customer', text: '嗯⋯我這邊水電師傅佔七成，設計師大概兩成。怎麼說？' }, feedback: '✓ 不打價格戰、先了解客戶結構，找出對方佔不到的市場。' },
-      { text: '我們舞光絕對比他便宜！我回去跟主管殺價', correct: false, response: { type: 'customer', text: '欸別這樣，價格戰打下去大家都死，我是要解方不是更慘的價格。' }, feedback: '× 客戶都不想打價格戰了，業務還在亂讓價，會被瞧不起。' }
-    ]
+    designer: {
+      avatar: '林', name: '林設計師',
+      subtitle: '台北信義 · 60 坪精品服飾店案',
+      tag: '商空案場',
+      intro: [
+        { type: 'narrator', text: '林設計師滑開手機把案場照片給你看。' },
+        { type: 'customer', text: '我接了一個 60 坪精品服飾店案，老闆要求商品顏色要呈現得漂亮，每季還要重新陳列。你舞光有什麼能搭配的？' }
+      ],
+      rounds: [
+        { options: [
+          { text: '索爾崁燈走量穩，60 坪算下來成本不高', correct: false, response: { type: 'customer', text: '索爾我知道，那個 Ra80 對精品店太一般了。' }, feedback: '× 索爾是電料行走量品，沒滿足設計師對「商品顏色呈現」的核心需求。' },
+          { text: '拉斐爾超薄磁吸軌道（6mm 不開槽）+ Ra≧90 投射燈，換季調角度兩隻手就行', correct: true, response: { type: 'customer', text: '不開槽是真的方便⋯每次拆天花太貴。Ra 還能再高嗎？' }, feedback: '✓ 設計師最在意「不破壞天花」+「演色性」+「換季彈性」，磁吸軌道一次解三個問題。' },
+          { text: '一般筒燈裝下去就好啊，省事又便宜', correct: false, response: { type: 'customer', text: '你不太懂我們設計師案吧。' }, feedback: '× 對設計師客戶不能用「便宜耐用」打動，他們替屋主要的是質感。' }
+        ]},
+        { options: [
+          { text: 'X 牌很爛啦那是中國貨', correct: false, response: { type: 'customer', text: '我跟 X 牌業務也很熟，你這樣講不太尊重。' }, feedback: '× 攻擊對手在設計師圈傳得快，自己被列黑名單。' },
+          { text: '我們有 R9>50 高紅色還原——精品紅色衣服掛起來才有層次。下週我帶幾支樣品到您事務所實機示範', correct: true, response: { type: 'customer', text: '好啊，下週三我有空。帶哪幾支？我老闆也會在。' }, feedback: '✓ 設計師看實機 + R9 細節，把對話拉到專業層次。' },
+          { text: '我們更貴所以更好', correct: false, response: { type: 'customer', text: '貴有貴的道理你要說出來啊。' }, feedback: '× 「貴=好」不是論點，要把細節講清楚。' }
+        ]},
+        { options: [
+          { text: '體驗館要先預約啦，您自己上網約', correct: false, response: { type: 'customer', text: '算了我自己處理。' }, feedback: '× 設計師案中業務該主動打通流程，把麻煩丟回客戶等於失格。' },
+          { text: '林口館免預約，我幫您和業主一起約這週六，現場示範拉斐爾與奧丁的差異', correct: true, response: { type: 'customer', text: '太好了，業主聽到「親自體驗」一定買單。週六見。' }, feedback: '✓ 把客戶 + 業主一起帶到體驗館，是設計師案最強的成交招。' },
+          { text: '樣品我寄到您事務所就好', correct: false, response: { type: 'customer', text: '業主沒看到光的真實效果，他不會點頭。' }, feedback: '× 設計師案的關鍵決策者是「業主」，業主不到現場就無法成交。' }
+        ]}
+      ],
+      finishMessage: '林設計師把舞光放進首選名單，下週三事務所實機示範。'
+    },
+
+    builder: {
+      avatar: '張', name: '張總',
+      subtitle: '新北・建商採購 · 60 戶建案',
+      tag: '大量議價',
+      intro: [
+        { type: 'narrator', text: '張總把建案規劃表攤在桌上。' },
+        { type: 'customer', text: '60 戶住宅、每戶崁燈 12 顆、吸頂燈 5 顆。給我最低價，下星期我簽合約。' }
+      ],
+      rounds: [
+        { options: [
+          { text: '崁燈 NT$200/顆、吸頂燈 NT$1,500/顆，這是底價了', correct: false, response: { type: 'customer', text: '你這就是底價了？太快了吧。我去問別家。' }, feedback: '× 一上來就壓底沒退路、客戶反而不信你。' },
+          { text: '報價之前我得先確認規格——色溫、瓦數、Ra、保固。不同規格成本差 30%', correct: true, response: { type: 'customer', text: '講得對。預售屋年輕買家居多、要日光中性白。Ra 你建議多少？' }, feedback: '✓ 釐清規格再報價，避免驗收糾紛 + 展現專業。' },
+          { text: '我老闆說最多打 8 折', correct: false, response: { type: 'customer', text: '我還沒講量你就打 8 折，那我量大應該打 6 折？' }, feedback: '× 沒談量就讓利、給客戶開很大胃口。' }
+        ]},
+        { options: [
+          { text: '3 個月帳期沒問題，明天我帶合約來', correct: false, response: { type: 'customer', text: '那簽合約之前要不要再給我多 5%？' }, feedback: '× 帳期是要請示主管的事，不該當場答應。' },
+          { text: '帳期我請示主管、今天下班前回您。先把規格 + 數量 + 交期定下來', correct: true, response: { type: 'customer', text: 'OK，3000K、12W、Ra80、防眩。60 戶 × 17 顆 = 1020 顆。' }, feedback: '✓ 把可確定的事先鎖定，需要核可的事誠實請示。' },
+          { text: '我們公司不接 3 個月帳期', correct: false, response: { type: 'customer', text: '那這案我給別家做。' }, feedback: '× 沒談就拒絕等於放棄案子。' }
+        ]},
+        { options: [
+          { text: '室內 LED 不會壞啦，您安心', correct: false, response: { type: 'customer', text: '不會壞？1020 顆裡面壞 1% 就 10 顆。維修怎麼算？' }, feedback: '× 客戶問的是責任分攤、不是產品迷思。' },
+          { text: '室內 LED 兩年保固，期間故障 3 個工作日內換新到工地。我們有 1500 萬產品責任險', correct: true, response: { type: 'customer', text: '1500 萬產品責任險⋯這個我喜歡。先簽 MOU，下週合約。' }, feedback: '✓ 用具體保險 + SLA 讓建商安心，是大量訂單的成交關鍵。' },
+          { text: '壞了找原買進的店家', correct: false, response: { type: 'customer', text: '我就是直接跟你買，哪有原買進店家？' }, feedback: '× 推卸責任客戶當場走人。' }
+        ]}
+      ],
+      finishMessage: '張總當天簽 MOU，下週走完 1020 顆訂單合約。'
+    },
+
+    shopkeeper: {
+      avatar: '王', name: '王老闆娘',
+      subtitle: '台中・燈飾店 30 年 · 賣 X 牌 20 年',
+      tag: '換品牌阻力',
+      intro: [
+        { type: 'narrator', text: '王老闆娘坐在收銀台後翻雜誌、頭也沒抬。' },
+        { type: 'customer', text: '我這家店賣 X 牌賣到我兒子當兵回來了。客人都認 X 牌的。你這種新業務還叫我換舞光？' }
+      ],
+      rounds: [
+        { options: [
+          { text: 'X 牌品質有夠差，您兒子如果在這應該勸您換', correct: false, response: { type: 'customer', text: '我兒子的事不用你管。' }, feedback: '× 攻擊客戶長期合作對象 = 攻擊她 20 年的判斷。' },
+          { text: '老闆娘我不是要您換掉 X 牌——是想多給您一個利潤更高的選擇，讓客人挑時有故事可以講', correct: true, response: { type: 'customer', text: '故事？什麼故事？' }, feedback: '✓ 不挑戰客戶過去決定，框架成「多一個選擇」+「賣點故事」。' },
+          { text: '您先進 50 顆試試看', correct: false, response: { type: 'customer', text: '我倉庫裡 X 牌都還沒清完。你別急。' }, feedback: '× 客戶沒說要進貨就被推 50 顆 = 嚇跑她。' }
+        ]},
+        { options: [
+          { text: '您 X 牌全砍掉換舞光，我給您 7 折', correct: false, response: { type: 'customer', text: '我 X 牌賣 20 年，你叫我全砍？我不要。' }, feedback: '× 對於老資格店家，「全換」永遠不是選項。' },
+          { text: '主推兩支熱賣品就好——索爾崁燈是 CP 王、雲朵吸頂燈是新婚換屋熱銷。X 牌您原本賣得好的繼續賣', correct: true, response: { type: 'customer', text: '嗯⋯雲朵的造型蠻多年輕客人問過。多少錢？' }, feedback: '✓ 抓兩支差異化主推、X 牌不衝突 = 倉庫不亂、利潤多賺。' },
+          { text: '舞光 Ra90 直流驅動無頻閃', correct: false, response: { type: 'customer', text: '你跟我講規格我聽不懂。' }, feedback: '× 老一代店家不認規格、認熟客買單故事。' }
+        ]},
+        { options: [
+          { text: '我下次來啊老闆娘', correct: false, response: { type: 'customer', text: '下次有的是業務來，你跟別人有差嗎？' }, feedback: '× 老資格客戶最在乎被記住，沒給記憶點等於下次再從零。' },
+          { text: '我叫陳柏翰、這是名片。LINE 加一下，週六我把雲朵和索爾樣品送來。客人問您不確定的，您 LINE 我，一分鐘回', correct: true, response: { type: 'customer', text: 'LINE 一分鐘回？小伙子嘴巴蠻甜。週六啊我等你。' }, feedback: '✓ 自我介紹 + 具體 SLA + 樣品 + 約定。把抽象的「業務」變具體的「會被記住的人」。' },
+          { text: '您隨時可以問我問題', correct: false, response: { type: 'customer', text: '隨時是什麼意思？' }, feedback: '× 「隨時」太抽象、不如「LINE 一分鐘回」具體。' }
+        ]}
+      ],
+      finishMessage: '王老闆娘加你 LINE、週六樣品約成。'
+    },
+
+    complaint: {
+      avatar: '李', name: '李先生',
+      subtitle: '屋主 · 軟條燈裝半年壞',
+      tag: '客訴處理',
+      intro: [
+        { type: 'narrator', text: '李先生 LINE 訊息：「請問你們是舞光業務嗎？」' },
+        { type: 'customer', text: '我半年前裝你們軟條燈、現在一段不亮了！品質這樣？這還能賣？' }
+      ],
+      rounds: [
+        { options: [
+          { text: '您裝的時候應該有問題吧？', correct: false, response: { type: 'customer', text: '你還沒看就說我裝錯？業務這樣對客戶？' }, feedback: '× 第一句不能質疑客戶，客訴 SOP 第一步是「先聽、先安撫」。' },
+          { text: '真的辛苦您了。能不能拍個照片給我看一下？我今天下班前一定回覆處理方式', correct: true, response: { type: 'customer', text: '好。照片我傳給你。' }, feedback: '✓ 道歉 + 釐清 + 承諾時間，是客訴 SOP 的標準三步。' },
+          { text: '我先請示一下喔', correct: false, response: { type: 'customer', text: '多久？我家明天有客人要來。' }, feedback: '× 沒給承諾時間 = 客戶情緒繼續發酵。' }
+        ]},
+        { options: [
+          { text: '您測試的方式是不是不對？', correct: false, response: { type: 'customer', text: '我都用了半年了還測試方式不對？' }, feedback: '× 拿到照片後質疑客戶能力 = 把對話又拉回對立。' },
+          { text: '看起來是電源驅動的問題，這在保固範圍內。我安排 3 個工作日內換新到您家', correct: true, response: { type: 'customer', text: '3 個工作日嗎？確定？' }, feedback: '✓ 拿到證據後立刻判斷 + 引用保固政策 + 給時間。' },
+          { text: '我直接寄新的給您！', correct: false, response: { type: 'customer', text: '我家地址你都沒問⋯' }, feedback: '× 沒走流程亂寄、出貨單沒對 = 倉儲端會混亂。' }
+        ]},
+        { options: [
+          { text: '應該 3 天到吧', correct: false, response: { type: 'customer', text: '應該？我等不起這種「應該」。' }, feedback: '× 「應該」這種詞客訴中是地雷。' },
+          { text: '我立刻打給倉儲確認，下午 5 點前 LINE 您確切到貨日。送達後一天我會再 LINE 您確認裝起來 OK', correct: true, response: { type: 'customer', text: '嗯，這樣聽起來有人負責。' }, feedback: '✓ 立刻行動 + 給確切回覆時間 + 售後追蹤，把客訴變忠誠度。' },
+          { text: '倉儲那邊我也問不到，您自己打 0800 客服比較快', correct: false, response: { type: 'customer', text: '你業務不是該幫我問嗎？' }, feedback: '× 把客戶丟給客服 = 業務責任放棄。' }
+        ]}
+      ],
+      finishMessage: '李先生回應「謝謝你這麼負責」、隔週主動推薦同社區鄰居。'
+    }
   };
 
-  const round2 = {
-    actor: '你',
-    options: [
-      { text: '水電師傅愛便宜，給他便宜貨；設計師看品質。我們把舞光主推商品鎖定設計師路線，讓您店裡多一條客人來源', correct: true, response: { type: 'customer', text: '這個有道理⋯設計師確實常問我有沒有 Ra90 那種，我都沒貨。你能教我怎麼推嗎？' }, feedback: '✓ 把產品線切兩條，便宜貨和高階貨並存，比一味降價更賺。' },
-      { text: '都進高階款啦，水電師傅遲早會懂', correct: false, response: { type: 'customer', text: '師傅不會等的⋯他們今天看不到便宜的就走別家了。' }, feedback: '× 一刀切的策略沒考慮現實。' },
-      { text: '舞光全系列您都要進，我們才能給您折扣', correct: false, response: { type: 'customer', text: '這樣我倉庫塞爆，現金壓死了。你有沒有別的方案？' }, feedback: '× 把客戶現金鎖死不是好策略。' }
-    ]
-  };
-
-  const round3 = {
-    actor: '你',
-    options: [
-      { text: '我們安排一場 30 分鐘的「設計師專業推薦」教學，我下週帶馬爾防眩崁燈、奧丁、拉斐爾來，現場示範 Ra90 vs Ra70 的差別。教完您就能跟客人講故事', correct: true, response: { type: 'customer', text: '好，就這樣定！下週二我把太太也叫來一起聽。你比上一個業務認真多了。' }, feedback: '✓ 提供教育訓練+樣品演示，是讓客戶對你產生長期依賴的最強招式。' },
-      { text: '我給您所有產品的 PDF 您自己讀', correct: false, response: { type: 'customer', text: 'PDF 我看不下去⋯算了我自己研究。' }, feedback: '× 讓客戶自學等於沒幫到。' },
-      { text: '您先進貨，慢慢摸索就會了', correct: false, response: { type: 'customer', text: '我都把錢壓進去了還要我自己摸索⋯你不太行欸。' }, feedback: '× 沒人會自己摸索做生意。' }
-    ]
-  };
-
-  const rounds = [round1, round2, round3];
+  let activeScenarioKey = 'dealer';
   let currentRound = 0;
+  let scenarioToken = 0;
+  const completedScenarios = new Set();
+
   const chatWindow = document.getElementById('chatWindow');
   const replyArea = document.getElementById('replyArea');
+  const chatActiveAvatar = document.getElementById('chatActiveAvatar');
+  const chatActiveName = document.getElementById('chatActiveName');
+  const chatActiveSubtitle = document.getElementById('chatActiveSubtitle');
+  const chatActiveTag = document.getElementById('chatActiveTag');
+  const scenariosCompletedEl = document.getElementById('scenariosCompleted');
 
   function appendBubble({ type, text, actorLabel }) {
     if (actorLabel) {
@@ -988,31 +1219,43 @@
   }
 
   function renderReplies() {
+    const myToken = scenarioToken;
     replyArea.innerHTML = '';
-    if (currentRound >= rounds.length) {
+    const scenario = scenarios[activeScenarioKey];
+    if (currentRound >= scenario.rounds.length) {
       const done = document.createElement('div');
       done.className = 'p-5 rounded-xl bg-orange-500/10 border border-orange-500/30 text-center';
-      done.innerHTML = '<div class="text-orange-300 font-bold mb-1">✓ 對話完成！+50 光點</div><div class="text-xs text-gray-400">陳老闆對你印象很好，下個月會主動約你聊新案。</div>';
+      done.innerHTML = '<div class="text-orange-300 font-bold mb-1">✓ 對話完成！+50 光點</div><div class="text-xs text-gray-400">' + scenario.finishMessage + '</div>';
       replyArea.appendChild(done);
-      updateScore(50);
+      if (!completedScenarios.has(activeScenarioKey)) {
+        completedScenarios.add(activeScenarioKey);
+        scenariosCompletedEl.textContent = completedScenarios.size;
+        const tab = document.querySelector('.scenario-tab[data-scenario="' + activeScenarioKey + '"]');
+        if (tab) tab.classList.add('completed');
+        updateScore(50);
+      }
       return;
     }
-    const round = rounds[currentRound];
+    const round = scenario.rounds[currentRound];
     round.options.forEach(opt => {
       const btn = document.createElement('button');
       btn.className = 'reply-pick';
       btn.textContent = opt.text;
       btn.addEventListener('click', () => {
+        if (myToken !== scenarioToken) return;
         appendBubble({ type: 'self', text: opt.text, actorLabel: '你' });
-        // disable other replies
         replyArea.querySelectorAll('button').forEach(b => b.disabled = true);
         setTimeout(() => {
-          appendBubble({ type: opt.response.type, text: opt.response.text, actorLabel: opt.response.type === 'customer' ? '陳老闆' : null });
-          // narrator feedback
+          if (myToken !== scenarioToken) return;
+          appendBubble({ type: opt.response.type, text: opt.response.text, actorLabel: opt.response.type === 'customer' ? scenario.name : null });
           setTimeout(() => {
+            if (myToken !== scenarioToken) return;
             appendBubble({ type: 'narrator', text: opt.feedback });
             currentRound++;
-            setTimeout(renderReplies, 800);
+            setTimeout(() => {
+              if (myToken !== scenarioToken) return;
+              renderReplies();
+            }, 800);
           }, 700);
         }, 600);
       });
@@ -1020,17 +1263,43 @@
     });
   }
 
-  // Initialize chat
-  setTimeout(() => {
-    chatScript.forEach((msg, idx) => {
+  function loadScenario(key) {
+    if (!scenarios[key]) return;
+    scenarioToken++;
+    const myToken = scenarioToken;
+    activeScenarioKey = key;
+    currentRound = 0;
+    chatWindow.innerHTML = '';
+    replyArea.innerHTML = '';
+    const scenario = scenarios[key];
+    chatActiveAvatar.textContent = scenario.avatar;
+    chatActiveName.textContent = scenario.name;
+    chatActiveSubtitle.textContent = scenario.subtitle;
+    chatActiveTag.textContent = scenario.tag;
+    document.querySelectorAll('.scenario-tab').forEach(t => t.classList.remove('active'));
+    const activeTab = document.querySelector('.scenario-tab[data-scenario="' + key + '"]');
+    if (activeTab) activeTab.classList.add('active');
+    scenario.intro.forEach((msg, idx) => {
       setTimeout(() => {
-        appendBubble({ ...msg, actorLabel: msg.type === 'customer' ? '陳老闆' : null });
-        if (idx === chatScript.length - 1) {
-          setTimeout(renderReplies, 500);
+        if (myToken !== scenarioToken) return;
+        appendBubble({ ...msg, actorLabel: msg.type === 'customer' ? scenario.name : null });
+        if (idx === scenario.intro.length - 1) {
+          setTimeout(() => {
+            if (myToken !== scenarioToken) return;
+            renderReplies();
+          }, 500);
         }
       }, idx * 600);
     });
-  }, 1000);
+  }
+
+  document.querySelectorAll('.scenario-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      loadScenario(tab.dataset.scenario);
+    });
+  });
+
+  setTimeout(() => loadScenario('dealer'), 1000);
 </script>
 
 </body>
