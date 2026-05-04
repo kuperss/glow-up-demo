@@ -136,6 +136,63 @@ async function ensureUserProfile(user) {
 // ========== 頁面守門員 ==========
 export function requireAuth(opts = {}) {
   return new Promise((resolve) => {
+    // ===== GUEST MODE (DEMO) — 正式上線前移除整個 if 區塊 =====
+    if (sessionStorage.getItem('glow-guest-mode') === '1') {
+      const guestDoc = {
+        uid: 'guest', email: 'guest@demo', name: '訪客',
+        empId: 'GUEST', role: opts.requireManager ? 'manager' : 'trainee',
+        photoURL: null, isGuest: true
+      };
+      currentUser = { uid: 'guest', email: 'guest@demo' };
+      currentUserDoc = guestDoc;
+      // Stub Firestore helpers — in-memory only, no actual writes
+      const guestProgress = { quizIds: new Set(), scenarios: new Set(), score: 0 };
+      window.glowFirebase = {
+        async recordQuizAttempt(quizId, isCorrect, points) {
+          if (!guestProgress.quizIds.has(quizId)) {
+            guestProgress.quizIds.add(quizId);
+            if (isCorrect) guestProgress.score += points;
+          }
+        },
+        async recordScenarioCompletion(key, points = 50) {
+          if (!guestProgress.scenarios.has(key)) {
+            guestProgress.scenarios.add(key);
+            guestProgress.score += points;
+          }
+        },
+        async loadProgress() {
+          return {
+            score: guestProgress.score,
+            completed: guestProgress.quizIds.size + guestProgress.scenarios.size,
+            quizIds: Array.from(guestProgress.quizIds),
+            scenarios: Array.from(guestProgress.scenarios)
+          };
+        },
+        async resetMyProgress() {
+          guestProgress.quizIds.clear(); guestProgress.scenarios.clear(); guestProgress.score = 0;
+        },
+        getCurrentUser: () => ({ auth: currentUser, doc: currentUserDoc }),
+        signOutUser: async () => {
+          sessionStorage.removeItem('glow-guest-mode');
+          location.href = 'login.html?signedout=1';
+        },
+        async listAllowlist() { return []; },
+        async addToAllowlist() { alert('訪客模式：無法寫入授權白名單'); },
+        async removeFromAllowlist() { alert('訪客模式：無法移除授權'); },
+        async listAllUsers() { return [guestDoc]; },
+        async getUserProgressDetail() {
+          return { progress: [], scenarios: [], score: guestProgress.score, totalCompleted: guestProgress.quizIds.size + guestProgress.scenarios.size };
+        },
+        onUsersUpdate(cb) { cb([guestDoc]); return () => {}; },
+        onAllowlistUpdate(cb) { cb([]); return () => {}; },
+        async getStuckPointAnalysis() { return []; }
+      };
+      document.dispatchEvent(new CustomEvent('glow-firebase-ready', { detail: { user: currentUser, doc: guestDoc } }));
+      resolve({ user: currentUser, doc: guestDoc });
+      return;
+    }
+    // ===== /GUEST MODE =====
+
     onAuth((user, info) => {
       if (!user) {
         const reason = info && info.reason;
@@ -159,7 +216,8 @@ export function requireAuth(opts = {}) {
         recordQuizAttempt, recordScenarioCompletion, loadProgress, resetMyProgress,
         getCurrentUser, signOutUser,
         listAllowlist, addToAllowlist, removeFromAllowlist,
-        listAllUsers, getUserProgressDetail
+        listAllUsers, getUserProgressDetail,
+        onUsersUpdate, onAllowlistUpdate, getStuckPointAnalysis
       };
       // Dispatch ready event for inline scripts that need to wait
       document.dispatchEvent(new CustomEvent('glow-firebase-ready', {
@@ -261,23 +319,26 @@ export function injectUserPill() {
   wrapper.id = 'userPillWrapper';
   wrapper.className = 'relative flex-shrink-0';
   const initial = (currentUserDoc.name || currentUserDoc.email || '?').charAt(0).toUpperCase();
+  const isGuest = !!currentUserDoc.isGuest;
   wrapper.innerHTML = `
-    <button id="userPillBtn" class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-orange-500/10 border border-orange-500/30 text-sm text-orange-200 hover:bg-orange-500/15 transition-colors whitespace-nowrap">
+    <button id="userPillBtn" class="flex items-center gap-2 px-3 py-1.5 rounded-full ${isGuest ? 'bg-gray-800/40 border border-gray-700' : 'bg-orange-500/10 border border-orange-500/30'} text-sm ${isGuest ? 'text-gray-300' : 'text-orange-200'} hover:bg-orange-500/15 transition-colors whitespace-nowrap">
       ${currentUserDoc.photoURL
         ? `<img src="${currentUserDoc.photoURL}" referrerpolicy="no-referrer" class="w-6 h-6 rounded-full" alt="">`
-        : `<div class="w-6 h-6 rounded-full bg-orange-500/30 flex items-center justify-center text-xs font-bold">${initial}</div>`}
+        : `<div class="w-6 h-6 rounded-full ${isGuest ? 'bg-gray-700' : 'bg-orange-500/30'} flex items-center justify-center text-xs font-bold">${initial}</div>`}
       <span class="hidden sm:inline">${currentUserDoc.name || currentUserDoc.email}</span>
-      ${currentUserDoc.role === 'manager' ? '<span class="text-[10px] px-1.5 py-0.5 rounded bg-orange-500/25 ml-1">主管</span>' : ''}
+      ${isGuest ? '<span class="text-[10px] px-1.5 py-0.5 rounded bg-gray-700 ml-1">DEMO</span>' :
+        (currentUserDoc.role === 'manager' ? '<span class="text-[10px] px-1.5 py-0.5 rounded bg-orange-500/25 ml-1">主管</span>' : '')}
     </button>
     <div id="userPillMenu" class="hidden absolute right-0 top-full mt-2 w-60 rounded-xl bg-[#131316] border border-orange-500/20 shadow-2xl shadow-orange-500/10 overflow-hidden z-50">
       <div class="px-4 py-3 border-b border-gray-800/60">
         <div class="text-sm font-semibold text-white">${currentUserDoc.name || ''}</div>
         ${currentUserDoc.empId ? `<div class="text-xs text-gray-500">員編 ${currentUserDoc.empId}</div>` : ''}
         <div class="text-xs text-gray-600 mt-1 truncate">${currentUserDoc.email}</div>
-        ${currentUserDoc.role === 'manager' ? '<div class="text-[10px] text-orange-400 mt-1">★ 主管權限</div>' : ''}
+        ${isGuest ? '<div class="text-[10px] text-yellow-400 mt-1">⚠ 訪客模式 · 進度不會儲存</div>' :
+          (currentUserDoc.role === 'manager' ? '<div class="text-[10px] text-orange-400 mt-1">★ 主管權限</div>' : '')}
       </div>
-      ${currentUserDoc.role === 'manager' ? '<a href="admin.html" class="block px-4 py-3 text-sm text-orange-300 hover:bg-orange-500/10 transition-colors border-b border-gray-800/60">主管後台 →</a>' : ''}
-      <button id="signOutBtn" class="w-full px-4 py-3 text-left text-sm text-gray-300 hover:bg-orange-500/10 hover:text-orange-300 transition-colors">登出</button>
+      ${(currentUserDoc.role === 'manager' || isGuest) ? '<a href="admin.html" class="block px-4 py-3 text-sm text-orange-300 hover:bg-orange-500/10 transition-colors border-b border-gray-800/60">主管後台 →</a>' : ''}
+      <button id="signOutBtn" class="w-full px-4 py-3 text-left text-sm text-gray-300 hover:bg-orange-500/10 hover:text-orange-300 transition-colors">${isGuest ? '結束訪客模式' : '登出'}</button>
     </div>
   `;
 
@@ -329,6 +390,48 @@ export async function listAllUsers() {
   const out = [];
   snap.forEach(d => out.push({ uid: d.id, ...d.data() }));
   return out;
+}
+
+// 即時訂閱：學員列表
+export function onUsersUpdate(callback) {
+  return onSnapshot(collection(db, 'users'), (snap) => {
+    const list = [];
+    snap.forEach(d => list.push({ uid: d.id, ...d.data() }));
+    callback(list);
+  }, (err) => console.warn('users onSnapshot err', err));
+}
+
+// 即時訂閱：白名單
+export function onAllowlistUpdate(callback) {
+  return onSnapshot(collection(db, 'allowlist'), (snap) => {
+    const list = [];
+    snap.forEach(d => list.push({ id: d.id, ...d.data() }));
+    callback(list);
+  }, (err) => console.warn('allowlist onSnapshot err', err));
+}
+
+// 卡關熱點：聚合所有用戶的 progress doc，計算每題答錯率
+export async function getStuckPointAnalysis() {
+  const usersSnap = await getDocs(collection(db, 'users'));
+  const stats = {}; // quizId -> { attempts, wrong }
+  // 並行抓每個用戶的 progress
+  const promises = [];
+  usersSnap.forEach(u => {
+    promises.push(getDocs(collection(db, 'users', u.id, 'progress')).then(snap => {
+      snap.forEach(p => {
+        const data = p.data();
+        const id = data.quizId;
+        if (!stats[id]) stats[id] = { quizId: id, attempts: 0, wrong: 0 };
+        stats[id].attempts++;
+        if (!data.correct) stats[id].wrong++;
+      });
+    }));
+  });
+  await Promise.all(promises);
+  return Object.values(stats).map(s => ({
+    ...s,
+    wrongRate: s.attempts > 0 ? s.wrong / s.attempts : 0
+  })).sort((a, b) => (b.wrongRate - a.wrongRate) || (b.wrong - a.wrong));
 }
 
 export async function getUserProgressDetail(uid) {

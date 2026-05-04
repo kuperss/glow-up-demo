@@ -86,6 +86,18 @@
 
     <div id="loginInfo" class="hidden mt-5 p-4 rounded-lg bg-orange-500/8 border border-orange-500/25 text-sm text-orange-200"></div>
 
+    <!-- ===== GUEST MODE (DEMO ONLY — 正式上線前移除整個 #guestModeBlock 區塊) ===== -->
+    <div id="guestModeBlock" class="mt-6 pt-6 border-t border-dashed border-gray-800">
+      <div class="text-center">
+        <div class="text-[11px] text-gray-600 tracking-widest mb-3">DEMO 預覽用</div>
+        <button id="guestBtn" class="w-full px-4 py-3 rounded-lg bg-gray-800/40 border border-gray-700 text-sm text-gray-300 hover:bg-gray-800/60 hover:text-orange-200 hover:border-orange-500/30 transition-colors">
+          訪客模式進入 →
+          <span class="block text-[10px] text-gray-500 mt-1">不需登入即可預覽 · 進度不會儲存</span>
+        </button>
+      </div>
+    </div>
+    <!-- ===== /GUEST MODE ===== -->
+
     <div class="mt-8 pt-6 border-t border-gray-800/60 text-center">
       <p class="text-xs text-gray-600 leading-relaxed">
         無法登入？請洽各區人資暨法務部 HR 將您的 Email 加入白名單。<br>
@@ -98,6 +110,9 @@
 
 <script type="module">
   import { onAuth, signInWithGoogle, SUPER_ADMIN_EMAIL } from './firebase-app.js';
+
+  // 進到 login 頁就清除 guest 狀態（避免卡住）
+  sessionStorage.removeItem('glow-guest-mode');
 
   const btn = document.getElementById('signInBtn');
   const errEl = document.getElementById('loginError');
@@ -145,6 +160,15 @@
       btn.disabled = false;
     }
   });
+
+  // ===== GUEST MODE (DEMO ONLY) =====
+  const guestBtn = document.getElementById('guestBtn');
+  if (guestBtn) {
+    guestBtn.addEventListener('click', () => {
+      sessionStorage.setItem('glow-guest-mode', '1');
+      location.href = 'index.html';
+    });
+  }
 
   // 從 logo_base64 載入 LOGO（如果頁面內有 inline 的話就用，否則從同源 .txt 讀）
   // 為避免 GitHub Pages 不存在 logo_base64.txt（gitignored），用 inline base64 的方式：

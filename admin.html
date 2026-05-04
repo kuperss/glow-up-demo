@@ -465,47 +465,44 @@
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           <div class="stat-card">
             <div class="stat-label">學員總數</div>
-            <div class="stat-num">12</div>
-            <div class="stat-trend stat-up">↑ 本月新進 3 位</div>
+            <div class="stat-num" id="dashTotalUsers">—</div>
+            <div class="stat-trend text-gray-500" id="dashTotalUsersHint">學員 / 主管</div>
           </div>
           <div class="stat-card">
             <div class="stat-label">平均完成率</div>
-            <div class="stat-num">68<span class="text-lg text-gray-500">%</span></div>
-            <div class="stat-trend stat-up">↑ +12% vs 上月</div>
+            <div class="stat-num"><span id="dashAvgPct">—</span><span class="text-lg text-gray-500">%</span></div>
+            <div class="stat-trend text-gray-500">基於 22 關卡</div>
           </div>
           <div class="stat-card">
             <div class="stat-label">平均光點</div>
-            <div class="stat-num">485</div>
-            <div class="stat-trend stat-up">↑ +85 vs 上月</div>
+            <div class="stat-num" id="dashAvgScore">—</div>
+            <div class="stat-trend text-gray-500">每位學員</div>
           </div>
           <div class="stat-card">
             <div class="stat-label">最常卡關</div>
-            <div class="stat-num text-2xl mt-1" style="font-size:1.5rem;">CH 04 · Q11</div>
-            <div class="stat-trend stat-down">62% 答錯率</div>
+            <div class="stat-num text-2xl mt-1" id="dashTopStuck" style="font-size:1.25rem;">—</div>
+            <div class="stat-trend stat-down" id="dashTopStuckRate">—</div>
           </div>
         </div>
 
         <div class="grid lg:grid-cols-[1.5fr_1fr] gap-6 mb-6">
-          <!-- Bar chart: completion by chapter -->
+          <!-- Bar chart: dynamic per stage -->
           <div class="panel">
             <div class="panel-header">
               <div>
-                <div class="panel-title">各章節平均完成率</div>
-                <div class="panel-subtitle">所有學員 · 本月</div>
+                <div class="panel-title">CH 04 各 Stage 完成率</div>
+                <div class="panel-subtitle">所有學員平均（CH 04 為唯一有量化進度的章節）</div>
               </div>
-              <button class="btn btn-ghost text-xs">匯出 CSV</button>
+              <button class="btn btn-ghost text-xs" id="csvExportBtn">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="inline"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                匯出 CSV
+              </button>
             </div>
-            <div class="bar-chart">
-              <div class="bar-col"><div class="bar-value">98%</div><div class="bar" style="height: 98%;"></div><div class="bar-label">CH 00</div></div>
-              <div class="bar-col"><div class="bar-value">95%</div><div class="bar" style="height: 95%;"></div><div class="bar-label">CH 01</div></div>
-              <div class="bar-col"><div class="bar-value">82%</div><div class="bar" style="height: 82%;"></div><div class="bar-label">CH 02</div></div>
-              <div class="bar-col"><div class="bar-value">68%</div><div class="bar" style="height: 68%;"></div><div class="bar-label">CH 03</div></div>
-              <div class="bar-col"><div class="bar-value">45%</div><div class="bar" style="height: 45%;"></div><div class="bar-label">CH 04</div></div>
-              <div class="bar-col"><div class="bar-value">28%</div><div class="bar" style="height: 28%;"></div><div class="bar-label">CH 05</div></div>
-              <div class="bar-col"><div class="bar-value">12%</div><div class="bar" style="height: 12%;"></div><div class="bar-label">CH 06</div></div>
+            <div class="bar-chart" id="dashBarChart" style="min-height:180px;">
+              <div class="text-xs text-gray-500 text-center w-full py-12 col-span-full">載入中…</div>
             </div>
-            <div class="text-xs text-gray-500 mt-4 pt-4 border-t border-gray-800">
-              💡 <span class="text-orange-300">主管洞察</span>：CH 04 闖關挑戰是明顯的卡關點，建議補強前置教材或新增中段提示。
+            <div class="text-xs text-gray-500 mt-4 pt-4 border-t border-gray-800" id="dashInsight">
+              💡 <span class="text-orange-300">主管洞察</span>：尚無學員資料。
             </div>
           </div>
 
@@ -519,35 +516,16 @@
             </div>
             <div class="flex items-center gap-6 mt-4">
               <div class="donut-wrap">
-                <svg viewBox="0 0 36 36" class="w-full h-full" style="transform: rotate(-90deg);">
+                <svg id="dashDonutSvg" viewBox="0 0 36 36" class="w-full h-full" style="transform: rotate(-90deg);">
                   <circle cx="18" cy="18" r="15.9155" fill="transparent" stroke="rgba(255,255,255,0.05)" stroke-width="3"></circle>
-                  <circle cx="18" cy="18" r="15.9155" fill="transparent" stroke="#F58220" stroke-width="3" stroke-dasharray="33 67" stroke-dashoffset="0" style="filter: drop-shadow(0 0 4px rgba(245,130,32,0.5));"></circle>
-                  <circle cx="18" cy="18" r="15.9155" fill="transparent" stroke="#FFA050" stroke-width="3" stroke-dasharray="42 58" stroke-dashoffset="-33"></circle>
-                  <circle cx="18" cy="18" r="15.9155" fill="transparent" stroke="#FFD27A" stroke-width="3" stroke-dasharray="17 83" stroke-dashoffset="-75"></circle>
-                  <circle cx="18" cy="18" r="15.9155" fill="transparent" stroke="rgba(255,255,255,0.15)" stroke-width="3" stroke-dasharray="8 92" stroke-dashoffset="-92"></circle>
                 </svg>
                 <div class="donut-text">
-                  <div class="text-2xl font-bold">12</div>
+                  <div class="text-2xl font-bold" id="dashDonutTotal">0</div>
                   <div class="text-[10px] text-gray-500 tracking-widest">TOTAL</div>
                 </div>
               </div>
-              <div class="flex-1 space-y-2 text-sm">
-                <div class="flex items-center justify-between">
-                  <span class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full" style="background:#F58220"></span>畢業</span>
-                  <span class="text-gray-400">4 位</span>
-                </div>
-                <div class="flex items-center justify-between">
-                  <span class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full" style="background:#FFA050"></span>進階中</span>
-                  <span class="text-gray-400">5 位</span>
-                </div>
-                <div class="flex items-center justify-between">
-                  <span class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full" style="background:#FFD27A"></span>入門中</span>
-                  <span class="text-gray-400">2 位</span>
-                </div>
-                <div class="flex items-center justify-between">
-                  <span class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full" style="background:rgba(255,255,255,0.15)"></span>未開始</span>
-                  <span class="text-gray-400">1 位</span>
-                </div>
+              <div class="flex-1 space-y-2 text-sm" id="dashDonutLegend">
+                <div class="text-xs text-gray-500">載入中…</div>
               </div>
             </div>
           </div>
@@ -559,35 +537,11 @@
             <div class="panel-header">
               <div>
                 <div class="panel-title">最常答錯的題目 · TOP 5</div>
-                <div class="panel-subtitle">需要補強教材的訊號</div>
+                <div class="panel-subtitle">需要補強教材的訊號 · 即時計算</div>
               </div>
             </div>
-            <div class="space-y-3">
-              <div class="flex items-center gap-3 p-3 rounded-lg bg-black/30 border border-gray-800">
-                <div class="text-xs text-orange-400 font-mono-en font-bold">CH04 Q11</div>
-                <div class="text-sm flex-1">雜牌應對：「網路上有便宜一半的」</div>
-                <div class="pill pill-red">62% 錯</div>
-              </div>
-              <div class="flex items-center gap-3 p-3 rounded-lg bg-black/30 border border-gray-800">
-                <div class="text-xs text-orange-400 font-mono-en font-bold">CH04 Q07</div>
-                <div class="text-sm flex-1">工程商殺價 8% 怎麼回</div>
-                <div class="pill pill-red">58% 錯</div>
-              </div>
-              <div class="flex items-center gap-3 p-3 rounded-lg bg-black/30 border border-gray-800">
-                <div class="text-xs text-orange-400 font-mono-en font-bold">CH02 Q03</div>
-                <div class="text-sm flex-1">磁吸軌道與傳統軌道差異</div>
-                <div class="pill pill-red">45% 錯</div>
-              </div>
-              <div class="flex items-center gap-3 p-3 rounded-lg bg-black/30 border border-gray-800">
-                <div class="text-xs text-orange-400 font-mono-en font-bold">CH01 Q05</div>
-                <div class="text-sm flex-1">舞光創立年份</div>
-                <div class="pill pill-orange">32% 錯</div>
-              </div>
-              <div class="flex items-center gap-3 p-3 rounded-lg bg-black/30 border border-gray-800">
-                <div class="text-xs text-orange-400 font-mono-en font-bold">CH04 Q12</div>
-                <div class="text-sm flex-1">「LED 都差不多」應對</div>
-                <div class="pill pill-orange">28% 錯</div>
-              </div>
+            <div class="space-y-3" id="dashStuckList">
+              <div class="text-xs text-gray-500 text-center py-8">尚無答題資料</div>
             </div>
           </div>
 
@@ -595,56 +549,12 @@
           <div class="panel">
             <div class="panel-header">
               <div>
-                <div class="panel-title">最近活動</div>
-                <div class="panel-subtitle">即時動態</div>
+                <div class="panel-title">最近上線</div>
+                <div class="panel-subtitle">最近活躍的 8 位學員</div>
               </div>
             </div>
-            <div class="space-y-1">
-              <div class="activity-item">
-                <div class="activity-icon">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-                </div>
-                <div class="flex-1 text-sm">
-                  <div><strong>陳柏翰</strong> 通關 CHAPTER 04，獲頒「闖關王」徽章</div>
-                  <div class="text-xs text-gray-500 mt-0.5">10 分鐘前</div>
-                </div>
-              </div>
-              <div class="activity-item">
-                <div class="activity-icon">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-                </div>
-                <div class="flex-1 text-sm">
-                  <div><strong>林雅婷</strong> 完成 CH02 產品實驗室，+200 光點</div>
-                  <div class="text-xs text-gray-500 mt-0.5">1 小時前</div>
-                </div>
-              </div>
-              <div class="activity-item">
-                <div class="activity-icon">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                </div>
-                <div class="flex-1 text-sm">
-                  <div><strong>王子豪</strong> 在 CH04 Q11 卡關 3 次</div>
-                  <div class="text-xs text-gray-500 mt-0.5">2 小時前</div>
-                </div>
-              </div>
-              <div class="activity-item">
-                <div class="activity-icon">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
-                </div>
-                <div class="flex-1 text-sm">
-                  <div>新進學員 <strong>張詠丞</strong> 已加入培訓計畫</div>
-                  <div class="text-xs text-gray-500 mt-0.5">昨天</div>
-                </div>
-              </div>
-              <div class="activity-item">
-                <div class="activity-icon">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                </div>
-                <div class="flex-1 text-sm">
-                  <div>主管新增資源「2026 新品速覽 PPT」</div>
-                  <div class="text-xs text-gray-500 mt-0.5">2 天前</div>
-                </div>
-              </div>
+            <div class="space-y-1" id="dashActivity">
+              <div class="text-xs text-gray-500 text-center py-8">尚無學員上線</div>
             </div>
           </div>
         </div>
@@ -1221,7 +1131,7 @@
   const defaultData = {
     chapters: [
       { id: 0, num: '00', name: '入職須知', desc: '出勤 · 病假 · 加班 · 服儀 · 公務車事故 SOP · 久任年資獎勵 · 三安福祉 · 雙軌路徑 · 法定須知（前置必讀）', status: 'live' },
-      { id: 1, num: '01', name: '品牌之光', desc: '公司沿革 · 舞光誕生 · 三大價值 · 二代團隊 · 三大體驗館', status: 'live' },
+      { id: 1, num: '01', name: '品牌之光', desc: '公司沿革 · 舞光誕生 · 五大價值 · 二代團隊 · 三大體驗館', status: 'live' },
       { id: 2, num: '02', name: '產品實驗室', desc: '20+ 大類 · 9 主打產品 · 規格速查 · 場景配對 · 品質骨幹', status: 'live' },
       { id: 3, num: '03', name: '業務學院', desc: '客戶分層 · 客戶分級 · 拜訪 SOP · 報價議價 · 異議處理 · 客訴 SOP', status: 'live' },
       { id: 4, num: '04', name: '闖關挑戰', desc: '12 道情境題 + 5 輪 AI 客戶對話 + 5 題 HR 規章（共 22 關卡）', status: 'live' },
@@ -1597,30 +1507,39 @@
 
     let allUsers = [];
     let allowlist = [];
+    let progressByUid = {};   // uid -> { score, totalCompleted, progress[], scenarios[] }
+    let stuckCache = [];       // [{ quizId, attempts, wrong, wrongRate }]
 
-    async function loadTrainees() {
+    // 題目對照表（用於 stuck-point 顯示題目摘要）
+    const QUIZ_META = {
+      q1:  { stage: 1, label: 'CH04 Q1',  desc: '光通量與瓦數對照' },
+      q2:  { stage: 1, label: 'CH04 Q2',  desc: 'Ra 演色性' },
+      q3:  { stage: 1, label: 'CH04 Q3',  desc: '色溫選擇' },
+      q4:  { stage: 1, label: 'CH04 Q4',  desc: '戶外 IP 等級' },
+      q5:  { stage: 1, label: 'CH04 Q5',  desc: '智慧家庭整合' },
+      q6:  { stage: 2, label: 'CH04 Q6',  desc: '燈飾店主婉拒新品' },
+      q7:  { stage: 2, label: 'CH04 Q7',  desc: '工程商殺價 8%' },
+      q8:  { stage: 2, label: 'CH04 Q8',  desc: '設計師詢問配光' },
+      q9:  { stage: 2, label: 'CH04 Q9',  desc: '客訴：燈具有閃爍' },
+      q10: { stage: 3, label: 'CH04 Q10', desc: '報價遇對手低 5%' },
+      q11: { stage: 3, label: 'CH04 Q11', desc: '雜牌應對：「網路便宜一半」' },
+      q12: { stage: 3, label: 'CH04 Q12', desc: '「LED 都差不多」應對' },
+      q13: { stage: 5, label: 'CH04 Q13', desc: '出勤規定（業務人員）' },
+      q14: { stage: 5, label: 'CH04 Q14', desc: '病假證明 N-1~N+4' },
+      q15: { stage: 5, label: 'CH04 Q15', desc: '三安福祉 = 安心/安身/安老' },
+      q16: { stage: 5, label: 'CH04 Q16', desc: '雙軌升等 1 年/12 月' },
+      q17: { stage: 5, label: 'CH04 Q17', desc: '公務車事故不可私下和解' }
+    };
+
+    function renderTrainees() {
       const tbody = document.getElementById('traineesTbody');
       const summary = document.getElementById('traineesSummary');
-      tbody.innerHTML = '<tr><td colspan="7" class="text-center text-gray-500 py-8">載入中…</td></tr>';
-      try {
-        allUsers = await fb.listAllUsers();
-        // 拉每個使用者的進度（並行）
-        const progresses = await Promise.all(allUsers.map(u => fb.getUserProgressDetail(u.uid).catch(()=>({score:0,totalCompleted:0}))));
-        renderTrainees(allUsers, progresses);
-        const total = allUsers.length;
-        const trainees = allUsers.filter(u => u.role !== 'manager').length;
-        summary.textContent = `共 ${total} 位（學員 ${trainees} 位 · 主管 ${total-trainees} 位）`;
-      } catch (e) {
-        console.error(e);
-        tbody.innerHTML = '<tr><td colspan="7" class="text-center text-red-300 py-8">讀取失敗：' + escapeHtml(e.message || e) + '</td></tr>';
-      }
-    }
-
-    function renderTrainees(users, progresses) {
-      const tbody = document.getElementById('traineesTbody');
+      const total = allUsers.length;
+      const trainees = allUsers.filter(u => u.role !== 'manager').length;
+      summary.textContent = `共 ${total} 位（學員 ${trainees} 位 · 主管 ${total-trainees} 位）`;
       const search = (document.getElementById('traineesSearch').value || '').toLowerCase();
-      const rows = users.map((u, i) => {
-        const p = progresses[i] || { score: 0, totalCompleted: 0 };
+      const rows = allUsers.map(u => {
+        const p = progressByUid[u.uid] || { score: 0, totalCompleted: 0 };
         const pct = Math.min(100, Math.round((p.totalCompleted / TOTAL) * 100));
         const matchesSearch = !search ||
           (u.name || '').toLowerCase().includes(search) ||
@@ -1654,18 +1573,6 @@
       tbody.innerHTML = rows || '<tr><td colspan="7" class="text-center text-gray-500 py-8">尚未有學員登入過</td></tr>';
     }
 
-    async function loadAllowlist() {
-      const tbody = document.getElementById('allowlistTbody');
-      tbody.innerHTML = '<tr><td colspan="7" class="text-center text-gray-500 py-8">載入中…</td></tr>';
-      try {
-        allowlist = await fb.listAllowlist();
-        renderAllowlist();
-      } catch (e) {
-        console.error(e);
-        tbody.innerHTML = '<tr><td colspan="7" class="text-center text-red-300 py-8">讀取失敗：' + escapeHtml(e.message || e) + '</td></tr>';
-      }
-    }
-
     function renderAllowlist() {
       const tbody = document.getElementById('allowlistTbody');
       // 對應已登入用戶判斷狀態
@@ -1694,13 +1601,202 @@
           btn.disabled = true;
           try {
             await fb.removeFromAllowlist(id);
-            await loadAllowlist();
+            // onSnapshot 會自動 re-render
           } catch(e) {
             alert('移除失敗：' + (e.message || e));
             btn.disabled = false;
           }
         });
       });
+    }
+
+    // ===== Dashboard render =====
+    function renderDashboard() {
+      const totalUsers = allUsers.length;
+      const trainees = allUsers.filter(u => u.role !== 'manager');
+      document.getElementById('dashTotalUsers').textContent = totalUsers;
+      document.getElementById('dashTotalUsersHint').textContent =
+        `學員 ${trainees.length} · 主管 ${totalUsers - trainees.length}`;
+
+      // 平均完成率 + 平均光點（只算 trainees）
+      let sumPct = 0, sumScore = 0;
+      trainees.forEach(u => {
+        const p = progressByUid[u.uid] || { totalCompleted: 0, score: 0 };
+        sumPct += (p.totalCompleted / TOTAL) * 100;
+        sumScore += p.score || 0;
+      });
+      const avgPct = trainees.length ? Math.round(sumPct / trainees.length) : 0;
+      const avgScore = trainees.length ? Math.round(sumScore / trainees.length) : 0;
+      document.getElementById('dashAvgPct').textContent = avgPct;
+      document.getElementById('dashAvgScore').textContent = avgScore;
+
+      // Stage 完成率（CH 04 內）
+      const stages = {
+        1: { label: 'STAGE 1', ids: ['q1','q2','q3','q4','q5'] },
+        2: { label: 'STAGE 2', ids: ['q6','q7','q8','q9'] },
+        3: { label: 'STAGE 3', ids: ['q10','q11','q12'] },
+        4: { label: 'STAGE 4', ids: null }, // scenarios
+        5: { label: 'STAGE 5', ids: ['q13','q14','q15','q16','q17'] }
+      };
+      const stagePcts = {};
+      Object.entries(stages).forEach(([k, s]) => {
+        if (trainees.length === 0) { stagePcts[k] = 0; return; }
+        let total = 0;
+        trainees.forEach(u => {
+          const p = progressByUid[u.uid] || {};
+          if (s.ids) {
+            const ids = new Set((p.progress || []).map(d => d.quizId));
+            const done = s.ids.filter(id => ids.has(id)).length;
+            total += done / s.ids.length;
+          } else {
+            total += (p.scenariosCompleted || 0) / 5;
+          }
+        });
+        stagePcts[k] = Math.round((total / trainees.length) * 100);
+      });
+      const bar = document.getElementById('dashBarChart');
+      bar.innerHTML = Object.entries(stages).map(([k, s]) => {
+        const pct = stagePcts[k];
+        return `<div class="bar-col"><div class="bar-value">${pct}%</div><div class="bar" style="height:${Math.max(2, pct)}%;"></div><div class="bar-label">${s.label}</div></div>`;
+      }).join('');
+
+      // 主管洞察
+      const lowestStage = Object.entries(stagePcts).sort((a,b) => a[1]-b[1])[0];
+      const insight = document.getElementById('dashInsight');
+      if (trainees.length === 0) {
+        insight.innerHTML = '💡 <span class="text-orange-300">主管洞察</span>：尚無學員開始挑戰。';
+      } else {
+        insight.innerHTML = `💡 <span class="text-orange-300">主管洞察</span>：${stages[lowestStage[0]].label} 完成率僅 <strong class="text-orange-300">${lowestStage[1]}%</strong>，是目前最弱的關卡，建議補強教材或加上中段提示。`;
+      }
+
+      // Donut: 完成度分級
+      const tiers = { graduated: 0, advanced: 0, beginner: 0, notStarted: 0 };
+      trainees.forEach(u => {
+        const p = progressByUid[u.uid] || { totalCompleted: 0 };
+        const pct = (p.totalCompleted / TOTAL) * 100;
+        if (pct >= 100) tiers.graduated++;
+        else if (pct >= 50) tiers.advanced++;
+        else if (pct > 0) tiers.beginner++;
+        else tiers.notStarted++;
+      });
+      const tierTotal = trainees.length;
+      const svg = document.getElementById('dashDonutSvg');
+      svg.innerHTML = '<circle cx="18" cy="18" r="15.9155" fill="transparent" stroke="rgba(255,255,255,0.05)" stroke-width="3"></circle>';
+      let offset = 0;
+      const ringColors = { graduated: '#F58220', advanced: '#FFA050', beginner: '#FFD27A', notStarted: 'rgba(255,255,255,0.15)' };
+      ['graduated','advanced','beginner','notStarted'].forEach(k => {
+        const v = tierTotal ? (tiers[k] / tierTotal) * 100 : 0;
+        if (v <= 0) return;
+        const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        circle.setAttribute('cx','18'); circle.setAttribute('cy','18'); circle.setAttribute('r','15.9155');
+        circle.setAttribute('fill','transparent'); circle.setAttribute('stroke', ringColors[k]);
+        circle.setAttribute('stroke-width','3');
+        circle.setAttribute('stroke-dasharray', `${v} ${100-v}`);
+        circle.setAttribute('stroke-dashoffset', `-${offset}`);
+        svg.appendChild(circle);
+        offset += v;
+      });
+      document.getElementById('dashDonutTotal').textContent = tierTotal;
+      document.getElementById('dashDonutLegend').innerHTML = `
+        <div class="flex items-center justify-between"><span class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full" style="background:#F58220"></span>畢業</span><span class="text-gray-400">${tiers.graduated} 位</span></div>
+        <div class="flex items-center justify-between"><span class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full" style="background:#FFA050"></span>進階中</span><span class="text-gray-400">${tiers.advanced} 位</span></div>
+        <div class="flex items-center justify-between"><span class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full" style="background:#FFD27A"></span>入門中</span><span class="text-gray-400">${tiers.beginner} 位</span></div>
+        <div class="flex items-center justify-between"><span class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full" style="background:rgba(255,255,255,0.15)"></span>未開始</span><span class="text-gray-400">${tiers.notStarted} 位</span></div>
+      `;
+
+      // 卡關熱點 Top 5
+      const stuckList = document.getElementById('dashStuckList');
+      const top5 = stuckCache.filter(s => s.attempts > 0).slice(0, 5);
+      if (top5.length === 0) {
+        stuckList.innerHTML = '<div class="text-xs text-gray-500 text-center py-8">尚無學員作答，無法分析</div>';
+        document.getElementById('dashTopStuck').textContent = '—';
+        document.getElementById('dashTopStuckRate').textContent = '—';
+      } else {
+        const top1 = top5[0];
+        const meta1 = QUIZ_META[top1.quizId] || { label: top1.quizId, desc: '' };
+        document.getElementById('dashTopStuck').textContent = meta1.label;
+        document.getElementById('dashTopStuckRate').textContent = Math.round(top1.wrongRate * 100) + '% 答錯率';
+        stuckList.innerHTML = top5.map(s => {
+          const meta = QUIZ_META[s.quizId] || { label: s.quizId, desc: '' };
+          const rate = Math.round(s.wrongRate * 100);
+          const pillClass = rate >= 50 ? 'pill-red' : rate >= 30 ? 'pill-orange' : 'pill-gray';
+          return `<div class="flex items-center gap-3 p-3 rounded-lg bg-black/30 border border-gray-800">
+            <div class="text-xs text-orange-400 font-mono-en font-bold whitespace-nowrap">${escapeHtml(meta.label)}</div>
+            <div class="text-sm flex-1">${escapeHtml(meta.desc)}</div>
+            <div class="pill ${pillClass}">${rate}% 錯</div>
+          </div>`;
+        }).join('');
+      }
+
+      // 最近上線 Top 8
+      const recent = [...allUsers]
+        .filter(u => u.lastSeen)
+        .sort((a, b) => {
+          const ta = a.lastSeen.toDate ? a.lastSeen.toDate().getTime() : 0;
+          const tb = b.lastSeen.toDate ? b.lastSeen.toDate().getTime() : 0;
+          return tb - ta;
+        })
+        .slice(0, 8);
+      const activity = document.getElementById('dashActivity');
+      if (recent.length === 0) {
+        activity.innerHTML = '<div class="text-xs text-gray-500 text-center py-8">尚無學員上線</div>';
+      } else {
+        activity.innerHTML = recent.map(u => {
+          const p = progressByUid[u.uid] || { totalCompleted: 0, score: 0 };
+          const initial = (u.name || u.email || '?').charAt(0);
+          return `<div class="activity-item">
+            <div class="w-7 h-7 rounded-full bg-gradient-to-br from-orange-300 to-orange-600 flex items-center justify-center text-black font-bold text-xs flex-shrink-0">${escapeHtml(initial)}</div>
+            <div class="flex-1 text-sm">
+              <div><strong>${escapeHtml(u.name || u.email)}</strong>　<span class="text-orange-300">${p.totalCompleted}/${TOTAL}</span><span class="text-gray-500"> · ${p.score} 光點</span></div>
+              <div class="text-xs text-gray-500 mt-0.5">${fmtTime(u.lastSeen)}</div>
+            </div>
+          </div>`;
+        }).join('');
+      }
+    }
+
+    // ===== CSV 匯出 =====
+    function exportCSV() {
+      const rows = [['員編','姓名','Email','角色','完成關卡','總關卡','完成率(%)','光點','最近上線']];
+      allUsers.forEach(u => {
+        const p = progressByUid[u.uid] || { totalCompleted: 0, score: 0 };
+        const pct = Math.round((p.totalCompleted / TOTAL) * 100);
+        const last = u.lastSeen && u.lastSeen.toDate ? u.lastSeen.toDate().toISOString() : '';
+        rows.push([
+          u.empId || '',
+          u.name || '',
+          u.email || '',
+          u.role || '',
+          p.totalCompleted,
+          TOTAL,
+          pct,
+          p.score || 0,
+          last
+        ]);
+      });
+      const csv = rows.map(r => r.map(c => {
+        const s = String(c == null ? '' : c);
+        return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+      }).join(',')).join('\n');
+      // BOM for Excel UTF-8 detection
+      const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `glow-trainees-${new Date().toISOString().slice(0,10)}.csv`;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    }
+    document.getElementById('csvExportBtn').addEventListener('click', exportCSV);
+
+    // ===== 共用：抓所有人進度 + 卡關 + 重渲 =====
+    async function refreshAllData() {
+      const results = await Promise.all(allUsers.map(u => fb.getUserProgressDetail(u.uid).catch(()=>({score:0,totalCompleted:0,progress:[],scenarios:[],quizCompleted:0,scenariosCompleted:0}))));
+      progressByUid = {};
+      allUsers.forEach((u, i) => { progressByUid[u.uid] = results[i]; });
+      try { stuckCache = await fb.getStuckPointAnalysis(); } catch(e) { stuckCache = []; }
+      renderTrainees();
+      renderAllowlist();
+      renderDashboard();
     }
 
     // 新增授權表單
@@ -1730,7 +1826,7 @@
         await fb.addToAllowlist({ email, name, empId, role });
         ['allowEmailInput','allowNameInput','allowEmpIdInput'].forEach(id => document.getElementById(id).value = '');
         form.classList.add('hidden');
-        await loadAllowlist();
+        // onSnapshot 會自動 re-render allowlist
       } catch(e) {
         msg.textContent = '新增失敗：' + (e.message || e);
       } finally {
@@ -1738,19 +1834,24 @@
       }
     });
 
-    // 重新整理
-    document.getElementById('refreshTraineesBtn').addEventListener('click', async () => {
-      await Promise.all([loadTrainees(), loadAllowlist()]);
-    });
-    // 搜尋
-    document.getElementById('traineesSearch').addEventListener('input', () => {
-      // 重新渲染（使用最近一次的 progresses）
-      Promise.all(allUsers.map(u => fb.getUserProgressDetail(u.uid).catch(()=>({score:0,totalCompleted:0}))))
-        .then(progresses => renderTrainees(allUsers, progresses));
-    });
+    // 手動重新整理（強制重抓進度）
+    document.getElementById('refreshTraineesBtn').addEventListener('click', () => refreshAllData());
 
-    // 初次載入
-    await Promise.all([loadTrainees(), loadAllowlist()]);
+    // 搜尋
+    document.getElementById('traineesSearch').addEventListener('input', () => renderTrainees());
+
+    // ===== 即時訂閱 =====
+    let usersInitDone = false, allowInitDone = false;
+    fb.onUsersUpdate(async (users) => {
+      allUsers = users;
+      await refreshAllData();
+      usersInitDone = true;
+    });
+    fb.onAllowlistUpdate((list) => {
+      allowlist = list;
+      renderAllowlist();
+      allowInitDone = true;
+    });
   });
 </script>
 
