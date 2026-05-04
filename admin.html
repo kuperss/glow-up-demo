@@ -409,6 +409,11 @@
         <span>內容編輯</span>
         <span class="ml-auto text-[10px] px-1.5 py-0.5 rounded bg-orange-500/20 text-orange-300">CMS</span>
       </a>
+      <a class="sidebar-link" data-page="ai">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12a4 4 0 0 1 8 0"/><circle cx="12" cy="10" r="1"/><path d="M12 14v4"/></svg>
+        <span>AI 設定</span>
+        <span class="ml-auto text-[10px] px-1.5 py-0.5 rounded bg-orange-500/30 text-orange-200">NEW</span>
+      </a>
       <a class="sidebar-link" data-page="resources">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
         <span>資源庫</span>
@@ -756,6 +761,91 @@
               </thead>
               <tbody id="quizTableBody"></tbody>
             </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== AI 設定 ===== -->
+      <section id="page-ai" class="page-section">
+        <div class="flex items-center justify-between mb-6">
+          <div>
+            <h2 class="text-2xl font-bold mb-1">AI 設定</h2>
+            <div class="text-sm text-gray-500">設定 LLM 提供者 + API Key · 學員端 AI 助教 / AI 對話演練都使用此設定</div>
+          </div>
+        </div>
+
+        <!-- 安全性警告 -->
+        <div class="panel mb-6" style="background: linear-gradient(180deg, rgba(255,180,80,0.04), rgba(19,19,22,0.4)); border-color: rgba(255,180,80,0.25);">
+          <div class="flex items-start gap-3">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FFB450" stroke-width="2" class="flex-shrink-0 mt-0.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            <div class="text-sm leading-relaxed">
+              <div class="font-semibold mb-1" style="color: #FFB450;">安全性說明（必讀）</div>
+              <p class="text-gray-300 mb-2">本系統使用瀏覽器直接呼叫 AI API，<strong class="text-orange-300">API Key 會儲存於 Firestore，所有登入用戶（含學員）都讀得到</strong>。最壞情況：員工複製 key 自用。</p>
+              <p class="text-gray-400 text-xs">緩解措施：(1) 在 API 提供商後台設使用上限與額度警示 (2) 定期更換 key (3) Production 環境建議升級為 Cloudflare Worker 代理（可隨時請工程師補上，key 將完全鎖在後端）</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 設定表單 -->
+        <div class="panel mb-6">
+          <div class="panel-header"><div class="panel-title">提供者與金鑰</div></div>
+
+          <div class="grid md:grid-cols-2 gap-5 mt-2">
+            <div>
+              <label class="text-xs text-gray-500 tracking-wider mb-2 block">AI 提供者</label>
+              <select id="aiProviderSelect" class="form-input">
+                <option value="gemini">Google Gemini</option>
+                <option value="claude">Anthropic Claude</option>
+                <option value="openai">OpenAI GPT</option>
+              </select>
+              <div class="text-[11px] text-gray-500 mt-2" id="aiProviderHint"></div>
+            </div>
+
+            <div>
+              <label class="text-xs text-gray-500 tracking-wider mb-2 block">模型名稱（空白使用預設）</label>
+              <input type="text" id="aiModelInput" class="form-input" placeholder="">
+              <div class="text-[11px] text-gray-500 mt-2" id="aiModelHint"></div>
+            </div>
+          </div>
+
+          <div class="mt-5">
+            <label class="text-xs text-gray-500 tracking-wider mb-2 block">API Key</label>
+            <div class="flex gap-2">
+              <input type="password" id="aiKeyInput" class="form-input flex-1" placeholder="貼上 API Key（儲存後會用密碼遮罩顯示）">
+              <button id="aiKeyToggleBtn" class="btn btn-ghost text-xs whitespace-nowrap">顯示</button>
+            </div>
+            <div class="text-[11px] text-gray-500 mt-2" id="aiKeyHint"></div>
+          </div>
+
+          <div class="mt-5">
+            <label class="text-xs text-gray-500 tracking-wider mb-2 block">系統提示詞（System Prompt）</label>
+            <textarea id="aiSystemPrompt" class="form-input" rows="4" placeholder="設定 AI 的角色與回應風格"></textarea>
+            <div class="text-[11px] text-gray-500 mt-2">告訴 AI「你是誰」、「應該怎麼回答」、「有哪些限制」。設好以後所有 AI 助教 / AI 對話演練都會套用這個基底人設。</div>
+          </div>
+
+          <div class="mt-5 flex flex-wrap items-center gap-3">
+            <label class="flex items-center gap-2 text-sm text-gray-300">
+              <input type="checkbox" id="aiEnabledChk" class="w-4 h-4 accent-orange-500">
+              <span>啟用 AI 功能（學員端浮動 AI 助教）</span>
+            </label>
+            <span class="text-[11px] text-gray-500" id="aiUpdatedAt"></span>
+          </div>
+
+          <div class="mt-6 flex flex-wrap gap-2 pt-4 border-t border-gray-800">
+            <button id="aiSaveBtn" class="btn btn-primary">儲存設定</button>
+            <button id="aiTestBtn" class="btn btn-ghost">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              測試呼叫
+            </button>
+            <span id="aiSaveMsg" class="text-xs ml-2"></span>
+          </div>
+        </div>
+
+        <!-- 測試對話 -->
+        <div class="panel">
+          <div class="panel-header"><div class="panel-title">測試對話</div></div>
+          <div id="aiTestChat" class="space-y-3 min-h-[120px] mb-4">
+            <div class="text-xs text-gray-500 text-center py-6">點上方「測試呼叫」會發送一則「你好，請介紹一下舞光 LED」測試訊息，看看設定是否正常。</div>
           </div>
         </div>
       </section>
@@ -1165,6 +1255,7 @@
         chapters: ['ADMIN · CHAPTERS', '章節管理'],
         quiz: ['ADMIN · QUIZ BANK', '題庫管理'],
         content: ['ADMIN · CONTENT CMS', '內容編輯'],
+        ai: ['ADMIN · AI CONFIG', 'AI 設定'],
         resources: ['ADMIN · RESOURCES', '資源庫'],
         analytics: ['ADMIN · ANALYTICS', '數據分析'],
         settings: ['ADMIN · SETTINGS', '系統設定']
@@ -1987,6 +2078,126 @@
     document.getElementById('contentRefreshBtn').addEventListener('click', async () => {
       siteContentList = await fb.listSiteContent();
       renderContent();
+    });
+
+    // ===== AI 設定 =====
+    const providerDefaults = fb.getProviderDefaults();
+    const providerHints = {
+      gemini: '建議模型：gemini-1.5-flash（快） / gemini-1.5-pro（強）/ gemini-2.0-flash-exp（最新）',
+      claude: '建議模型：claude-haiku-4-5-20251001（快） / claude-sonnet-4-6（強）/ claude-opus-4-7（最強）',
+      openai: '建議模型：gpt-4o-mini（快、便宜） / gpt-4o（強） / gpt-4-turbo（穩定）'
+    };
+    const keyHints = {
+      gemini: '取得位置：<a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-orange-300 hover:underline">aistudio.google.com/app/apikey</a>（免費額度生成式 AI Studio）',
+      claude: '取得位置：<a href="https://console.anthropic.com/" target="_blank" class="text-orange-300 hover:underline">console.anthropic.com</a> → Settings → API Keys',
+      openai: '取得位置：<a href="https://platform.openai.com/api-keys" target="_blank" class="text-orange-300 hover:underline">platform.openai.com/api-keys</a>'
+    };
+
+    const elProvider = document.getElementById('aiProviderSelect');
+    const elModel = document.getElementById('aiModelInput');
+    const elKey = document.getElementById('aiKeyInput');
+    const elKeyToggle = document.getElementById('aiKeyToggleBtn');
+    const elSystem = document.getElementById('aiSystemPrompt');
+    const elEnabled = document.getElementById('aiEnabledChk');
+    const elSaveBtn = document.getElementById('aiSaveBtn');
+    const elTestBtn = document.getElementById('aiTestBtn');
+    const elSaveMsg = document.getElementById('aiSaveMsg');
+    const elProviderHint = document.getElementById('aiProviderHint');
+    const elModelHint = document.getElementById('aiModelHint');
+    const elKeyHint = document.getElementById('aiKeyHint');
+    const elUpdatedAt = document.getElementById('aiUpdatedAt');
+    const elTestChat = document.getElementById('aiTestChat');
+
+    function updateProviderHints(provider) {
+      const def = providerDefaults[provider];
+      elProviderHint.textContent = def ? `預設模型：${def.model}` : '';
+      elModel.placeholder = def ? def.model : '';
+      elModelHint.textContent = providerHints[provider] || '';
+      elKeyHint.innerHTML = keyHints[provider] || '';
+    }
+
+    elProvider.addEventListener('change', () => updateProviderHints(elProvider.value));
+
+    let keyVisible = false;
+    elKeyToggle.addEventListener('click', () => {
+      keyVisible = !keyVisible;
+      elKey.type = keyVisible ? 'text' : 'password';
+      elKeyToggle.textContent = keyVisible ? '隱藏' : '顯示';
+    });
+
+    // 訂閱 aiConfig（即時同步）
+    fb.onAIConfigUpdate((cfg) => {
+      elProvider.value = cfg.provider || 'gemini';
+      elModel.value = cfg.model || '';
+      elKey.value = cfg.apiKey || '';
+      elSystem.value = cfg.systemPrompt || '';
+      elEnabled.checked = !!cfg.enabled;
+      updateProviderHints(elProvider.value);
+      if (cfg.updatedAt) elUpdatedAt.textContent = '上次更新：' + fmtTime(cfg.updatedAt);
+    });
+
+    elSaveBtn.addEventListener('click', async () => {
+      elSaveMsg.textContent = '';
+      elSaveBtn.disabled = true;
+      const orig = elSaveBtn.textContent;
+      elSaveBtn.textContent = '儲存中…';
+      try {
+        await fb.saveAIConfig({
+          provider: elProvider.value,
+          model: elModel.value.trim(),
+          apiKey: elKey.value.trim(),
+          systemPrompt: elSystem.value,
+          enabled: elEnabled.checked
+        });
+        elSaveMsg.innerHTML = '<span class="text-green-300">✓ 已儲存</span>';
+        setTimeout(() => { elSaveMsg.textContent = ''; }, 2000);
+      } catch (e) {
+        elSaveMsg.innerHTML = '<span class="text-red-300">✗ ' + escapeHtml(e.message || e) + '</span>';
+      } finally {
+        elSaveBtn.disabled = false;
+        elSaveBtn.textContent = orig;
+      }
+    });
+
+    elTestBtn.addEventListener('click', async () => {
+      elTestBtn.disabled = true;
+      const orig = elTestBtn.innerHTML;
+      elTestBtn.innerHTML = '<span class="inline-block animate-pulse">呼叫中…</span>';
+      const userPrompt = '你好，請用 1 句話介紹舞光 LED。';
+      elTestChat.innerHTML = `
+        <div class="flex justify-end"><div class="max-w-[80%] px-4 py-2.5 rounded-2xl rounded-br-sm bg-orange-500/15 border border-orange-500/30 text-sm">${escapeHtml(userPrompt)}</div></div>
+        <div class="flex justify-start"><div class="max-w-[80%] px-4 py-2.5 rounded-2xl rounded-bl-sm bg-gray-800/50 border border-gray-700 text-sm text-gray-400 animate-pulse">思考中…</div></div>
+      `;
+      try {
+        // 用當前表單即時值測試（不必先存）
+        const reply = await fb.callAI({
+          messages: [{ role: 'user', content: userPrompt }],
+          system: elSystem.value,
+          configOverride: {
+            provider: elProvider.value,
+            model: elModel.value.trim(),
+            apiKey: elKey.value.trim(),
+            systemPrompt: elSystem.value
+          }
+        });
+        elTestChat.innerHTML = `
+          <div class="flex justify-end"><div class="max-w-[80%] px-4 py-2.5 rounded-2xl rounded-br-sm bg-orange-500/15 border border-orange-500/30 text-sm">${escapeHtml(userPrompt)}</div></div>
+          <div class="flex justify-start"><div class="max-w-[80%] px-4 py-2.5 rounded-2xl rounded-bl-sm bg-gray-800/50 border border-gray-700 text-sm whitespace-pre-wrap">${escapeHtml(reply)}</div></div>
+          <div class="text-[11px] text-green-300 text-center pt-2">✓ 連線正常 · ${escapeHtml(elProvider.value)} · ${escapeHtml(elModel.value || providerDefaults[elProvider.value].model)}</div>
+        `;
+      } catch (e) {
+        elTestChat.innerHTML = `
+          <div class="flex justify-end"><div class="max-w-[80%] px-4 py-2.5 rounded-2xl rounded-br-sm bg-orange-500/15 border border-orange-500/30 text-sm">${escapeHtml(userPrompt)}</div></div>
+          <div class="p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-sm text-red-300">
+            <div class="font-bold mb-1">✗ 呼叫失敗</div>
+            <div class="text-xs whitespace-pre-wrap">${escapeHtml(e.message || e)}</div>
+            <div class="text-[11px] text-gray-400 mt-2">常見原因：(1) API Key 錯誤 (2) 模型名稱錯誤 (3) 帳戶額度用完 (4) Anthropic Claude 需要在請求時帶 dangerous-direct-browser-access header（已自動處理）</div>
+          </div>
+        `;
+      } finally {
+        elTestBtn.disabled = false;
+        elTestBtn.innerHTML = orig;
+      }
     });
   });
 </script>

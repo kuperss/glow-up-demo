@@ -33,6 +33,14 @@ service cloud.firestore {
       allow create, update, delete: if isManagerOrSuper();
     }
 
+    // ===== AI Config =====
+    // 任何登入者都能讀（呼叫 AI 需要 apiKey）；只有主管能寫
+    // 注意：此設計下 apiKey 對所有登入用戶可見。Production 建議部署 Cloudflare Worker 代理。
+    match /aiConfig/{configId} {
+      allow read: if isSignedIn();
+      allow create, update, delete: if isManagerOrSuper();
+    }
+
     // ===== Users =====
     // 任何人都能讀自己；主管能讀全部
     // 創建/更新自己的 user doc 是被允許的（但只能寫自己的 uid）

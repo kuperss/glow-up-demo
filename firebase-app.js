@@ -190,7 +190,12 @@ export function requireAuth(opts = {}) {
         async listSiteContent() { return []; },
         async saveContentValue() { alert('訪客模式：無法儲存內容變更'); },
         onSiteContentUpdate(cb) { cb([]); return () => {}; },
-        async applySiteContent() { /* no-op for guest */ }
+        async applySiteContent() { /* no-op for guest */ },
+        async getAIConfig() { return { provider: 'gemini', apiKey: '', model: '', systemPrompt: '', enabled: false }; },
+        async saveAIConfig() { alert('訪客模式：無法儲存 AI 設定'); },
+        onAIConfigUpdate(cb) { cb({ provider: 'gemini', apiKey: '', model: '', systemPrompt: '', enabled: false }); return () => {}; },
+        async callAI() { throw new Error('訪客模式：AI 功能不可用，請登入正式帳號'); },
+        getProviderDefaults() { return PROVIDER_DEFAULTS; }
       };
       document.dispatchEvent(new CustomEvent('glow-firebase-ready', { detail: { user: currentUser, doc: guestDoc } }));
       resolve({ user: currentUser, doc: guestDoc });
@@ -223,10 +228,16 @@ export function requireAuth(opts = {}) {
         listAllowlist, addToAllowlist, removeFromAllowlist,
         listAllUsers, getUserProgressDetail,
         onUsersUpdate, onAllowlistUpdate, getStuckPointAnalysis,
-        listSiteContent, saveContentValue, onSiteContentUpdate, applySiteContent
+        listSiteContent, saveContentValue, onSiteContentUpdate, applySiteContent,
+        getAIConfig, saveAIConfig, onAIConfigUpdate, callAI, getProviderDefaults,
+        injectAIHelper
       };
       // 自動套用 siteContent 覆蓋
       applySiteContent();
+      // 注入 AI 助教浮動按鈕（若有設定且 enabled）— admin 頁面不顯示（已有專屬 AI 設定 UI）
+      if (!location.pathname.endsWith('admin.html')) {
+        injectAIHelper();
+      }
       // Dispatch ready event for inline scripts that need to wait
       document.dispatchEvent(new CustomEvent('glow-firebase-ready', {
         detail: { user, doc: currentUserDoc }
@@ -512,6 +523,347 @@ export async function applySiteContent() {
       }
     });
   } catch(e) { console.warn('applySiteContent failed', e); }
+}
+
+// ========== AI 浮動助教（學員端）==========
+// 在所有訓練頁右下角插入「AI 助教」按鈕，點開即可發問
+function injectAIHelperCSS() {
+  if (document.getElementById('glow-ai-helper-css')) return;
+  const s = document.createElement('style');
+  s.id = 'glow-ai-helper-css';
+  s.textContent = `
+    .ai-helper-fab {
+      position: fixed; right: 24px; bottom: 24px; z-index: 9998;
+      width: 56px; height: 56px; border-radius: 50%;
+      background: linear-gradient(135deg, #F58220, #C66510);
+      border: 1px solid rgba(255,200,150,0.3);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; box-shadow: 0 12px 40px -8px rgba(245,130,32,0.6);
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      animation: ai-fab-pulse 3s ease-in-out infinite;
+    }
+    .ai-helper-fab:hover { transform: scale(1.08) translateY(-2px); }
+    @keyframes ai-fab-pulse { 0%,100% { box-shadow: 0 12px 40px -8px rgba(245,130,32,0.6); } 50% { box-shadow: 0 16px 60px -8px rgba(245,130,32,0.9); } }
+    .ai-helper-panel {
+      position: fixed; right: 24px; bottom: 92px; z-index: 9998;
+      width: 380px; max-width: calc(100vw - 32px);
+      height: 540px; max-height: calc(100vh - 120px);
+      background: linear-gradient(180deg, #131316, #0f0f12);
+      border: 1px solid rgba(245,130,32,0.3); border-radius: 18px;
+      box-shadow: 0 30px 80px -20px rgba(245,130,32,0.4);
+      display: none; flex-direction: column; overflow: hidden;
+      backdrop-filter: blur(20px);
+    }
+    .ai-helper-panel.open { display: flex; animation: ai-panel-in 0.3s cubic-bezier(0.16,1,0.3,1); }
+    @keyframes ai-panel-in { from { opacity: 0; transform: translateY(20px) scale(0.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
+    .ai-panel-header {
+      padding: 16px 18px; border-bottom: 1px solid rgba(255,255,255,0.06);
+      display: flex; align-items: center; gap: 12px;
+      background: linear-gradient(180deg, rgba(245,130,32,0.08), transparent);
+    }
+    .ai-panel-icon {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: linear-gradient(135deg, #FFA050, #F58220);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .ai-panel-title { font-weight: 700; font-size: 15px; color: #F5F5F7; }
+    .ai-panel-subtitle { font-size: 11px; color: #6B6B75; }
+    .ai-panel-close { margin-left: auto; padding: 6px; border-radius: 6px; color: #6B6B75; cursor: pointer; transition: all 0.2s; }
+    .ai-panel-close:hover { color: #F58220; background: rgba(245,130,32,0.1); }
+    .ai-chat-list { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+    .ai-chat-bubble {
+      max-width: 85%; padding: 10px 14px; border-radius: 14px;
+      font-size: 13px; line-height: 1.55; white-space: pre-wrap; word-wrap: break-word;
+    }
+    .ai-chat-bubble.ai { background: rgba(38,38,44,0.8); border: 1px solid rgba(255,255,255,0.05); color: #F5F5F7; align-self: flex-start; border-bottom-left-radius: 4px; }
+    .ai-chat-bubble.user { background: linear-gradient(135deg, rgba(245,130,32,0.18), rgba(245,130,32,0.1)); border: 1px solid rgba(245,130,32,0.3); color: #F5F5F7; align-self: flex-end; border-bottom-right-radius: 4px; }
+    .ai-chat-bubble.thinking { animation: ai-bubble-pulse 1.4s ease-in-out infinite; color: #A0A0AB; }
+    @keyframes ai-bubble-pulse { 0%,100% { opacity: 0.6; } 50% { opacity: 1; } }
+    .ai-chat-error { background: rgba(255,82,82,0.08); border: 1px solid rgba(255,82,82,0.3); color: #FFB0B0; padding: 10px 14px; border-radius: 12px; font-size: 12px; align-self: stretch; }
+    .ai-input-area { border-top: 1px solid rgba(255,255,255,0.06); padding: 12px; display: flex; gap: 8px; }
+    .ai-input {
+      flex: 1; padding: 10px 14px; border-radius: 10px;
+      background: rgba(8,8,10,0.6); border: 1px solid rgba(255,255,255,0.08);
+      color: #F5F5F7; font-size: 13px; resize: none;
+      font-family: 'Noto Sans TC', sans-serif;
+    }
+    .ai-input:focus { outline: none; border-color: rgba(245,130,32,0.5); background: rgba(8,8,10,0.9); }
+    .ai-send-btn {
+      padding: 0 14px; border-radius: 10px;
+      background: linear-gradient(135deg, #F58220, #C66510);
+      color: white; font-size: 13px; font-weight: 600; cursor: pointer;
+      border: none; transition: all 0.2s;
+    }
+    .ai-send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .ai-send-btn:not(:disabled):hover { transform: translateY(-1px); box-shadow: 0 6px 20px -4px rgba(245,130,32,0.5); }
+    .ai-helper-suggestions { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 16px 12px; }
+    .ai-helper-suggestion {
+      font-size: 11px; padding: 5px 10px; border-radius: 999px;
+      background: rgba(245,130,32,0.08); border: 1px solid rgba(245,130,32,0.2);
+      color: #FFA050; cursor: pointer; transition: all 0.2s;
+    }
+    .ai-helper-suggestion:hover { background: rgba(245,130,32,0.15); border-color: rgba(245,130,32,0.4); }
+    @media (max-width: 480px) {
+      .ai-helper-panel { width: calc(100vw - 16px); right: 8px; bottom: 80px; height: 70vh; }
+    }
+  `;
+  document.head.appendChild(s);
+}
+
+export async function injectAIHelper() {
+  // 訪客模式不顯示
+  if (currentUserDoc && currentUserDoc.isGuest) return;
+  // 讀取設定
+  const cfg = await getAIConfig();
+  if (!cfg.enabled || !cfg.apiKey) return;
+  // 已注入過就不重複
+  if (document.getElementById('aiHelperFab')) return;
+  injectAIHelperCSS();
+
+  const fab = document.createElement('button');
+  fab.id = 'aiHelperFab';
+  fab.className = 'ai-helper-fab';
+  fab.title = '舞光 AI 助教';
+  fab.innerHTML = `
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 2a4 4 0 0 1 4 4v3h3a4 4 0 0 1 4 4v3"/>
+      <path d="M21 16v3a4 4 0 0 1-4 4h-3"/>
+      <path d="M14 23H6a4 4 0 0 1-4-4v-3"/>
+      <path d="M2 13v-3a4 4 0 0 1 4-4h3"/>
+      <circle cx="12" cy="13" r="2.5" fill="white"/>
+    </svg>`;
+  document.body.appendChild(fab);
+
+  const panel = document.createElement('div');
+  panel.id = 'aiHelperPanel';
+  panel.className = 'ai-helper-panel';
+  panel.innerHTML = `
+    <div class="ai-panel-header">
+      <div class="ai-panel-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3" fill="white"/></svg>
+      </div>
+      <div>
+        <div class="ai-panel-title">舞光 AI 助教</div>
+        <div class="ai-panel-subtitle">隨時問訓練內容相關的問題</div>
+      </div>
+      <button class="ai-panel-close" id="aiPanelCloseBtn" title="關閉">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="ai-chat-list" id="aiChatList">
+      <div class="ai-chat-bubble ai">嗨！我是舞光 AI 助教。<br>有任何訓練內容（產品、客戶、規章、福利）的疑問都可以問我。<br><br>提示：點下方建議快速開始。</div>
+    </div>
+    <div class="ai-helper-suggestions" id="aiSuggestions">
+      <button class="ai-helper-suggestion" data-q="Ra90 跟 Ra80 差在哪？">Ra90 跟 Ra80 差在哪？</button>
+      <button class="ai-helper-suggestion" data-q="客戶嫌我們貴怎麼回？">客戶嫌我們貴怎麼回？</button>
+      <button class="ai-helper-suggestion" data-q="三安福祉是什麼？">三安福祉是什麼？</button>
+    </div>
+    <div class="ai-input-area">
+      <textarea id="aiHelperInput" class="ai-input" rows="1" placeholder="問點什麼吧⋯"></textarea>
+      <button id="aiHelperSendBtn" class="ai-send-btn">送出</button>
+    </div>
+  `;
+  document.body.appendChild(panel);
+
+  const list = document.getElementById('aiChatList');
+  const input = document.getElementById('aiHelperInput');
+  const sendBtn = document.getElementById('aiHelperSendBtn');
+  const closeBtn = document.getElementById('aiPanelCloseBtn');
+  const suggestionsEl = document.getElementById('aiSuggestions');
+  const history = [];
+
+  fab.addEventListener('click', () => {
+    panel.classList.toggle('open');
+    if (panel.classList.contains('open')) setTimeout(() => input.focus(), 300);
+  });
+  closeBtn.addEventListener('click', () => panel.classList.remove('open'));
+
+  async function send(text) {
+    text = (text || '').trim();
+    if (!text) return;
+    // 隱藏建議區
+    if (suggestionsEl) suggestionsEl.style.display = 'none';
+    // 用戶氣泡
+    const u = document.createElement('div');
+    u.className = 'ai-chat-bubble user';
+    u.textContent = text;
+    list.appendChild(u);
+    history.push({ role: 'user', content: text });
+    // 思考中
+    const thinking = document.createElement('div');
+    thinking.className = 'ai-chat-bubble ai thinking';
+    thinking.textContent = '思考中⋯';
+    list.appendChild(thinking);
+    list.scrollTop = list.scrollHeight;
+    input.value = ''; input.style.height = 'auto';
+    sendBtn.disabled = true;
+
+    try {
+      const reply = await callAI({
+        messages: history,
+        // system 由 aiConfig 提供
+      });
+      thinking.remove();
+      const a = document.createElement('div');
+      a.className = 'ai-chat-bubble ai';
+      a.textContent = reply;
+      list.appendChild(a);
+      history.push({ role: 'assistant', content: reply });
+    } catch (e) {
+      thinking.remove();
+      const err = document.createElement('div');
+      err.className = 'ai-chat-error';
+      err.textContent = '⚠ ' + (e.message || e);
+      list.appendChild(err);
+    } finally {
+      list.scrollTop = list.scrollHeight;
+      sendBtn.disabled = false;
+      input.focus();
+    }
+  }
+
+  sendBtn.addEventListener('click', () => send(input.value));
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      send(input.value);
+    }
+  });
+  // 自動高度
+  input.addEventListener('input', () => {
+    input.style.height = 'auto';
+    input.style.height = Math.min(input.scrollHeight, 120) + 'px';
+  });
+  // 建議快速問題
+  suggestionsEl.querySelectorAll('.ai-helper-suggestion').forEach(b => {
+    b.addEventListener('click', () => send(b.dataset.q));
+  });
+}
+
+// ========== AI 整合（Gemini / Claude / OpenAI）==========
+// 設定儲存於 /aiConfig/default
+// 主管在 admin.html 設定 provider + apiKey + model + systemPrompt
+// 任何登入用戶都能讀（用來呼叫 AI），但只有主管能寫
+//
+// 安全性：API key 在 Firestore，所有登入用戶都讀得到。
+// 風險：員工可能拷貝 key 自用。緩解：
+//   1) 在 API 提供商設定使用上限
+//   2) 定期更換 key
+//   3) 升級為 Cloudflare Worker 代理（下階段）
+
+const DEFAULT_AI_CONFIG = {
+  provider: 'gemini',        // 'gemini' | 'claude' | 'openai'
+  apiKey: '',
+  model: '',                 // 空字串時使用 provider 預設
+  systemPrompt: '你是舞光 LED 業務新人訓練系統的 AI 助教。請用繁體中文，以友善、專業的口吻回答業務新人關於展晟照明集團、舞光 LED 產品、客戶經營、業務技巧的問題。回答簡潔明確，避免冗長，每次最多 200 字。',
+  enabled: false
+};
+
+const PROVIDER_DEFAULTS = {
+  gemini: { model: 'gemini-1.5-flash', label: 'Google Gemini', testEndpoint: 'https://generativelanguage.googleapis.com/' },
+  claude: { model: 'claude-haiku-4-5-20251001', label: 'Anthropic Claude', testEndpoint: 'https://api.anthropic.com/' },
+  openai: { model: 'gpt-4o-mini', label: 'OpenAI GPT', testEndpoint: 'https://api.openai.com/' }
+};
+
+export function getProviderDefaults() {
+  return PROVIDER_DEFAULTS;
+}
+
+export async function getAIConfig() {
+  try {
+    const snap = await getDoc(doc(db, 'aiConfig', 'default'));
+    if (snap.exists()) return { ...DEFAULT_AI_CONFIG, ...snap.data() };
+  } catch (e) { console.warn('getAIConfig failed', e); }
+  return { ...DEFAULT_AI_CONFIG };
+}
+
+export async function saveAIConfig(cfg) {
+  await setDoc(doc(db, 'aiConfig', 'default'), {
+    ...cfg,
+    updatedAt: serverTimestamp()
+  }, { merge: true });
+}
+
+export function onAIConfigUpdate(cb) {
+  return onSnapshot(doc(db, 'aiConfig', 'default'), (snap) => {
+    cb(snap.exists() ? { ...DEFAULT_AI_CONFIG, ...snap.data() } : { ...DEFAULT_AI_CONFIG });
+  }, (err) => console.warn('aiConfig onSnapshot err', err));
+}
+
+// 統一呼叫介面
+// messages: [{ role: 'user' | 'assistant', content: string }, ...]
+// system: 可選，會覆蓋 config 的 systemPrompt
+export async function callAI({ messages, system, configOverride } = {}) {
+  const cfg = configOverride || await getAIConfig();
+  if (!cfg.apiKey) throw new Error('尚未設定 API Key（請主管至 admin.html → AI 設定）');
+  const model = (cfg.model && cfg.model.trim()) || PROVIDER_DEFAULTS[cfg.provider].model;
+  const sysPrompt = system || cfg.systemPrompt || '';
+
+  if (cfg.provider === 'gemini') return _callGemini(cfg.apiKey, model, messages, sysPrompt);
+  if (cfg.provider === 'claude') return _callClaude(cfg.apiKey, model, messages, sysPrompt);
+  if (cfg.provider === 'openai') return _callOpenAI(cfg.apiKey, model, messages, sysPrompt);
+  throw new Error('未知的 AI provider: ' + cfg.provider);
+}
+
+async function _callGemini(apiKey, model, messages, system) {
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(apiKey)}`;
+  const body = {
+    contents: messages.map(m => ({
+      role: m.role === 'assistant' ? 'model' : 'user',
+      parts: [{ text: m.content }]
+    }))
+  };
+  if (system) body.systemInstruction = { parts: [{ text: system }] };
+  const r = await fetch(url, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+  const data = await r.json();
+  if (!r.ok) throw new Error(`Gemini ${r.status}: ${data?.error?.message || 'unknown'}`);
+  const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+  if (!text) throw new Error('Gemini 回應為空');
+  return text;
+}
+
+async function _callClaude(apiKey, model, messages, system) {
+  const r = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true',
+      'content-type': 'application/json'
+    },
+    body: JSON.stringify({
+      model,
+      max_tokens: 1024,
+      ...(system ? { system } : {}),
+      messages
+    })
+  });
+  const data = await r.json();
+  if (!r.ok) throw new Error(`Claude ${r.status}: ${data?.error?.message || 'unknown'}`);
+  const text = data?.content?.[0]?.text;
+  if (!text) throw new Error('Claude 回應為空');
+  return text;
+}
+
+async function _callOpenAI(apiKey, model, messages, system) {
+  const allMsgs = system ? [{ role: 'system', content: system }, ...messages] : messages;
+  const r = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'content-type': 'application/json'
+    },
+    body: JSON.stringify({ model, messages: allMsgs })
+  });
+  const data = await r.json();
+  if (!r.ok) throw new Error(`OpenAI ${r.status}: ${data?.error?.message || 'unknown'}`);
+  const text = data?.choices?.[0]?.message?.content;
+  if (!text) throw new Error('OpenAI 回應為空');
+  return text;
 }
 
 // 重新匯出常用 Firestore primitives 供頁面直接使用
