@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>闖關挑戰 · CHAPTER 04 | 舞光戰將點燈計劃</title>
-<meta name="description" content="4 關 · 25 題 · 模擬真實客戶情境的業務實戰測驗">
+<title>職涯地圖 · CHAPTER 06 | 舞光戰將點燈計劃</title>
+<meta name="description" content="三年成長路徑 · 5 大技能樹 · 學長姐錦囊 · 利他企業 DNA · 畢業專題">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Noto+Sans+TC:wght@300;400;500;700;900&family=Noto+Serif+TC:wght@500;700;900&display=swap" rel="stylesheet">
@@ -24,10 +24,7 @@
   }
   * { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
   html { scroll-behavior: smooth; }
-  body {
-    font-family: 'Noto Sans TC', 'Inter', system-ui, sans-serif;
-    background: var(--bg-base); color: var(--text-primary); overflow-x: hidden;
-  }
+  body { font-family: 'Noto Sans TC', 'Inter', system-ui, sans-serif; background: var(--bg-base); color: var(--text-primary); overflow-x: hidden; }
   .font-display { font-family: 'Noto Serif TC', 'Inter', serif; font-weight: 900; letter-spacing: -0.02em; }
   .font-mono-en { font-family: 'Inter', sans-serif; letter-spacing: 0.05em; }
 
@@ -35,371 +32,247 @@
   .glow-text { text-shadow: 0 0 20px rgba(245,130,32,0.6), 0 0 40px rgba(245,130,32,0.3); }
   .glow-orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.5; pointer-events: none; z-index: 0; }
 
-  .nav-blur {
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
-    background: rgba(8,8,10,0.6);
-    border-bottom: 1px solid rgba(245,130,32,0.08);
-  }
+  .nav-blur { backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%); background: rgba(8,8,10,0.6); border-bottom: 1px solid rgba(245,130,32,0.08); }
   .nav-link { position: relative; transition: color 0.3s ease; }
-  .nav-link::after {
-    content: ''; position: absolute; left: 0; bottom: -6px; width: 0; height: 1px;
-    background: var(--glow-orange); transition: width 0.3s ease;
-  }
+  .nav-link::after { content: ''; position: absolute; left: 0; bottom: -6px; width: 0; height: 1px; background: var(--glow-orange); transition: width 0.3s ease; }
   .nav-link:hover { color: var(--glow-orange-bright); }
   .nav-link:hover::after, .nav-link.active::after { width: 100%; }
   .nav-link.active { color: var(--glow-orange-bright); }
 
-  .hero-grid {
-    background-image:
-      linear-gradient(rgba(245,130,32,0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(245,130,32,0.03) 1px, transparent 1px);
-    background-size: 64px 64px;
-    mask-image: radial-gradient(ellipse 60% 50% at 50% 40%, black 30%, transparent 80%);
-    -webkit-mask-image: radial-gradient(ellipse 60% 50% at 50% 40%, black 30%, transparent 80%);
-  }
+  .hero-grid { background-image: linear-gradient(rgba(245,130,32,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(245,130,32,0.03) 1px, transparent 1px); background-size: 64px 64px; mask-image: radial-gradient(ellipse 60% 50% at 50% 40%, black 30%, transparent 80%); -webkit-mask-image: radial-gradient(ellipse 60% 50% at 50% 40%, black 30%, transparent 80%); }
 
-  .hero-eyebrow {
-    display: inline-flex; align-items: center; gap: 0.5rem;
-    padding: 0.4rem 1rem; border-radius: 999px;
-    background: rgba(245,130,32,0.08); border: 1px solid rgba(245,130,32,0.25);
-    color: var(--glow-orange-bright); font-size: 0.78rem; font-weight: 500; letter-spacing: 0.1em;
-  }
-  .hero-eyebrow::before {
-    content: ''; width: 6px; height: 6px; border-radius: 50%;
-    background: var(--glow-orange); box-shadow: 0 0 10px var(--glow-orange);
-    animation: pulse-dot 2s ease-in-out infinite;
-  }
+  .hero-eyebrow { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.4rem 1rem; border-radius: 999px; background: rgba(245,130,32,0.08); border: 1px solid rgba(245,130,32,0.25); color: var(--glow-orange-bright); font-size: 0.78rem; font-weight: 500; letter-spacing: 0.1em; }
+  .hero-eyebrow::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--glow-orange); box-shadow: 0 0 10px var(--glow-orange); animation: pulse-dot 2s ease-in-out infinite; }
   @keyframes pulse-dot { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(0.8); } }
 
-  .btn-primary {
-    position: relative; display: inline-flex; align-items: center; justify-content: center;
-    gap: 0.5rem; padding: 1rem 2.25rem;
-    background: linear-gradient(135deg, #F58220 0%, #FFA050 100%);
-    color: #08080A; font-weight: 700; border-radius: 999px;
-    transition: all 0.3s ease; overflow: hidden;
-    box-shadow: 0 0 0 1px rgba(255,200,100,0.4), 0 8px 24px -4px rgba(245,130,32,0.5), inset 0 1px 0 rgba(255,255,255,0.3);
-  }
+  .btn-primary { position: relative; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 1rem 2.25rem; background: linear-gradient(135deg, #F58220 0%, #FFA050 100%); color: #08080A; font-weight: 700; border-radius: 999px; transition: all 0.3s ease; overflow: hidden; box-shadow: 0 0 0 1px rgba(255,200,100,0.4), 0 8px 24px -4px rgba(245,130,32,0.5), inset 0 1px 0 rgba(255,255,255,0.3); }
   .btn-primary:hover { transform: translateY(-2px); }
-  .btn-secondary {
-    display: inline-flex; align-items: center; gap: 0.5rem;
-    padding: 1rem 2rem; background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.12); color: var(--text-primary);
-    font-weight: 500; border-radius: 999px; transition: all 0.3s ease; backdrop-filter: blur(10px);
-  }
+  .btn-secondary { display: inline-flex; align-items: center; gap: 0.5rem; padding: 1rem 2rem; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.12); color: var(--text-primary); font-weight: 500; border-radius: 999px; transition: all 0.3s ease; backdrop-filter: blur(10px); }
   .btn-secondary:hover { background: rgba(255,255,255,0.08); border-color: rgba(245,130,32,0.4); }
 
-  .stat-number {
-    font-family: 'Inter', sans-serif; font-weight: 800; line-height: 1;
-    background: linear-gradient(135deg, #FFA050 0%, #F58220 50%, #FFD27A 100%);
-    -webkit-background-clip: text; background-clip: text; color: transparent;
-  }
+  .card { position: relative; background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 20px; padding: 2rem; transition: all 0.4s cubic-bezier(0.16,1,0.3,1); overflow: hidden; }
+  .card:hover { border-color: rgba(245,130,32,0.3); transform: translateY(-4px); box-shadow: 0 20px 40px -12px rgba(0,0,0,0.6); }
 
-  .section-eyebrow {
-    display: inline-flex; align-items: center; gap: 0.75rem;
-    color: var(--glow-orange); font-size: 0.78rem; font-weight: 600;
-    letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 1.5rem;
-  }
-  .section-eyebrow::before {
-    content: ''; width: 32px; height: 1px; background: linear-gradient(90deg, var(--glow-orange), transparent);
-  }
+  .stat-number { font-family: 'Inter', sans-serif; font-weight: 800; line-height: 1; background: linear-gradient(135deg, #FFA050 0%, #F58220 50%, #FFD27A 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+  .section-eyebrow { display: inline-flex; align-items: center; gap: 0.75rem; color: var(--glow-orange); font-size: 0.78rem; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 1.5rem; }
+  .section-eyebrow::before { content: ''; width: 32px; height: 1px; background: linear-gradient(90deg, var(--glow-orange), transparent); }
 
   .reveal { opacity: 0; transform: translateY(40px); transition: opacity 1s ease, transform 1s cubic-bezier(0.16,1,0.3,1); }
   .reveal.visible { opacity: 1; transform: translateY(0); }
 
-  /* === Challenge Specific === */
-
-  /* Stage hero */
-  .stage-hero {
+  /* === Career page specific === */
+  .roadmap-rail {
     position: relative;
-    background: linear-gradient(180deg, var(--bg-card) 0%, var(--bg-elevated) 100%);
-    border: 1px solid var(--border-subtle);
-    border-radius: 24px;
-    padding: 2.5rem;
-    overflow: hidden;
-    transition: all 0.4s cubic-bezier(0.16,1,0.3,1);
+    max-width: 1100px;
+    margin: 0 auto;
   }
-  .stage-hero::before {
+  .roadmap-rail::before {
     content: '';
     position: absolute;
-    top: -40%; right: -20%;
-    width: 70%; aspect-ratio: 1;
-    background: radial-gradient(circle, rgba(245,130,32,0.18), transparent 70%);
-    pointer-events: none;
-    transition: all 0.6s ease;
+    left: 24px; top: 0; bottom: 0;
+    width: 2px;
+    background: linear-gradient(180deg, transparent 0%, rgba(245,130,32,0.5) 8%, rgba(245,130,32,0.5) 92%, transparent 100%);
   }
-  .stage-hero:hover {
-    border-color: rgba(245,130,32,0.3);
-    transform: translateY(-3px);
-    box-shadow: 0 20px 40px -12px rgba(0,0,0,0.6);
+  @media (min-width: 768px) {
+    .roadmap-rail::before { left: 50%; transform: translateX(-50%); }
   }
-  .stage-num {
-    font-family: 'Inter', sans-serif;
-    font-weight: 900;
-    font-size: 5rem;
-    line-height: 1;
-    background: linear-gradient(180deg, rgba(245,130,32,0.4), rgba(245,130,32,0.05));
-    -webkit-background-clip: text; background-clip: text; color: transparent;
+  .road-step {
+    position: relative;
+    padding: 1.5rem 0;
+    display: grid;
+    grid-template-columns: 60px 1fr;
+    gap: 1.5rem;
+    align-items: stretch;
   }
-
-  /* Quiz */
-  .quiz-block {
-    background: var(--bg-card);
-    border: 1px solid var(--border-subtle);
-    border-radius: 24px;
-    padding: 2rem;
-    transition: all 0.3s ease;
+  @media (min-width: 768px) {
+    .road-step { grid-template-columns: 1fr 80px 1fr; }
+    .road-step:nth-child(odd) .road-card { grid-column: 1; text-align: right; }
+    .road-step:nth-child(odd) .road-card-body { margin-left: auto; }
+    .road-step:nth-child(even) .road-card { grid-column: 3; text-align: left; }
   }
-  .quiz-block.completed { border-color: rgba(245,130,32,0.4); }
-  .quiz-block.completed .quiz-tag { background: rgba(245,130,32,0.12); color: var(--glow-orange-bright); }
-
-  .quiz-question {
-    font-size: 1.05rem;
-    line-height: 1.6;
-    color: #E5E5E7;
-    margin-bottom: 1.25rem;
+  .road-marker-cell {
+    display: flex; justify-content: center; align-items: flex-start;
+    position: relative; z-index: 1;
   }
-
-  .quiz-tag {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-    padding: 0.3rem 0.8rem;
-    border-radius: 999px;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.1);
-    color: var(--text-secondary);
-    font-size: 0.7rem;
-    font-weight: 500;
-    letter-spacing: 0.1em;
+  @media (min-width: 768px) {
+    .road-marker-cell { grid-column: 2; }
   }
-
-  .opt {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.75rem;
-    padding: 0.9rem 1.1rem;
-    background: rgba(255,255,255,0.02);
-    border: 1px solid var(--border-subtle);
-    border-radius: 12px;
-    cursor: pointer;
-    transition: all 0.25s ease;
-    color: #D5D5D7;
-    font-size: 0.95rem;
-  }
-  .opt:hover {
-    background: rgba(245,130,32,0.06);
-    border-color: rgba(245,130,32,0.3);
-    transform: translateX(4px);
-  }
-  .opt.correct {
-    background: rgba(245,130,32,0.12);
-    border-color: var(--glow-orange);
-    color: var(--glow-orange-bright);
-  }
-  .opt.wrong {
-    background: rgba(255,80,80,0.06);
-    border-color: rgba(255,100,100,0.4);
-    color: #ffb6b6;
-  }
-  .opt .opt-letter {
-    width: 26px; height: 26px;
+  .road-marker {
+    width: 20px; height: 20px;
     border-radius: 50%;
-    background: rgba(255,255,255,0.06);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.78rem;
-    font-weight: 700;
-    flex-shrink: 0;
-  }
-  .opt.correct .opt-letter { background: var(--glow-orange); color: #08080A; }
-  .opt.wrong .opt-letter { background: rgba(255,100,100,0.3); color: #ffd5d5; }
-  .opt .opt-icon { opacity: 0; transition: opacity 0.3s ease; flex-shrink: 0; }
-  .opt.correct .opt-icon, .opt.wrong .opt-icon { opacity: 1; }
-
-  .feedback {
+    background: var(--bg-base);
+    border: 2px solid var(--glow-orange);
+    box-shadow: 0 0 14px rgba(245,130,32,0.6);
     margin-top: 1rem;
-    padding: 0.9rem 1.1rem;
-    border-radius: 12px;
-    background: rgba(245,130,32,0.06);
-    border-left: 3px solid var(--glow-orange);
-    font-size: 0.9rem;
-    line-height: 1.6;
-    color: #D5D5D7;
-    display: none;
+    position: relative;
   }
-  .feedback.show { display: block; animation: slide-in 0.4s ease; }
-  @keyframes slide-in { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
-  .feedback strong { color: var(--glow-orange-bright); }
-
-  /* AI Chat */
-  .chat-window {
-    background: var(--bg-card);
+  .road-marker::before {
+    content: '';
+    position: absolute; inset: -8px;
+    border-radius: 50%;
+    border: 1px solid rgba(245,130,32,0.25);
+  }
+  .road-card {
+    background: linear-gradient(180deg, var(--bg-card), var(--bg-elevated));
     border: 1px solid var(--border-subtle);
-    border-radius: 24px;
-    padding: 2rem 1.5rem;
-    min-height: 480px;
-    max-height: 620px;
-    overflow-y: auto;
-  }
-  .chat-bubble {
-    max-width: 80%;
-    padding: 0.9rem 1.1rem;
     border-radius: 18px;
+    padding: 1.5rem 1.75rem;
+    transition: all 0.4s ease;
+  }
+  .road-card:hover { border-color: rgba(245,130,32,0.4); transform: translateY(-3px); }
+  .road-card-body { max-width: 30rem; }
+  .road-time {
+    font-family: 'Inter', sans-serif;
+    font-weight: 800;
     font-size: 0.95rem;
-    line-height: 1.55;
-    margin-bottom: 0.8rem;
-    animation: bubble-in 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  }
-  @keyframes bubble-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-  .bubble-customer {
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.08);
-    color: #E5E5E7;
-    border-bottom-left-radius: 4px;
-  }
-  .bubble-self {
-    background: linear-gradient(135deg, rgba(245,130,32,0.85), rgba(255,160,80,0.7));
-    color: #08080A;
-    margin-left: auto;
-    border-bottom-right-radius: 4px;
-    font-weight: 500;
-  }
-  .bubble-narrator {
-    background: rgba(255,210,122,0.06);
-    border: 1px dashed rgba(255,210,122,0.3);
-    color: var(--glow-gold);
-    font-size: 0.82rem;
-    font-style: italic;
-    margin-left: auto;
-    margin-right: auto;
-    text-align: center;
-    max-width: 92%;
-    border-radius: 12px;
-  }
-
-  .chat-actor {
-    font-size: 0.7rem;
-    color: rgba(255,255,255,0.4);
-    margin-bottom: 4px;
+    background: linear-gradient(135deg, #FFA050, #F58220);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
     letter-spacing: 0.05em;
   }
-  .chat-actor.right { text-align: right; }
 
-  .reply-pick {
-    width: 100%;
-    text-align: left;
-    padding: 0.9rem 1.1rem;
-    background: rgba(245,130,32,0.06);
-    border: 1px solid rgba(245,130,32,0.25);
-    border-radius: 14px;
-    color: #E5E5E7;
-    font-size: 0.92rem;
-    cursor: pointer;
-    transition: all 0.25s ease;
-    margin-bottom: 0.6rem;
-    line-height: 1.5;
-  }
-  .reply-pick:hover {
-    background: rgba(245,130,32,0.1);
-    border-color: rgba(245,130,32,0.5);
-    transform: translateY(-1px);
-  }
-  .reply-pick:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
-
-  /* Scenario picker */
-  .scenario-picker {
+  /* Skill tree */
+  .skill-row {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.5rem;
-    margin-bottom: 1.25rem;
-  }
-  @media (min-width: 640px) {
-    .scenario-picker { grid-template-columns: repeat(5, 1fr); }
-  }
-  .scenario-tab {
-    position: relative;
-    display: flex;
-    flex-direction: column;
+    grid-template-columns: 140px 1fr;
+    gap: 1.5rem;
     align-items: center;
-    gap: 0.45rem;
-    padding: 0.85rem 0.5rem;
-    background: rgba(255,255,255,0.02);
+    padding: 1.25rem 1.5rem;
+    background: var(--bg-card);
     border: 1px solid var(--border-subtle);
-    border-radius: 12px;
-    cursor: pointer;
-    transition: all 0.25s ease;
-    text-align: center;
-    color: inherit;
-    font-family: inherit;
+    border-radius: 14px;
+    margin-bottom: 0.6rem;
+    transition: all 0.3s ease;
   }
-  .scenario-tab:hover {
+  .skill-row:hover { border-color: rgba(245,130,32,0.3); transform: translateX(4px); }
+  @media (max-width: 640px) {
+    .skill-row { grid-template-columns: 1fr; gap: 0.75rem; }
+  }
+  .skill-name { font-weight: 600; font-size: 0.95rem; color: var(--text-primary); }
+  .skill-level-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+  }
+  .skill-level {
+    padding: 0.55rem 0.7rem;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border-subtle);
+    font-size: 0.78rem;
+    line-height: 1.4;
+    color: var(--text-secondary);
+    transition: all 0.3s ease;
+  }
+  .skill-level strong {
+    display: block;
+    color: var(--glow-orange-bright);
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.25rem;
+  }
+  .skill-level:hover {
     background: rgba(245,130,32,0.06);
     border-color: rgba(245,130,32,0.3);
-    transform: translateY(-2px);
+    color: var(--text-primary);
   }
-  .scenario-tab.active {
-    background: rgba(245,130,32,0.1);
-    border-color: rgba(245,130,32,0.55);
-    box-shadow: 0 0 0 1px rgba(245,130,32,0.3), 0 8px 20px -8px rgba(245,130,32,0.45);
+
+  /* Wisdom card (學長姐錦囊) */
+  .wisdom-card {
+    background: linear-gradient(180deg, var(--bg-card), var(--bg-elevated));
+    border: 1px solid var(--border-subtle);
+    border-radius: 18px;
+    padding: 1.75rem;
+    transition: all 0.4s cubic-bezier(0.16,1,0.3,1);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
   }
-  .scenario-tab-avatar {
-    width: 36px; height: 36px;
+  .wisdom-card:hover {
+    border-color: rgba(245,130,32,0.35);
+    transform: translateY(-4px);
+  }
+  .wisdom-avatar {
+    width: 56px; height: 56px;
     border-radius: 50%;
     background: linear-gradient(135deg, #F58220, #C66510);
     color: #08080A;
     display: flex; align-items: center; justify-content: center;
+    font-family: 'Noto Serif TC', serif;
     font-weight: 700;
-    font-size: 0.95rem;
-    flex-shrink: 0;
+    font-size: 1.4rem;
+    margin-bottom: 1rem;
   }
-  .scenario-tab-name {
-    font-size: 0.78rem;
+  .wisdom-quote {
+    font-family: 'Noto Serif TC', serif;
+    font-size: 1.05rem;
+    line-height: 1.55;
+    color: #ffd9b3;
+    margin-bottom: 1rem;
+    flex: 1;
+  }
+  .wisdom-name {
     font-weight: 600;
     color: var(--text-primary);
-    line-height: 1.2;
+    font-size: 0.9rem;
   }
-  .scenario-tab-tag {
-    font-size: 0.65rem;
+  .wisdom-role {
+    font-size: 0.72rem;
     color: var(--text-secondary);
-    line-height: 1.2;
-  }
-  .scenario-tab-check {
-    position: absolute;
-    top: 0.4rem; right: 0.4rem;
-    width: 18px; height: 18px;
-    border-radius: 50%;
-    background: #4ade80;
-    color: #08080A;
-    display: none;
-    align-items: center; justify-content: center;
-    font-size: 0.65rem;
-    font-weight: 800;
-  }
-  .scenario-tab.completed .scenario-tab-check { display: flex; }
-  .scenario-tab.completed .scenario-tab-avatar { opacity: 0.55; }
-  .scenario-progress-line {
-    margin-top: 0.85rem;
-    text-align: center;
-    font-size: 0.78rem;
-    color: var(--text-secondary);
+    margin-top: 0.2rem;
   }
 
-  /* Progress bar */
-  .progress-bar {
-    height: 6px;
-    background: rgba(255,255,255,0.05);
-    border-radius: 999px;
-    overflow: hidden;
-  }
-  .progress-bar-fill {
+  /* DNA value card */
+  .dna-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: 16px;
+    padding: 1.75rem;
+    transition: all 0.3s ease;
     height: 100%;
-    background: linear-gradient(90deg, #F58220, #FFA050, #FFD27A);
-    border-radius: 999px;
-    transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-    box-shadow: 0 0 12px rgba(245,130,32,0.6);
+  }
+  .dna-card:hover { border-color: rgba(245,130,32,0.3); }
+  .dna-icon {
+    width: 44px; height: 44px;
+    border-radius: 12px;
+    background: rgba(245,130,32,0.12);
+    border: 1px solid rgba(245,130,32,0.3);
+    color: var(--glow-orange-bright);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 1rem;
+  }
+
+  /* Graduation card */
+  .graduation-block {
+    background: linear-gradient(135deg, rgba(245,130,32,0.08), rgba(255,210,122,0.04));
+    border: 1px solid rgba(245,130,32,0.35);
+    border-radius: 24px;
+    padding: 2.5rem;
+    overflow: hidden;
+    position: relative;
+  }
+  .graduation-block::before {
+    content: '';
+    position: absolute;
+    top: -40%; right: -20%;
+    width: 60%; aspect-ratio: 1;
+    background: radial-gradient(circle, rgba(245,130,32,0.25), transparent 70%);
+    pointer-events: none;
+  }
+  .checklist-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.6rem 0;
+  }
+  .checklist-item .check-icon {
+    flex-shrink: 0;
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: rgba(245,130,32,0.15);
+    border: 1px solid rgba(245,130,32,0.4);
+    color: var(--glow-orange-bright);
+    display: flex; align-items: center; justify-content: center;
   }
 
   ::selection { background: rgba(245,130,32,0.5); color: white; }
@@ -412,7 +285,7 @@
 
 <canvas id="particle-canvas"></canvas>
 
-<!-- ===== Navigation ===== -->
+<!-- ===== Nav ===== -->
 <nav class="fixed top-0 left-0 right-0 z-50 nav-blur">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 h-16 flex items-center justify-between">
     <a href="index.html" class="flex items-center gap-2 sm:gap-3 group">
@@ -429,14 +302,10 @@
       <a href="brand.html" class="nav-link">品牌之光</a>
       <a href="products.html" class="nav-link">產品實驗室</a>
       <a href="academy.html" class="nav-link">業務學院</a>
-      <a href="challenge.html" class="nav-link active">闖關挑戰</a>
+      <a href="challenge.html" class="nav-link">闖關挑戰</a>
       <a href="admin.html" class="nav-link text-gray-500">主管後台</a>
     </div>
     <div class="flex items-center gap-3">
-      <button class="hidden sm:inline-flex items-center gap-2 text-sm text-gray-400 hover:text-orange-400 transition px-3 py-2">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
-        我的進度
-      </button>
       <button class="text-xs sm:text-sm font-medium px-4 py-2 rounded-full bg-gradient-to-r from-orange-500 to-orange-400 text-black hover:from-orange-400 hover:to-orange-300 transition-all shadow-lg shadow-orange-500/20">登入</button>
     </div>
   </div>
@@ -450,279 +319,188 @@
 
   <div class="relative z-10 max-w-6xl mx-auto px-6 text-center">
     <div class="hero-eyebrow mb-8 reveal">
-      <span class="font-mono-en">CHAPTER 04 · 闖關挑戰</span>
+      <span class="font-mono-en">CHAPTER 06 · 職涯地圖</span>
     </div>
     <h1 class="font-display text-5xl sm:text-6xl md:text-7xl lg:text-8xl leading-[1.05] mb-6 reveal" style="transition-delay:0.1s;">
-      <span class="block">看完了，</span>
-      <span class="block"><span class="bg-gradient-to-r from-orange-300 via-orange-400 to-orange-200 bg-clip-text text-transparent glow-text">該開始實戰了</span></span>
+      <span class="block">三年後，</span>
+      <span class="block"><span class="bg-gradient-to-r from-orange-300 via-orange-400 to-orange-200 bg-clip-text text-transparent glow-text">你會在哪？</span></span>
     </h1>
-    <div class="font-mono-en text-sm sm:text-base text-orange-300/70 tracking-[0.4em] mb-8 reveal" style="transition-delay:0.2s;">THE CHALLENGE</div>
+    <div class="font-mono-en text-sm sm:text-base text-orange-300/70 tracking-[0.4em] mb-8 reveal" style="transition-delay:0.2s;">THE CAREER MAP</div>
     <p class="text-base sm:text-lg text-gray-400 max-w-2xl mx-auto leading-relaxed mb-12 reveal" style="transition-delay:0.3s;">
-      四個關卡，模擬真實業務最常面對的客戶情境。<br>
-      答對累積光點，闖完全關獲頒「<span class="text-orange-300">闖關王</span>」徽章。
+      從第一天的微光，到成為帶團隊的戰將。<br>
+      五大能力、九個里程碑、三年養成路徑——<span class="text-orange-300">畫給你看</span>。
     </p>
     <div class="flex flex-col sm:flex-row items-center justify-center gap-4 reveal" style="transition-delay:0.4s;">
-      <a href="#stage1" class="btn-primary">
-        <span>開始第一關</span>
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+      <a href="#roadmap" class="btn-primary">
+        <span>進入路徑圖</span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
       </a>
-      <a href="academy.html" class="btn-secondary">
+      <a href="digital.html" class="btn-secondary">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-        <span>回業務學院複習</span>
+        <span>回數位行銷</span>
       </a>
     </div>
 
-    <!-- 4 stages overview -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 max-w-5xl mx-auto mt-20 reveal" style="transition-delay:0.5s;">
-      <div class="stage-hero">
-        <div class="stage-num">01</div>
-        <div class="text-xs text-orange-400 font-mono-en tracking-widest mt-2 mb-1">STAGE 01</div>
-        <div class="font-bold mb-1">產品快問</div>
-        <div class="text-xs text-gray-500">5 題 · 規格判讀</div>
-      </div>
-      <div class="stage-hero" style="transition-delay:0.05s;">
-        <div class="stage-num">02</div>
-        <div class="text-xs text-orange-400 font-mono-en tracking-widest mt-2 mb-1">STAGE 02</div>
-        <div class="font-bold mb-1">情境選擇</div>
-        <div class="text-xs text-gray-500">4 題 · 客戶現場</div>
-      </div>
-      <div class="stage-hero" style="transition-delay:0.1s;">
-        <div class="stage-num">03</div>
-        <div class="text-xs text-orange-400 font-mono-en tracking-widest mt-2 mb-1">STAGE 03</div>
-        <div class="font-bold mb-1">競品 PK</div>
-        <div class="text-xs text-gray-500">3 題 · 異議處理</div>
-      </div>
-      <div class="stage-hero" style="transition-delay:0.15s;">
-        <div class="stage-num">04</div>
-        <div class="text-xs text-orange-400 font-mono-en tracking-widest mt-2 mb-1">STAGE 04</div>
-        <div class="font-bold mb-1">AI 客戶對話</div>
-        <div class="text-xs text-gray-500">3 輪 · 即時對答</div>
-      </div>
+    <!-- Hero stats -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 max-w-4xl mx-auto mt-20 reveal" style="transition-delay:0.5s;">
+      <div class="text-center"><div class="stat-number text-3xl sm:text-5xl">3<span class="text-xl"> 年</span></div><div class="text-xs sm:text-sm text-gray-500 mt-2 tracking-widest">養成週期</div></div>
+      <div class="text-center sm:border-x border-gray-800/60"><div class="stat-number text-3xl sm:text-5xl">5 大</div><div class="text-xs sm:text-sm text-gray-500 mt-2 tracking-widest">技能能力</div></div>
+      <div class="text-center sm:border-r border-gray-800/60"><div class="stat-number text-3xl sm:text-5xl">9</div><div class="text-xs sm:text-sm text-gray-500 mt-2 tracking-widest">里程碑徽章</div></div>
+      <div class="text-center"><div class="stat-number text-3xl sm:text-5xl">∞</div><div class="text-xs sm:text-sm text-gray-500 mt-2 tracking-widest">成長可能</div></div>
     </div>
   </div>
 </section>
 
-<!-- ===== Score Bar (sticky) ===== -->
-<section class="sticky top-16 z-40 backdrop-blur bg-black/70 border-b border-gray-900 py-3">
-  <div class="max-w-5xl mx-auto px-6 flex items-center gap-4">
-    <div class="flex items-center gap-2">
-      <svg class="text-orange-400" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-      <span class="text-sm text-gray-400">光點</span>
-      <span id="totalScore" class="text-orange-300 font-bold text-lg">0</span>
-    </div>
-    <div class="flex-1 progress-bar">
-      <div id="totalProgress" class="progress-bar-fill" style="width: 0%;"></div>
-    </div>
-    <div class="text-xs text-gray-500 font-mono-en tracking-widest hidden sm:block">
-      <span id="completed">0</span> / 17
-    </div>
-  </div>
-</section>
+<!-- ===== 三年路徑 ===== -->
+<section id="roadmap" class="relative py-32 overflow-hidden">
+  <div class="glow-orb" style="background:#F58220; width:500px; height:500px; top:30%; right:-150px; opacity:0.1;"></div>
 
-<!-- ===== Stage 1: 產品快問 ===== -->
-<section id="stage1" class="relative py-24">
-  <div class="max-w-4xl mx-auto px-6">
-    <div class="text-center mb-12 reveal">
-      <div class="section-eyebrow justify-center" style="display:inline-flex;">STAGE 01 · 產品快問</div>
-      <h2 class="font-display text-3xl md:text-4xl lg:text-5xl leading-[1.1] mb-4">
-        基本功，<br>
-        <span class="text-orange-300">五題定生死</span>
+  <div class="relative max-w-7xl mx-auto px-6 lg:px-10">
+    <div class="text-center mb-16 reveal">
+      <div class="section-eyebrow justify-center" style="display:inline-flex;">CHAPTER 1 · 三年路徑</div>
+      <h2 class="font-display text-4xl md:text-5xl lg:text-6xl leading-[1.1] mb-4">
+        從新人光點，<br>
+        <span class="text-orange-300">點亮成戰將</span>
       </h2>
-      <p class="text-gray-500 max-w-xl mx-auto leading-relaxed mt-4">
-        每題答對 +10 光點 · 直接點選作答 · 立即看解析。
+      <p class="text-gray-500 max-w-xl mx-auto leading-relaxed mt-6">
+        每個階段都有對應的里程碑與獎勵徽章。先看清楚自己現在站在哪。
       </p>
     </div>
 
-    <div class="space-y-5">
+    <div class="roadmap-rail">
 
-      <!-- Q1 -->
-      <div class="quiz-block reveal" data-quiz="q1" data-points="10">
-        <div class="flex items-center justify-between mb-3">
-          <span class="quiz-tag">Q01 · 規格判讀</span>
-          <span class="text-xs text-gray-500">+10 光點</span>
-        </div>
-        <div class="quiz-question">
-          客戶問：「這顆崁燈說明寫 800 流明，等於傳統幾瓦的燈泡？」
-        </div>
-        <div class="space-y-2.5">
-          <div class="opt" data-correct="false"><span class="flex items-center gap-3"><span class="opt-letter">A</span> 約等於 800W</span><svg class="opt-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 6L6 18M6 6l12 12"/></svg></div>
-          <div class="opt" data-correct="true"><span class="flex items-center gap-3"><span class="opt-letter">B</span> 約等於傳統 60W 白熾燈</span><svg class="opt-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
-          <div class="opt" data-correct="false"><span class="flex items-center gap-3"><span class="opt-letter">C</span> 流明跟瓦數沒關係，無法換算</span><svg class="opt-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 6L6 18M6 6l12 12"/></svg></div>
-        </div>
-        <div class="feedback">
-          <strong>解析：</strong>10W LED 約 800-1000 流明，亮度等同傳統 60W 白熾燈。瓦數現在只看「省不省電」，**亮度真正看流明**。
+      <div class="road-step reveal">
+        <div class="road-marker-cell"><div class="road-marker"></div></div>
+        <div class="road-card">
+          <div class="road-card-body">
+            <div class="road-time mb-2">DAY 1 · 入職第一天</div>
+            <h3 class="font-display text-xl mb-2">新人光點</h3>
+            <p class="text-sm text-gray-400 leading-relaxed">
+              認識公司沿革、舞光品牌價值、體驗館導覽。
+              學長姐帶拜訪、看陳列、聽議價、寫紀錄。
+              這一個月你不用開單，搞清楚戰場在哪比較重要。
+            </p>
+          </div>
         </div>
       </div>
 
-      <!-- Q2 -->
-      <div class="quiz-block reveal" data-quiz="q2" data-points="10">
-        <div class="flex items-center justify-between mb-3">
-          <span class="quiz-tag">Q02 · 演色性</span>
-          <span class="text-xs text-gray-500">+10 光點</span>
-        </div>
-        <div class="quiz-question">
-          一家服飾店老闆抱怨「我裝了某品牌 LED，客人試衣服說顏色看起來奇怪」。問題最可能出在？
-        </div>
-        <div class="space-y-2.5">
-          <div class="opt" data-correct="false"><span class="flex items-center gap-3"><span class="opt-letter">A</span> 流明不夠</span><svg class="opt-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 6L6 18M6 6l12 12"/></svg></div>
-          <div class="opt" data-correct="false"><span class="flex items-center gap-3"><span class="opt-letter">B</span> IP 防護等級不夠</span><svg class="opt-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 6L6 18M6 6l12 12"/></svg></div>
-          <div class="opt" data-correct="true"><span class="flex items-center gap-3"><span class="opt-letter">C</span> 演色性 Ra 太低（可能 Ra80 以下）</span><svg class="opt-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
-        </div>
-        <div class="feedback">
-          <strong>解析：</strong>服飾店要 <strong>Ra ≧ 90</strong>，且 <strong>R9 &gt; 50</strong>（紅色還原）才能讓商品顏色漂亮。可推薦舞光「馬爾防眩崁燈」或拉斐爾磁吸軌道高演色款。
+      <div class="road-step reveal">
+        <div class="road-marker-cell"><div class="road-marker"></div></div>
+        <div class="road-card">
+          <div class="road-card-body">
+            <div class="road-time mb-2">MONTH 3 · 獨當一面</div>
+            <h3 class="font-display text-xl mb-2">獨立拜訪</h3>
+            <p class="text-sm text-gray-400 leading-relaxed">
+              開始接 C 級客戶獨立拜訪。每天 3-4 家、每週寫紀錄。
+              第一張小單通常是電料行的索爾崁燈、燈管。
+              這時期會踩很多雷，關鍵是：每個雷都要寫下來。
+            </p>
+          </div>
         </div>
       </div>
 
-      <!-- Q3 -->
-      <div class="quiz-block reveal" data-quiz="q3" data-points="10">
-        <div class="flex items-center justify-between mb-3">
-          <span class="quiz-tag">Q03 · 色溫</span>
-          <span class="text-xs text-gray-500">+10 光點</span>
-        </div>
-        <div class="quiz-question">
-          客戶要在臥室裝吸頂燈，希望「躺著看不刺眼、能放鬆睡覺」。應該推薦的色溫是？
-        </div>
-        <div class="space-y-2.5">
-          <div class="opt" data-correct="true"><span class="flex items-center gap-3"><span class="opt-letter">A</span> 2700K-3000K（暖黃光）</span><svg class="opt-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
-          <div class="opt" data-correct="false"><span class="flex items-center gap-3"><span class="opt-letter">B</span> 4000K（自然白光）</span><svg class="opt-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 6L6 18M6 6l12 12"/></svg></div>
-          <div class="opt" data-correct="false"><span class="flex items-center gap-3"><span class="opt-letter">C</span> 6500K（正白偏冷）</span><svg class="opt-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 6L6 18M6 6l12 12"/></svg></div>
-        </div>
-        <div class="feedback">
-          <strong>解析：</strong>臥室用暖光（2700K 像夕陽、3000K 像日落）讓人放鬆。書房和辦公才用 4000K 以上。也可以推薦「Ai 智慧崁燈」整段調色，一支搞定。
+      <div class="road-step reveal">
+        <div class="road-marker-cell"><div class="road-marker"></div></div>
+        <div class="road-card">
+          <div class="road-card-body">
+            <div class="road-time mb-2">MONTH 6 · 站穩腳跟</div>
+            <h3 class="font-display text-xl mb-2">客戶名單成形</h3>
+            <p class="text-sm text-gray-400 leading-relaxed">
+              手上有 20-30 家穩定回頭客戶。
+              開始學會分 A/B/C 級、排路線、規劃週拜訪節奏。
+              主管會把你某一區的責任正式劃給你。
+            </p>
+          </div>
         </div>
       </div>
 
-      <!-- Q4 -->
-      <div class="quiz-block reveal" data-quiz="q4" data-points="10">
-        <div class="flex items-center justify-between mb-3">
-          <span class="quiz-tag">Q04 · IP 防護</span>
-          <span class="text-xs text-gray-500">+10 光點</span>
-        </div>
-        <div class="quiz-question">
-          一個食品工廠要做整廠燈具汰換，重點訴求「沖洗不能壞」。最低應該選的 IP 等級是？
-        </div>
-        <div class="space-y-2.5">
-          <div class="opt" data-correct="false"><span class="flex items-center gap-3"><span class="opt-letter">A</span> IP20</span><svg class="opt-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 6L6 18M6 6l12 12"/></svg></div>
-          <div class="opt" data-correct="false"><span class="flex items-center gap-3"><span class="opt-letter">B</span> IP44</span><svg class="opt-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 6L6 18M6 6l12 12"/></svg></div>
-          <div class="opt" data-correct="true"><span class="flex items-center gap-3"><span class="opt-letter">C</span> IP65 以上（含 IP66）</span><svg class="opt-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
-        </div>
-        <div class="feedback">
-          <strong>解析：</strong>食品廠常需要高壓沖洗，<strong>IP65 起跳</strong>（防噴水），高規格場域用 IP66。可推薦舞光防潮燈系列。
+      <div class="road-step reveal">
+        <div class="road-marker-cell"><div class="road-marker"></div></div>
+        <div class="road-card">
+          <div class="road-card-body">
+            <div class="road-time mb-2">YEAR 1 · 一年生</div>
+            <h3 class="font-display text-xl mb-2">熟悉產品力</h3>
+            <p class="text-sm text-gray-400 leading-relaxed">
+              800+ 產品線你能講出 30+ 主力品的差異與賣點。
+              開始接設計師、小型工程案。
+              月業績穩定達標，部分月份開始拿獎金。
+            </p>
+          </div>
         </div>
       </div>
 
-      <!-- Q5 -->
-      <div class="quiz-block reveal" data-quiz="q5" data-points="10">
-        <div class="flex items-center justify-between mb-3">
-          <span class="quiz-tag">Q05 · 智慧家居</span>
-          <span class="text-xs text-gray-500">+10 光點</span>
-        </div>
-        <div class="quiz-question">
-          客戶說「我家全部用 Apple HomePod，我想用 iPhone 控制全屋燈」。你應該如何回應？
-        </div>
-        <div class="space-y-2.5">
-          <div class="opt" data-correct="false"><span class="flex items-center gap-3"><span class="opt-letter">A</span> 沒問題！舞光 Ai 系列完美支援 HomeKit</span><svg class="opt-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 6L6 18M6 6l12 12"/></svg></div>
-          <div class="opt" data-correct="true"><span class="flex items-center gap-3"><span class="opt-letter">B</span> 舞光 Ai 系列目前不支援 Apple HomeKit，但可整合米家或 Google Home，可提供折衷方案</span><svg class="opt-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
-          <div class="opt" data-correct="false"><span class="flex items-center gap-3"><span class="opt-letter">C</span> Apple 一定支援啦，您先裝沒問題</span><svg class="opt-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 6L6 18M6 6l12 12"/></svg></div>
-        </div>
-        <div class="feedback">
-          <strong>解析：</strong>誠實是業務的命。舞光 Ai 系列只支援 <strong>米家 + Google Home</strong>，2.4GHz Wi-Fi。HomeKit 暫不支援要老實講，否則一裝完就客訴。
+      <div class="road-step reveal">
+        <div class="road-marker-cell"><div class="road-marker"></div></div>
+        <div class="road-card">
+          <div class="road-card-body">
+            <div class="road-time mb-2">YEAR 1.5 · 議價老手</div>
+            <h3 class="font-display text-xl mb-2">能 hold 大案</h3>
+            <p class="text-sm text-gray-400 leading-relaxed">
+              第一個五位數量級的工程案落在你手上。
+              從報價、議價、結案、催收，全程獨立操盤。
+              學會「請示主管」當談判槓桿、用條件換條件。
+            </p>
+          </div>
         </div>
       </div>
 
-    </div>
-  </div>
-</section>
-
-<!-- ===== Stage 2: 情境選擇 ===== -->
-<section id="stage2" class="relative py-24 bg-gradient-to-b from-transparent via-black/30 to-transparent">
-  <div class="max-w-4xl mx-auto px-6">
-    <div class="text-center mb-12 reveal">
-      <div class="section-eyebrow justify-center" style="display:inline-flex;">STAGE 02 · 情境選擇</div>
-      <h2 class="font-display text-3xl md:text-4xl lg:text-5xl leading-[1.1] mb-4">
-        現場一問三不知，<br>
-        <span class="text-orange-300">就準備被退單</span>
-      </h2>
-      <p class="text-gray-500 max-w-xl mx-auto leading-relaxed mt-4">
-        每題 +20 光點 · 客戶現場真實情境，不只看規格、看你怎麼接話。
-      </p>
-    </div>
-
-    <div class="space-y-5">
-
-      <!-- Q6 -->
-      <div class="quiz-block reveal" data-quiz="q6" data-points="20">
-        <div class="flex items-center justify-between mb-3">
-          <span class="quiz-tag">Q06 · 燈飾店</span>
-          <span class="text-xs text-gray-500">+20 光點</span>
-        </div>
-        <div class="quiz-question">
-          燈飾店老闆娘說：「我這個月才剛進過貨，倉庫塞滿了，你下次再來推。」你的最佳回應？
-        </div>
-        <div class="space-y-2.5">
-          <div class="opt" data-correct="false"><span class="flex items-center gap-3"><span class="opt-letter">A</span> 「沒關係，那我下個月再來。」 然後告辭</span><svg class="opt-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 6L6 18M6 6l12 12"/></svg></div>
-          <div class="opt" data-correct="true"><span class="flex items-center gap-3"><span class="opt-letter">B</span> 「老闆娘辛苦了，我今天不推新品，但給您看一個最近熱銷的 3 分鐘介紹，您下次想到再進」</span><svg class="opt-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
-          <div class="opt" data-correct="false"><span class="flex items-center gap-3"><span class="opt-letter">C</span> 「您不進就不會有業績啊」 強推新品</span><svg class="opt-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 6L6 18M6 6l12 12"/></svg></div>
-        </div>
-        <div class="feedback">
-          <strong>解析：</strong>客戶說「不要」不是真的不要，是「現在不想被推銷」。<strong>放下今天的單、種下下次的種子</strong>，才是長期經營。直接離開或硬推都是新人地雷。
+      <div class="road-step reveal">
+        <div class="road-marker-cell"><div class="road-marker"></div></div>
+        <div class="road-card">
+          <div class="road-card-body">
+            <div class="road-time mb-2">YEAR 2 · 業績前段</div>
+            <h3 class="font-display text-xl mb-2">A 級客戶經營</h3>
+            <p class="text-sm text-gray-400 leading-relaxed">
+              你的 A 級客戶名單有 5-8 家。
+              每月主動約來體驗館、新品提早給你試。
+              年度業績進區域前 30%，主管開始讓你帶新進業務。
+            </p>
+          </div>
         </div>
       </div>
 
-      <!-- Q7 -->
-      <div class="quiz-block reveal" data-quiz="q7" data-points="20">
-        <div class="flex items-center justify-between mb-3">
-          <span class="quiz-tag">Q07 · 工程商</span>
-          <span class="text-xs text-gray-500">+20 光點</span>
-        </div>
-        <div class="quiz-question">
-          一個建商工程要 1,000 顆崁燈，客戶當場說「這價格如果能再殺 8%，我下午就下單」。你的處理？
-        </div>
-        <div class="space-y-2.5">
-          <div class="opt" data-correct="false"><span class="flex items-center gap-3"><span class="opt-letter">A</span> 為了結案，當場答應 8%</span><svg class="opt-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 6L6 18M6 6l12 12"/></svg></div>
-          <div class="opt" data-correct="true"><span class="flex items-center gap-3"><span class="opt-letter">B</span> 「8% 我必須請示主管，我半小時內回覆您。」 然後回車上算成本確認</span><svg class="opt-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
-          <div class="opt" data-correct="false"><span class="flex items-center gap-3"><span class="opt-letter">C</span> 「我們公司規定不能讓」 直接拒絕</span><svg class="opt-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 6L6 18M6 6l12 12"/></svg></div>
-        </div>
-        <div class="feedback">
-          <strong>解析：</strong>當場答應會被吃定底價、無法請示是讓步槓桿。<strong>「請示主管」既是談判技巧也是核算保護</strong>。回頭算清成本、毛利、保固成本後再回覆，必要時改送贈品 / 拉長帳期取代降價。
+      <div class="road-step reveal">
+        <div class="road-marker-cell"><div class="road-marker"></div></div>
+        <div class="road-card">
+          <div class="road-card-body">
+            <div class="road-time mb-2">YEAR 2.5 · 數位戰將</div>
+            <h3 class="font-display text-xl mb-2">借力品牌資源</h3>
+            <p class="text-sm text-gray-400 leading-relaxed">
+              你開始把客戶帶進新世代學院、邀請二代上課。
+              ESG 案、智慧家居案、O2O 平台你能整套提案。
+              客戶把你當顧問，不再只是業務。
+            </p>
+          </div>
         </div>
       </div>
 
-      <!-- Q8 -->
-      <div class="quiz-block reveal" data-quiz="q8" data-points="20">
-        <div class="flex items-center justify-between mb-3">
-          <span class="quiz-tag">Q08 · 設計師</span>
-          <span class="text-xs text-gray-500">+20 光點</span>
-        </div>
-        <div class="quiz-question">
-          設計師說：「我有個高級住宅案，無主燈設計，3 米天花板。你會推什麼崁燈？」
-        </div>
-        <div class="space-y-2.5">
-          <div class="opt" data-correct="false"><span class="flex items-center gap-3"><span class="opt-letter">A</span> 「索爾崁燈最便宜」</span><svg class="opt-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 6L6 18M6 6l12 12"/></svg></div>
-          <div class="opt" data-correct="true"><span class="flex items-center gap-3"><span class="opt-letter">B</span> 「奧丁崁燈 7.5cm 極簡無框，搭配可調光款做場景，配舞色軟條燈做氣氛光」</span><svg class="opt-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
-          <div class="opt" data-correct="false"><span class="flex items-center gap-3"><span class="opt-letter">C</span> 「高天井燈最亮」</span><svg class="opt-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 6L6 18M6 6l12 12"/></svg></div>
-        </div>
-        <div class="feedback">
-          <strong>解析：</strong>設計師要的是<strong>「跟空間融為一體」的存在感</strong>。奧丁崁燈小尺寸無框設計就是為這種情境誕生。再配軟條燈做層次照明，一個案場就吃下不只一條產品線。
+      <div class="road-step reveal">
+        <div class="road-marker-cell"><div class="road-marker"></div></div>
+        <div class="road-card">
+          <div class="road-card-body">
+            <div class="road-time mb-2">YEAR 3 · 資深戰將</div>
+            <h3 class="font-display text-xl mb-2">帶團隊</h3>
+            <p class="text-sm text-gray-400 leading-relaxed">
+              你開始帶 2-3 個新進業務跑線。
+              主管把區域副主管的位置留給你。
+              不只跑自己的單，要讓整個小隊的單都跑得動。
+            </p>
+          </div>
         </div>
       </div>
 
-      <!-- Q9 -->
-      <div class="quiz-block reveal" data-quiz="q9" data-points="20">
-        <div class="flex items-center justify-between mb-3">
-          <span class="quiz-tag">Q09 · 客訴</span>
-          <span class="text-xs text-gray-500">+20 光點</span>
-        </div>
-        <div class="quiz-question">
-          客戶 LINE 你：「上次裝的軟條燈不到一年就一段不亮了！你們品質這樣？」第一句該回什麼？
-        </div>
-        <div class="space-y-2.5">
-          <div class="opt" data-correct="false"><span class="flex items-center gap-3"><span class="opt-letter">A</span> 「你裝的方式不對啦，應該不是燈的問題」</span><svg class="opt-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 6L6 18M6 6l12 12"/></svg></div>
-          <div class="opt" data-correct="true"><span class="flex items-center gap-3"><span class="opt-letter">B</span> 「真的辛苦您了，能不能拍個照片給我？我今天下班前回覆您處理方式」</span><svg class="opt-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
-          <div class="opt" data-correct="false"><span class="flex items-center gap-3"><span class="opt-letter">C</span> 「我先請示一下，請等通知」 然後沒下文</span><svg class="opt-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 6L6 18M6 6l12 12"/></svg></div>
-        </div>
-        <div class="feedback">
-          <strong>解析：</strong>客訴 SOP 第一步：<strong>先安撫情緒、釐清事實、承諾時間</strong>。LED 室內保固 2 年，產品責任險 1,500 萬，公司流程撐得住——但情緒沒接好，再好的流程都白搭。
+      <div class="road-step reveal">
+        <div class="road-marker-cell"><div class="road-marker"></div></div>
+        <div class="road-card">
+          <div class="road-card-body">
+            <div class="road-time mb-2">YEAR 3+ · 點燈者</div>
+            <h3 class="font-display text-xl mb-2">舞光戰將</h3>
+            <p class="text-sm text-gray-400 leading-relaxed">
+              你不只是一個業務，是區域的代表。
+              新進業務看著你的紀錄學、客戶把案子直接 LINE 給你不再走流程。
+              <span class="text-orange-300">你成為了「點燈者」</span>。
+            </p>
+          </div>
         </div>
       </div>
 
@@ -730,147 +508,253 @@
   </div>
 </section>
 
-<!-- ===== Stage 3: 競品 PK ===== -->
-<section id="stage3" class="relative py-24">
-  <div class="max-w-4xl mx-auto px-6">
-    <div class="text-center mb-12 reveal">
-      <div class="section-eyebrow justify-center" style="display:inline-flex;">STAGE 03 · 競品 PK</div>
-      <h2 class="font-display text-3xl md:text-4xl lg:text-5xl leading-[1.1] mb-4">
-        客戶拿出競品，<br>
-        <span class="text-orange-300">你怎麼接？</span>
+<!-- ===== 5 大技能樹 ===== -->
+<section class="relative py-32 bg-gradient-to-b from-transparent via-black/30 to-transparent">
+  <div class="max-w-6xl mx-auto px-6 lg:px-10">
+    <div class="text-center mb-16 reveal">
+      <div class="section-eyebrow justify-center" style="display:inline-flex;">CHAPTER 2 · 技能樹</div>
+      <h2 class="font-display text-4xl md:text-5xl lg:text-6xl leading-[1.1] mb-4">
+        五大能力，<br>
+        <span class="text-orange-300">三級進化</span>
       </h2>
-      <p class="text-gray-500 max-w-xl mx-auto leading-relaxed mt-4">
-        每題 +30 光點 · 沒有「便宜」這種爛答案。
+      <p class="text-gray-500 max-w-xl mx-auto leading-relaxed mt-6">
+        每一條技能都有可量化的進化路徑。
+        對照看你目前在哪、下一步要練什麼。
       </p>
     </div>
 
-    <div class="space-y-5">
-
-      <!-- Q10 -->
-      <div class="quiz-block reveal" data-quiz="q10" data-points="30">
-        <div class="flex items-center justify-between mb-3">
-          <span class="quiz-tag">Q10 · 國際品牌 PK</span>
-          <span class="text-xs text-gray-500">+30 光點</span>
-        </div>
-        <div class="quiz-question">
-          客戶：「飛利浦這款崁燈跟你舞光規格幾乎一樣，但便宜 20 元，我為什麼要選你？」
-        </div>
-        <div class="space-y-2.5">
-          <div class="opt" data-correct="false"><span class="flex items-center gap-3"><span class="opt-letter">A</span> 「我們是台灣品牌啊，挺台灣不是很好嗎」</span><svg class="opt-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 6L6 18M6 6l12 12"/></svg></div>
-          <div class="opt" data-correct="true"><span class="flex items-center gap-3"><span class="opt-letter">B</span> 「老闆我們把規格表打開比，瓦數一樣、Ra 一樣的時候，我們有 1,500 萬產品責任險、2 年在地保固。壞了直接 LINE 我，3 天換新到府」</span><svg class="opt-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
-          <div class="opt" data-correct="false"><span class="flex items-center gap-3"><span class="opt-letter">C</span> 「飛利浦現在都在中國代工」 攻擊對手</span><svg class="opt-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 6L6 18M6 6l12 12"/></svg></div>
-        </div>
-        <div class="feedback">
-          <strong>解析：</strong>不要打口水戰、不要訴諸民族主義。<strong>把對話拉回規格、保固、服務的具體差異</strong>，把 20 元的單支差價，攤在 1,500 萬產品責任險上談。
-        </div>
-      </div>
-
-      <!-- Q11 -->
-      <div class="quiz-block reveal" data-quiz="q11" data-points="30">
-        <div class="flex items-center justify-between mb-3">
-          <span class="quiz-tag">Q11 · 雜牌</span>
-          <span class="text-xs text-gray-500">+30 光點</span>
-        </div>
-        <div class="quiz-question">
-          燈飾店老闆：「網路上有牌子賣便宜一半，我去進那個就好啦」
-        </div>
-        <div class="space-y-2.5">
-          <div class="opt" data-correct="false"><span class="flex items-center gap-3"><span class="opt-letter">A</span> 「便宜的東西爛啦」 主觀貶低</span><svg class="opt-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 6L6 18M6 6l12 12"/></svg></div>
-          <div class="opt" data-correct="true"><span class="flex items-center gap-3"><span class="opt-letter">B</span> 「便宜版可以放沒人看的角落出貨。但客人來店裡看到陳列的舞光，問起來您能說出 R9 紅色還原、無頻閃驅動。客人下單看的是您專業，不只是便宜」</span><svg class="opt-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
-          <div class="opt" data-correct="false"><span class="flex items-center gap-3"><span class="opt-letter">C</span> 「您要進就進啊，我管不到」 賭氣</span><svg class="opt-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 6L6 18M6 6l12 12"/></svg></div>
-        </div>
-        <div class="feedback">
-          <strong>解析：</strong>把選擇權交回老闆手上。<strong>幫他想他的客戶</strong>—— 燈飾店的客戶不是只看價，也看老闆「懂不懂」。便宜貨 + 舞光「主推商品」搭配，是真實的店面策略。
-        </div>
-      </div>
-
-      <!-- Q12 -->
-      <div class="quiz-block reveal" data-quiz="q12" data-points="30">
-        <div class="flex items-center justify-between mb-3">
-          <span class="quiz-tag">Q12 · 異議處理</span>
-          <span class="text-xs text-gray-500">+30 光點</span>
-        </div>
-        <div class="quiz-question">
-          客戶：「LED 都差不多吧，我看不出來差異」
-        </div>
-        <div class="space-y-2.5">
-          <div class="opt" data-correct="false"><span class="flex items-center gap-3"><span class="opt-letter">A</span> 「老闆您不懂啦」 否定客戶</span><svg class="opt-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 6L6 18M6 6l12 12"/></svg></div>
-          <div class="opt" data-correct="false"><span class="flex items-center gap-3"><span class="opt-letter">B</span> 「我們有很多認證」 搬規格表</span><svg class="opt-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 6L6 18M6 6l12 12"/></svg></div>
-          <div class="opt" data-correct="true"><span class="flex items-center gap-3"><span class="opt-letter">C</span> 「老闆我給您看個東西」 同時點亮 Ra70 雜牌跟 Ra90 舞光照同一塊紅布，讓客戶當場看到差異</span><svg class="opt-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
-        </div>
-        <div class="feedback">
-          <strong>解析：</strong>客戶看不出差異不是錯，是因為<strong>沒有比較基準</strong>。業務的工作就是「給他比較基準」。隨身帶兩支樣品，現場演示比 100 句話有效。這是舞光經銷大會教過的標準動作。
-        </div>
-      </div>
-
-    </div>
-  </div>
-</section>
-
-<!-- ===== Stage 4: AI 客戶對話 ===== -->
-<section id="stage4" class="relative py-24 bg-gradient-to-b from-transparent via-black/30 to-transparent">
-  <div class="max-w-4xl mx-auto px-6">
-    <div class="text-center mb-12 reveal">
-      <div class="section-eyebrow justify-center" style="display:inline-flex;">STAGE 04 · AI 客戶對話</div>
-      <h2 class="font-display text-3xl md:text-4xl lg:text-5xl leading-[1.1] mb-4">
-        三輪對話，<br>
-        <span class="text-orange-300">三個選擇</span>
-      </h2>
-      <p class="text-gray-500 max-w-xl mx-auto leading-relaxed mt-4">
-        模擬真實客戶溝通 · 每個選擇影響對話走向 · 完成 +50 光點。
-      </p>
-    </div>
-
-    <!-- Scenario picker + Chat -->
-    <div class="reveal">
-      <div class="scenario-picker" role="tablist" aria-label="情境選擇">
-        <button type="button" class="scenario-tab active" data-scenario="dealer">
-          <div class="scenario-tab-avatar">陳</div>
-          <div class="scenario-tab-name">陳老闆</div>
-          <div class="scenario-tab-tag">電料行・對手低價</div>
-          <span class="scenario-tab-check">✓</span>
-        </button>
-        <button type="button" class="scenario-tab" data-scenario="designer">
-          <div class="scenario-tab-avatar">林</div>
-          <div class="scenario-tab-name">林設計師</div>
-          <div class="scenario-tab-tag">商空案場</div>
-          <span class="scenario-tab-check">✓</span>
-        </button>
-        <button type="button" class="scenario-tab" data-scenario="builder">
-          <div class="scenario-tab-avatar">張</div>
-          <div class="scenario-tab-name">張總</div>
-          <div class="scenario-tab-tag">建商議價</div>
-          <span class="scenario-tab-check">✓</span>
-        </button>
-        <button type="button" class="scenario-tab" data-scenario="shopkeeper">
-          <div class="scenario-tab-avatar">王</div>
-          <div class="scenario-tab-name">王老闆娘</div>
-          <div class="scenario-tab-tag">老燈飾店</div>
-          <span class="scenario-tab-check">✓</span>
-        </button>
-        <button type="button" class="scenario-tab" data-scenario="complaint">
-          <div class="scenario-tab-avatar">李</div>
-          <div class="scenario-tab-name">李先生</div>
-          <div class="scenario-tab-tag">客訴處理</div>
-          <span class="scenario-tab-check">✓</span>
-        </button>
-      </div>
-
-      <div class="flex items-center gap-3 mb-4 px-1">
-        <div id="chatActiveAvatar" class="w-10 h-10 rounded-full bg-gradient-to-br from-orange-500 to-orange-700 flex items-center justify-center text-black font-bold">陳</div>
+    <div class="space-y-2">
+      <div class="skill-row reveal">
         <div>
-          <div id="chatActiveName" class="text-sm font-medium">陳老闆</div>
-          <div id="chatActiveSubtitle" class="text-xs text-gray-500">桃園・電料行 · 二代接班 3 年</div>
+          <div class="skill-name">產品力</div>
+          <div class="text-xs text-gray-500 mt-1">Product Mastery</div>
         </div>
-        <span id="chatActiveTag" class="ml-auto text-xs text-orange-300/70 px-3 py-1 rounded-full bg-orange-500/10 border border-orange-500/30">對手低價戰</span>
+        <div class="skill-level-grid">
+          <div class="skill-level"><strong>LV.1 · 入門</strong>能講出主力 10 支產品差異</div>
+          <div class="skill-level"><strong>LV.2 · 進階</strong>能依空間條件做整套提案</div>
+          <div class="skill-level"><strong>LV.3 · 高手</strong>能跟設計師談 Ra / R9 / 演色性細節</div>
+        </div>
       </div>
 
-      <div class="chat-window" id="chatWindow"></div>
+      <div class="skill-row reveal" style="transition-delay:0.05s;">
+        <div>
+          <div class="skill-name">客戶力</div>
+          <div class="text-xs text-gray-500 mt-1">Customer Insight</div>
+        </div>
+        <div class="skill-level-grid">
+          <div class="skill-level"><strong>LV.1 · 入門</strong>能完成標準拜訪 + 寫紀錄</div>
+          <div class="skill-level"><strong>LV.2 · 進階</strong>分 A/B/C 級 · 規劃週路線</div>
+          <div class="skill-level"><strong>LV.3 · 高手</strong>客戶主動約你、把你當顧問</div>
+        </div>
+      </div>
 
-      <div id="replyArea" class="mt-4 space-y-2"></div>
+      <div class="skill-row reveal" style="transition-delay:0.1s;">
+        <div>
+          <div class="skill-name">議價力</div>
+          <div class="text-xs text-gray-500 mt-1">Negotiation</div>
+        </div>
+        <div class="skill-level-grid">
+          <div class="skill-level"><strong>LV.1 · 入門</strong>背得出底價 · 不會當場讓利</div>
+          <div class="skill-level"><strong>LV.2 · 進階</strong>3 段讓價節奏 · 用條件換條件</div>
+          <div class="skill-level"><strong>LV.3 · 高手</strong>大案議價中能掌控對話走向</div>
+        </div>
+      </div>
 
-      <div class="scenario-progress-line">
-        完成情境：<span id="scenariosCompleted">0</span> / 5　·　每完成一個 +50 光點
+      <div class="skill-row reveal" style="transition-delay:0.15s;">
+        <div>
+          <div class="skill-name">數位力</div>
+          <div class="text-xs text-gray-500 mt-1">Digital Sense</div>
+        </div>
+        <div class="skill-level-grid">
+          <div class="skill-level"><strong>LV.1 · 入門</strong>會用官網 / YT / LINE 帶資源給客戶</div>
+          <div class="skill-level"><strong>LV.2 · 進階</strong>能介紹 O2O 平台、智慧家居整合</div>
+          <div class="skill-level"><strong>LV.3 · 高手</strong>引導經銷商二代加入新世代學院</div>
+        </div>
+      </div>
+
+      <div class="skill-row reveal" style="transition-delay:0.2s;">
+        <div>
+          <div class="skill-name">領導力</div>
+          <div class="text-xs text-gray-500 mt-1">Leadership</div>
+        </div>
+        <div class="skill-level-grid">
+          <div class="skill-level"><strong>LV.1 · 入門</strong>能做好自己手上的單</div>
+          <div class="skill-level"><strong>LV.2 · 進階</strong>能帶 1-2 個新進業務跑線</div>
+          <div class="skill-level"><strong>LV.3 · 高手</strong>能讓整個小隊業績都動起來</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 學長姐錦囊 ===== -->
+<section class="relative py-32">
+  <div class="max-w-7xl mx-auto px-6 lg:px-10">
+    <div class="text-center mb-16 reveal">
+      <div class="section-eyebrow justify-center" style="display:inline-flex;">CHAPTER 3 · 學長姐錦囊</div>
+      <h2 class="font-display text-4xl md:text-5xl lg:text-6xl leading-[1.1] mb-4">
+        他們都從新人走過來，<br>
+        <span class="text-orange-300">這是他們留下的話</span>
+      </h2>
+    </div>
+
+    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+      <div class="wisdom-card reveal">
+        <div class="wisdom-avatar">陳</div>
+        <p class="wisdom-quote">「客戶記得住你的名字，業績就只是時間問題。」</p>
+        <div class="wisdom-name">陳柏翰</div>
+        <div class="wisdom-role">資深業務 · 入職 3 年</div>
+      </div>
+
+      <div class="wisdom-card reveal" style="transition-delay:0.05s;">
+        <div class="wisdom-avatar">林</div>
+        <p class="wisdom-quote">「拜訪紀錄寫得勤，比拚命跑客戶更重要。三個月後的我會謝謝今天的我。」</p>
+        <div class="wisdom-name">林佳穎</div>
+        <div class="wisdom-role">區域指標 · 入職 5 年</div>
+      </div>
+
+      <div class="wisdom-card reveal" style="transition-delay:0.1s;">
+        <div class="wisdom-avatar">王</div>
+        <p class="wisdom-quote">「第一年我怕被罵、怕被拒絕、怕報錯價。一年後，學長姐都成了我的人脈。」</p>
+        <div class="wisdom-name">王子豪</div>
+        <div class="wisdom-role">業務 · 入職 1 年</div>
+      </div>
+
+      <div class="wisdom-card reveal" style="transition-delay:0.15s;">
+        <div class="wisdom-avatar">許</div>
+        <p class="wisdom-quote">「業務的成熟，是學會說『我請示主管』的那一天。它不是退讓，是談判槓桿。」</p>
+        <div class="wisdom-name">許主任</div>
+        <div class="wisdom-role">區域副主管 · 入職 8 年</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 利他企業 DNA ===== -->
+<section class="relative py-32 bg-gradient-to-b from-transparent via-black/30 to-transparent">
+  <div class="max-w-6xl mx-auto px-6 lg:px-10">
+    <div class="text-center mb-16 reveal">
+      <div class="section-eyebrow justify-center" style="display:inline-flex;">CHAPTER 4 · 企業 DNA</div>
+      <h2 class="font-display text-4xl md:text-5xl lg:text-6xl leading-[1.1] mb-4">
+        共好．共榮．共學<br>
+        <span class="text-orange-300">利他是底層作業系統</span>
+      </h2>
+      <p class="text-gray-500 max-w-xl mx-auto leading-relaxed mt-6">
+        舞光從一間燈飾店起家，所以最懂「業務不是壓榨客戶、是替客戶想」。
+      </p>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-5">
+      <div class="dna-card reveal">
+        <div class="dna-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+        <div class="text-xs text-orange-400 font-mono-en tracking-widest mb-1">INTERNAL · 對內</div>
+        <h3 class="font-display text-xl mb-2">師徒制</h3>
+        <p class="text-sm text-gray-400 leading-relaxed">
+          新進業務有專屬資深學長姐帶。前 3 個月每週 1 次 1on1、
+          路線一起跑、紀錄一起檢討。
+          公司花在你身上的時間是真的不省。
+        </p>
+      </div>
+
+      <div class="dna-card reveal" style="transition-delay:0.05s;">
+        <div class="dna-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+        </div>
+        <div class="text-xs text-orange-400 font-mono-en tracking-widest mb-1">EXTERNAL · 對外</div>
+        <h3 class="font-display text-xl mb-2">與經銷商共好</h3>
+        <p class="text-sm text-gray-400 leading-relaxed">
+          舞光照明新世代學院 2020 年開辦至今，
+          1,000+ 經銷商二代受訓 · 完全免費。
+          幫客戶賺得到錢，舞光才賺得長久。
+        </p>
+      </div>
+
+      <div class="dna-card reveal" style="transition-delay:0.1s;">
+        <div class="dna-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        </div>
+        <div class="text-xs text-orange-400 font-mono-en tracking-widest mb-1">PHILANTHROPY · 對社會</div>
+        <h3 class="font-display text-xl mb-2">舞愛公益</h3>
+        <p class="text-sm text-gray-400 leading-relaxed">
+          義工團隊定期協助弱勢家庭汰換老舊燈具，
+          提供節電支援與明亮居住環境。
+          這不是 CSR 表演，是公司營運的延伸。
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 畢業專題 ===== -->
+<section class="relative py-32 overflow-hidden">
+  <div class="glow-orb" style="background:#F58220; width:600px; height:600px; top:30%; left:50%; transform:translateX(-50%); opacity:0.12;"></div>
+
+  <div class="relative max-w-5xl mx-auto px-6">
+    <div class="text-center mb-12 reveal">
+      <div class="section-eyebrow justify-center" style="display:inline-flex;">CHAPTER 5 · 畢業專題</div>
+      <h2 class="font-display text-4xl md:text-5xl lg:text-6xl leading-[1.1] mb-4">
+        最後一道任務，<br>
+        <span class="text-orange-300">點燈者徽章</span>
+      </h2>
+    </div>
+
+    <div class="graduation-block reveal">
+      <div class="relative">
+        <div class="text-xs text-orange-400 font-mono-en tracking-widest mb-3">FINAL PROJECT · 畢業任務</div>
+        <h3 class="font-display text-3xl mb-4">客戶開發實戰提案</h3>
+        <p class="text-gray-300 leading-relaxed mb-8">
+          挑一家你目前還沒成交的潛在客戶，做一份完整的開發提案。
+          不是靠運氣談下來，是靠你前面五個章節學會的所有東西。
+        </p>
+
+        <div class="grid md:grid-cols-2 gap-8">
+          <div>
+            <div class="text-xs text-orange-300 font-mono-en tracking-widest mb-3">DELIVERABLES · 提交內容</div>
+            <div class="space-y-1">
+              <div class="checklist-item">
+                <div class="check-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+                <span class="text-sm text-gray-300">客戶背景分析（業態 / 客流 / 競品）</span>
+              </div>
+              <div class="checklist-item">
+                <div class="check-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+                <span class="text-sm text-gray-300">舞光主推產品組合（5-8 支型號）</span>
+              </div>
+              <div class="checklist-item">
+                <div class="check-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+                <span class="text-sm text-gray-300">毛利試算 + 客戶賺多少</span>
+              </div>
+              <div class="checklist-item">
+                <div class="check-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+                <span class="text-sm text-gray-300">3 段拜訪 SOP（破冰 / 提案 / 結案）</span>
+              </div>
+              <div class="checklist-item">
+                <div class="check-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+                <span class="text-sm text-gray-300">預期異議 + 應對話術</span>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div class="text-xs text-orange-300 font-mono-en tracking-widest mb-3">REWARD · 通關獎勵</div>
+            <div class="bg-black/30 border border-orange-500/30 rounded-2xl p-5 mb-3">
+              <div class="flex items-center gap-3">
+                <div class="w-12 h-12 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center text-black flex-shrink-0">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                </div>
+                <div>
+                  <div class="font-bold text-orange-300">點燈者徽章</div>
+                  <div class="text-xs text-gray-400">舞光戰將最高榮譽</div>
+                </div>
+              </div>
+            </div>
+            <div class="text-xs text-gray-500 leading-relaxed">
+              通過評審 (主管 + 區域副主管) 後，正式畢業、頒授徽章。
+              徽章顯示在你的個人 dashboard，是區域內公開可見的榮譽。
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -881,22 +765,22 @@
   <div class="glow-orb" style="background:#F58220; width:600px; height:600px; bottom:-200px; left:50%; transform:translateX(-50%); opacity:0.2;"></div>
   <div class="max-w-4xl mx-auto px-6 text-center relative z-10">
     <div class="reveal">
-      <div class="section-eyebrow justify-center" style="display:inline-flex;">CHAPTER 04 · 完成</div>
+      <div class="section-eyebrow justify-center" style="display:inline-flex;">CHAPTER 06 · 完成</div>
       <h2 class="font-display text-5xl md:text-6xl lg:text-7xl leading-[1.05] mb-8">
-        闖完了，<br>
-        <span class="bg-gradient-to-r from-orange-300 to-orange-500 bg-clip-text text-transparent glow-text">你不一樣了</span>
+        全部章節走完了，<br>
+        <span class="bg-gradient-to-r from-orange-300 to-orange-500 bg-clip-text text-transparent glow-text">該你發光了</span>
       </h2>
       <p class="text-gray-400 text-lg max-w-xl mx-auto mb-12">
-        繼續下一關，或先看看自己解鎖了哪些徽章。
+        回到首頁查看你累積的徽章，或從頭再走一次任何章節。
       </p>
       <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
-        <a href="digital.html" class="btn-primary">
-          <span>進行下一階段的關卡</span>
+        <a href="index.html#achievement" class="btn-primary">
+          <span>查看我的徽章</span>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
         </a>
-        <a href="index.html#achievement" class="btn-secondary">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-          <span>看徽章</span>
+        <a href="index.html" class="btn-secondary">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          <span>回首頁</span>
         </a>
       </div>
     </div>
@@ -918,10 +802,8 @@
             <div class="text-[10px] text-gray-500 font-mono-en tracking-widest">TRAINING ACADEMY</div>
           </div>
         </div>
-        <p class="text-sm text-gray-500 leading-relaxed max-w-sm mb-4">
-          展晟照明股份有限公司　業務部新人培訓系統<br>
-          <span class="font-mono-en text-xs text-gray-600">JAN-CHENG LIGHTING × DANCELIGHT LED</span>
-        </p>
+        <p class="text-sm text-gray-500 leading-relaxed max-w-sm mb-4">展晟照明股份有限公司　業務部新人培訓系統<br>
+          <span class="font-mono-en text-xs text-gray-600">JAN-CHENG LIGHTING × DANCELIGHT LED</span></p>
         <div class="text-xs text-orange-300/70 font-medium tracking-wide">光氛圍 · 光感動 · 光智慧</div>
       </div>
       <div>
@@ -930,9 +812,9 @@
           <li><a href="brand.html" class="hover:text-orange-400 transition">CH 01 · 品牌之光</a></li>
           <li><a href="products.html" class="hover:text-orange-400 transition">CH 02 · 產品實驗室</a></li>
           <li><a href="academy.html" class="hover:text-orange-400 transition">CH 03 · 業務學院</a></li>
-          <li><a href="challenge.html" class="text-orange-400">CH 04 · 闖關挑戰</a></li>
+          <li><a href="challenge.html" class="hover:text-orange-400 transition">CH 04 · 闖關挑戰</a></li>
           <li><a href="digital.html" class="hover:text-orange-400 transition">CH 05 · 數位行銷</a></li>
-          <li><a href="career.html" class="hover:text-orange-400 transition">CH 06 · 職涯地圖</a></li>
+          <li><a href="career.html" class="text-orange-400">CH 06 · 職涯地圖</a></li>
         </ul>
       </div>
       <div>
@@ -959,13 +841,12 @@
     </div>
     <div class="pt-8 border-t border-gray-900 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-gray-500">
       <div>© 1987-2026 展晟照明股份有限公司　光耀四十・共創未來</div>
-      <div class="font-mono-en tracking-widest">INTERNAL TRAINING USE ONLY · v0.4 PREVIEW</div>
+      <div class="font-mono-en tracking-widest">INTERNAL TRAINING USE ONLY · v0.6 PREVIEW</div>
     </div>
   </div>
 </footer>
 
 <script>
-  // === Particle Canvas ===
   (function() {
     const canvas = document.getElementById('particle-canvas');
     const ctx = canvas.getContext('2d');
@@ -989,319 +870,26 @@
         if (this.y < -10) this.reset(false);
       }
       draw() {
-        const gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.r * 4);
-        gradient.addColorStop(0, `rgba(255, 180, 100, ${this.opacity})`);
-        gradient.addColorStop(0.4, `rgba(245, 130, 32, ${this.opacity * 0.5})`);
-        gradient.addColorStop(1, 'rgba(245, 130, 32, 0)');
-        ctx.beginPath(); ctx.fillStyle = gradient;
-        ctx.arc(this.x, this.y, this.r * 4, 0, Math.PI * 2); ctx.fill();
+        const g = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.r * 4);
+        g.addColorStop(0, `rgba(255, 180, 100, ${this.opacity})`);
+        g.addColorStop(0.4, `rgba(245, 130, 32, ${this.opacity * 0.5})`);
+        g.addColorStop(1, 'rgba(245, 130, 32, 0)');
+        ctx.beginPath(); ctx.fillStyle = g; ctx.arc(this.x, this.y, this.r * 4, 0, Math.PI * 2); ctx.fill();
         ctx.beginPath(); ctx.fillStyle = `rgba(255, 220, 180, ${this.opacity})`;
         ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2); ctx.fill();
       }
     }
-    function init() { particles = []; const count = Math.floor((w * h) / 14000); for (let i = 0; i < count; i++) particles.push(new Particle()); }
+    function init() { particles = []; const c = Math.floor((w * h) / 14000); for (let i = 0; i < c; i++) particles.push(new Particle()); }
     function animate() { ctx.clearRect(0, 0, w, h); particles.forEach(p => { p.update(); p.draw(); }); requestAnimationFrame(animate); }
     window.addEventListener('resize', () => { w = canvas.width = window.innerWidth; h = canvas.height = window.innerHeight; init(); });
     init(); animate();
   })();
 
-  // === Reveal ===
   const reveals = document.querySelectorAll('.reveal');
   const io = new IntersectionObserver((entries) => {
     entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); } });
   }, { threshold: 0.12 });
   reveals.forEach(r => io.observe(r));
-
-  // === Quiz Logic ===
-  const TOTAL_QUIZ_COUNT = 12 + 5; // 12 mc + 5 AI chat scenarios
-  let totalScore = 0;
-  let completedCount = 0;
-
-  function updateScore(points) {
-    totalScore += points;
-    completedCount++;
-    document.getElementById('totalScore').textContent = totalScore;
-    document.getElementById('completed').textContent = completedCount;
-    document.getElementById('totalProgress').style.width = ((completedCount / TOTAL_QUIZ_COUNT) * 100) + '%';
-  }
-
-  document.querySelectorAll('.quiz-block').forEach(block => {
-    const opts = block.querySelectorAll('.opt');
-    const feedback = block.querySelector('.feedback');
-    const points = parseInt(block.dataset.points || '10');
-    let answered = false;
-    opts.forEach(opt => {
-      opt.addEventListener('click', () => {
-        if (answered) return;
-        const isCorrect = opt.dataset.correct === 'true';
-        opts.forEach(o => {
-          if (o.dataset.correct === 'true') o.classList.add('correct');
-        });
-        if (!isCorrect) opt.classList.add('wrong');
-        if (feedback) feedback.classList.add('show');
-        if (isCorrect) {
-          updateScore(points);
-          block.classList.add('completed');
-        } else {
-          updateScore(0);
-        }
-        answered = true;
-      });
-    });
-  });
-
-  // === Stage 4: 5 Scenarios driven AI Chat ===
-  const scenarios = {
-    dealer: {
-      avatar: '陳', name: '陳老闆',
-      subtitle: '桃園・電料行 · 二代接班 3 年',
-      tag: '對手低價戰',
-      intro: [
-        { type: 'narrator', text: '陳老闆走進你的門市，一臉困擾。' },
-        { type: 'customer', text: '我隔壁那家燈飾店最近進了一批超便宜的崁燈，水電師傅都跑去他那邊。我這邊是不是也要進那種貨拼價格？' }
-      ],
-      rounds: [
-        { options: [
-          { text: '老闆，您也跟著進就好啦，反正客人只看價格', correct: false, response: { type: 'customer', text: '你這業務也太沒水準了吧⋯連你都這樣想，那我自己想辦法。' }, feedback: '× 跟著對手降價是死路，業務該幫客戶想差異化。' },
-          { text: '老闆別急，那家水電師傅佔比高還是設計師佔比高？我們可以走不同的路', correct: true, response: { type: 'customer', text: '嗯⋯我這邊水電師傅佔七成，設計師兩成。怎麼說？' }, feedback: '✓ 不打價格戰、先了解客戶結構，找出對方佔不到的市場。' },
-          { text: '我們絕對比他便宜！我回去跟主管殺價', correct: false, response: { type: 'customer', text: '欸別這樣，價格戰打下去大家都死。我要解方不是更慘的價格。' }, feedback: '× 客戶都不想打價格戰了，業務還在亂讓價會被瞧不起。' }
-        ]},
-        { options: [
-          { text: '水電師傅愛便宜給他便宜貨；設計師看品質。我們把主推鎖定設計師路線，您店裡多一條客人來源', correct: true, response: { type: 'customer', text: '有道理⋯設計師常問我有沒有 Ra90 的，我都沒貨。怎麼推？' }, feedback: '✓ 把產品線切兩條，比一味降價更賺。' },
-          { text: '都進高階款啦，水電師傅遲早會懂', correct: false, response: { type: 'customer', text: '師傅不會等的⋯他們今天看不到便宜就走別家了。' }, feedback: '× 一刀切沒考慮現實。' },
-          { text: '舞光全系列您都要進，我們才能給您折扣', correct: false, response: { type: 'customer', text: '這樣倉庫塞爆現金壓死了。有沒有別的方案？' }, feedback: '× 把客戶現金鎖死不是好策略。' }
-        ]},
-        { options: [
-          { text: '我安排 30 分鐘「設計師專業推薦」教學，下週帶馬爾、奧丁、拉斐爾來現場示範 Ra90 vs Ra70 差別', correct: true, response: { type: 'customer', text: '好，就這樣！下週二我把太太也叫來。你比上一個業務認真多了。' }, feedback: '✓ 教育訓練+樣品演示，是讓客戶長期依賴你的最強招式。' },
-          { text: '我給您所有產品 PDF 您自己讀', correct: false, response: { type: 'customer', text: 'PDF 我看不下去⋯算了我自己研究。' }, feedback: '× 讓客戶自學等於沒幫到。' },
-          { text: '您先進貨慢慢摸索就會了', correct: false, response: { type: 'customer', text: '我把錢壓進去還要自己摸索⋯你不太行欸。' }, feedback: '× 沒人會自己摸索做生意。' }
-        ]}
-      ],
-      finishMessage: '陳老闆對你印象很好，下個月會主動約你聊新案。'
-    },
-
-    designer: {
-      avatar: '林', name: '林設計師',
-      subtitle: '台北信義 · 60 坪精品服飾店案',
-      tag: '商空案場',
-      intro: [
-        { type: 'narrator', text: '林設計師滑開手機把案場照片給你看。' },
-        { type: 'customer', text: '我接了一個 60 坪精品服飾店案，老闆要求商品顏色要呈現得漂亮，每季還要重新陳列。你舞光有什麼能搭配的？' }
-      ],
-      rounds: [
-        { options: [
-          { text: '索爾崁燈走量穩，60 坪算下來成本不高', correct: false, response: { type: 'customer', text: '索爾我知道，那個 Ra80 對精品店太一般了。' }, feedback: '× 索爾是電料行走量品，沒滿足設計師對「商品顏色呈現」的核心需求。' },
-          { text: '拉斐爾超薄磁吸軌道（6mm 不開槽）+ Ra≧90 投射燈，換季調角度兩隻手就行', correct: true, response: { type: 'customer', text: '不開槽是真的方便⋯每次拆天花太貴。Ra 還能再高嗎？' }, feedback: '✓ 設計師最在意「不破壞天花」+「演色性」+「換季彈性」，磁吸軌道一次解三個問題。' },
-          { text: '一般筒燈裝下去就好啊，省事又便宜', correct: false, response: { type: 'customer', text: '你不太懂我們設計師案吧。' }, feedback: '× 對設計師客戶不能用「便宜耐用」打動，他們替屋主要的是質感。' }
-        ]},
-        { options: [
-          { text: 'X 牌很爛啦那是中國貨', correct: false, response: { type: 'customer', text: '我跟 X 牌業務也很熟，你這樣講不太尊重。' }, feedback: '× 攻擊對手在設計師圈傳得快，自己被列黑名單。' },
-          { text: '我們有 R9>50 高紅色還原——精品紅色衣服掛起來才有層次。下週我帶幾支樣品到您事務所實機示範', correct: true, response: { type: 'customer', text: '好啊，下週三我有空。帶哪幾支？我老闆也會在。' }, feedback: '✓ 設計師看實機 + R9 細節，把對話拉到專業層次。' },
-          { text: '我們更貴所以更好', correct: false, response: { type: 'customer', text: '貴有貴的道理你要說出來啊。' }, feedback: '× 「貴=好」不是論點，要把細節講清楚。' }
-        ]},
-        { options: [
-          { text: '體驗館要先預約啦，您自己上網約', correct: false, response: { type: 'customer', text: '算了我自己處理。' }, feedback: '× 設計師案中業務該主動打通流程，把麻煩丟回客戶等於失格。' },
-          { text: '林口館免預約，我幫您和業主一起約這週六，現場示範拉斐爾與奧丁的差異', correct: true, response: { type: 'customer', text: '太好了，業主聽到「親自體驗」一定買單。週六見。' }, feedback: '✓ 把客戶 + 業主一起帶到體驗館，是設計師案最強的成交招。' },
-          { text: '樣品我寄到您事務所就好', correct: false, response: { type: 'customer', text: '業主沒看到光的真實效果，他不會點頭。' }, feedback: '× 設計師案的關鍵決策者是「業主」，業主不到現場就無法成交。' }
-        ]}
-      ],
-      finishMessage: '林設計師把舞光放進首選名單，下週三事務所實機示範。'
-    },
-
-    builder: {
-      avatar: '張', name: '張總',
-      subtitle: '新北・建商採購 · 60 戶建案',
-      tag: '大量議價',
-      intro: [
-        { type: 'narrator', text: '張總把建案規劃表攤在桌上。' },
-        { type: 'customer', text: '60 戶住宅、每戶崁燈 12 顆、吸頂燈 5 顆。給我最低價，下星期我簽合約。' }
-      ],
-      rounds: [
-        { options: [
-          { text: '崁燈 NT$200/顆、吸頂燈 NT$1,500/顆，這是底價了', correct: false, response: { type: 'customer', text: '你這就是底價了？太快了吧。我去問別家。' }, feedback: '× 一上來就壓底沒退路、客戶反而不信你。' },
-          { text: '報價之前我得先確認規格——色溫、瓦數、Ra、保固。不同規格成本差 30%', correct: true, response: { type: 'customer', text: '講得對。預售屋年輕買家居多、要日光中性白。Ra 你建議多少？' }, feedback: '✓ 釐清規格再報價，避免驗收糾紛 + 展現專業。' },
-          { text: '我老闆說最多打 8 折', correct: false, response: { type: 'customer', text: '我還沒講量你就打 8 折，那我量大應該打 6 折？' }, feedback: '× 沒談量就讓利、給客戶開很大胃口。' }
-        ]},
-        { options: [
-          { text: '3 個月帳期沒問題，明天我帶合約來', correct: false, response: { type: 'customer', text: '那簽合約之前要不要再給我多 5%？' }, feedback: '× 帳期是要請示主管的事，不該當場答應。' },
-          { text: '帳期我請示主管、今天下班前回您。先把規格 + 數量 + 交期定下來', correct: true, response: { type: 'customer', text: 'OK，3000K、12W、Ra80、防眩。60 戶 × 17 顆 = 1020 顆。' }, feedback: '✓ 把可確定的事先鎖定，需要核可的事誠實請示。' },
-          { text: '我們公司不接 3 個月帳期', correct: false, response: { type: 'customer', text: '那這案我給別家做。' }, feedback: '× 沒談就拒絕等於放棄案子。' }
-        ]},
-        { options: [
-          { text: '室內 LED 不會壞啦，您安心', correct: false, response: { type: 'customer', text: '不會壞？1020 顆裡面壞 1% 就 10 顆。維修怎麼算？' }, feedback: '× 客戶問的是責任分攤、不是產品迷思。' },
-          { text: '室內 LED 兩年保固，期間故障 3 個工作日內換新到工地。我們有 1500 萬產品責任險', correct: true, response: { type: 'customer', text: '1500 萬產品責任險⋯這個我喜歡。先簽 MOU，下週合約。' }, feedback: '✓ 用具體保險 + SLA 讓建商安心，是大量訂單的成交關鍵。' },
-          { text: '壞了找原買進的店家', correct: false, response: { type: 'customer', text: '我就是直接跟你買，哪有原買進店家？' }, feedback: '× 推卸責任客戶當場走人。' }
-        ]}
-      ],
-      finishMessage: '張總當天簽 MOU，下週走完 1020 顆訂單合約。'
-    },
-
-    shopkeeper: {
-      avatar: '王', name: '王老闆娘',
-      subtitle: '台中・燈飾店 30 年 · 賣 X 牌 20 年',
-      tag: '換品牌阻力',
-      intro: [
-        { type: 'narrator', text: '王老闆娘坐在收銀台後翻雜誌、頭也沒抬。' },
-        { type: 'customer', text: '我這家店賣 X 牌賣到我兒子當兵回來了。客人都認 X 牌的。你這種新業務還叫我換舞光？' }
-      ],
-      rounds: [
-        { options: [
-          { text: 'X 牌品質有夠差，您兒子如果在這應該勸您換', correct: false, response: { type: 'customer', text: '我兒子的事不用你管。' }, feedback: '× 攻擊客戶長期合作對象 = 攻擊她 20 年的判斷。' },
-          { text: '老闆娘我不是要您換掉 X 牌——是想多給您一個利潤更高的選擇，讓客人挑時有故事可以講', correct: true, response: { type: 'customer', text: '故事？什麼故事？' }, feedback: '✓ 不挑戰客戶過去決定，框架成「多一個選擇」+「賣點故事」。' },
-          { text: '您先進 50 顆試試看', correct: false, response: { type: 'customer', text: '我倉庫裡 X 牌都還沒清完。你別急。' }, feedback: '× 客戶沒說要進貨就被推 50 顆 = 嚇跑她。' }
-        ]},
-        { options: [
-          { text: '您 X 牌全砍掉換舞光，我給您 7 折', correct: false, response: { type: 'customer', text: '我 X 牌賣 20 年，你叫我全砍？我不要。' }, feedback: '× 對於老資格店家，「全換」永遠不是選項。' },
-          { text: '主推兩支熱賣品就好——索爾崁燈是 CP 王、雲朵吸頂燈是新婚換屋熱銷。X 牌您原本賣得好的繼續賣', correct: true, response: { type: 'customer', text: '嗯⋯雲朵的造型蠻多年輕客人問過。多少錢？' }, feedback: '✓ 抓兩支差異化主推、X 牌不衝突 = 倉庫不亂、利潤多賺。' },
-          { text: '舞光 Ra90 直流驅動無頻閃', correct: false, response: { type: 'customer', text: '你跟我講規格我聽不懂。' }, feedback: '× 老一代店家不認規格、認熟客買單故事。' }
-        ]},
-        { options: [
-          { text: '我下次來啊老闆娘', correct: false, response: { type: 'customer', text: '下次有的是業務來，你跟別人有差嗎？' }, feedback: '× 老資格客戶最在乎被記住，沒給記憶點等於下次再從零。' },
-          { text: '我叫陳柏翰、這是名片。LINE 加一下，週六我把雲朵和索爾樣品送來。客人問您不確定的，您 LINE 我，一分鐘回', correct: true, response: { type: 'customer', text: 'LINE 一分鐘回？小伙子嘴巴蠻甜。週六啊我等你。' }, feedback: '✓ 自我介紹 + 具體 SLA + 樣品 + 約定。把抽象的「業務」變具體的「會被記住的人」。' },
-          { text: '您隨時可以問我問題', correct: false, response: { type: 'customer', text: '隨時是什麼意思？' }, feedback: '× 「隨時」太抽象、不如「LINE 一分鐘回」具體。' }
-        ]}
-      ],
-      finishMessage: '王老闆娘加你 LINE、週六樣品約成。'
-    },
-
-    complaint: {
-      avatar: '李', name: '李先生',
-      subtitle: '屋主 · 軟條燈裝半年壞',
-      tag: '客訴處理',
-      intro: [
-        { type: 'narrator', text: '李先生 LINE 訊息：「請問你們是舞光業務嗎？」' },
-        { type: 'customer', text: '我半年前裝你們軟條燈、現在一段不亮了！品質這樣？這還能賣？' }
-      ],
-      rounds: [
-        { options: [
-          { text: '您裝的時候應該有問題吧？', correct: false, response: { type: 'customer', text: '你還沒看就說我裝錯？業務這樣對客戶？' }, feedback: '× 第一句不能質疑客戶，客訴 SOP 第一步是「先聽、先安撫」。' },
-          { text: '真的辛苦您了。能不能拍個照片給我看一下？我今天下班前一定回覆處理方式', correct: true, response: { type: 'customer', text: '好。照片我傳給你。' }, feedback: '✓ 道歉 + 釐清 + 承諾時間，是客訴 SOP 的標準三步。' },
-          { text: '我先請示一下喔', correct: false, response: { type: 'customer', text: '多久？我家明天有客人要來。' }, feedback: '× 沒給承諾時間 = 客戶情緒繼續發酵。' }
-        ]},
-        { options: [
-          { text: '您測試的方式是不是不對？', correct: false, response: { type: 'customer', text: '我都用了半年了還測試方式不對？' }, feedback: '× 拿到照片後質疑客戶能力 = 把對話又拉回對立。' },
-          { text: '看起來是電源驅動的問題，這在保固範圍內。我安排 3 個工作日內換新到您家', correct: true, response: { type: 'customer', text: '3 個工作日嗎？確定？' }, feedback: '✓ 拿到證據後立刻判斷 + 引用保固政策 + 給時間。' },
-          { text: '我直接寄新的給您！', correct: false, response: { type: 'customer', text: '我家地址你都沒問⋯' }, feedback: '× 沒走流程亂寄、出貨單沒對 = 倉儲端會混亂。' }
-        ]},
-        { options: [
-          { text: '應該 3 天到吧', correct: false, response: { type: 'customer', text: '應該？我等不起這種「應該」。' }, feedback: '× 「應該」這種詞客訴中是地雷。' },
-          { text: '我立刻打給倉儲確認，下午 5 點前 LINE 您確切到貨日。送達後一天我會再 LINE 您確認裝起來 OK', correct: true, response: { type: 'customer', text: '嗯，這樣聽起來有人負責。' }, feedback: '✓ 立刻行動 + 給確切回覆時間 + 售後追蹤，把客訴變忠誠度。' },
-          { text: '倉儲那邊我也問不到，您自己打 0800 客服比較快', correct: false, response: { type: 'customer', text: '你業務不是該幫我問嗎？' }, feedback: '× 把客戶丟給客服 = 業務責任放棄。' }
-        ]}
-      ],
-      finishMessage: '李先生回應「謝謝你這麼負責」、隔週主動推薦同社區鄰居。'
-    }
-  };
-
-  let activeScenarioKey = 'dealer';
-  let currentRound = 0;
-  let scenarioToken = 0;
-  const completedScenarios = new Set();
-
-  const chatWindow = document.getElementById('chatWindow');
-  const replyArea = document.getElementById('replyArea');
-  const chatActiveAvatar = document.getElementById('chatActiveAvatar');
-  const chatActiveName = document.getElementById('chatActiveName');
-  const chatActiveSubtitle = document.getElementById('chatActiveSubtitle');
-  const chatActiveTag = document.getElementById('chatActiveTag');
-  const scenariosCompletedEl = document.getElementById('scenariosCompleted');
-
-  function appendBubble({ type, text, actorLabel }) {
-    if (actorLabel) {
-      const labelEl = document.createElement('div');
-      labelEl.className = 'chat-actor' + (type === 'self' ? ' right' : '');
-      labelEl.textContent = actorLabel;
-      chatWindow.appendChild(labelEl);
-    }
-    const bubble = document.createElement('div');
-    bubble.className = 'chat-bubble bubble-' + type;
-    bubble.textContent = text;
-    chatWindow.appendChild(bubble);
-    chatWindow.scrollTop = chatWindow.scrollHeight;
-  }
-
-  function renderReplies() {
-    const myToken = scenarioToken;
-    replyArea.innerHTML = '';
-    const scenario = scenarios[activeScenarioKey];
-    if (currentRound >= scenario.rounds.length) {
-      const done = document.createElement('div');
-      done.className = 'p-5 rounded-xl bg-orange-500/10 border border-orange-500/30 text-center';
-      done.innerHTML = '<div class="text-orange-300 font-bold mb-1">✓ 對話完成！+50 光點</div><div class="text-xs text-gray-400">' + scenario.finishMessage + '</div>';
-      replyArea.appendChild(done);
-      if (!completedScenarios.has(activeScenarioKey)) {
-        completedScenarios.add(activeScenarioKey);
-        scenariosCompletedEl.textContent = completedScenarios.size;
-        const tab = document.querySelector('.scenario-tab[data-scenario="' + activeScenarioKey + '"]');
-        if (tab) tab.classList.add('completed');
-        updateScore(50);
-      }
-      return;
-    }
-    const round = scenario.rounds[currentRound];
-    round.options.forEach(opt => {
-      const btn = document.createElement('button');
-      btn.className = 'reply-pick';
-      btn.textContent = opt.text;
-      btn.addEventListener('click', () => {
-        if (myToken !== scenarioToken) return;
-        appendBubble({ type: 'self', text: opt.text, actorLabel: '你' });
-        replyArea.querySelectorAll('button').forEach(b => b.disabled = true);
-        setTimeout(() => {
-          if (myToken !== scenarioToken) return;
-          appendBubble({ type: opt.response.type, text: opt.response.text, actorLabel: opt.response.type === 'customer' ? scenario.name : null });
-          setTimeout(() => {
-            if (myToken !== scenarioToken) return;
-            appendBubble({ type: 'narrator', text: opt.feedback });
-            currentRound++;
-            setTimeout(() => {
-              if (myToken !== scenarioToken) return;
-              renderReplies();
-            }, 800);
-          }, 700);
-        }, 600);
-      });
-      replyArea.appendChild(btn);
-    });
-  }
-
-  function loadScenario(key) {
-    if (!scenarios[key]) return;
-    scenarioToken++;
-    const myToken = scenarioToken;
-    activeScenarioKey = key;
-    currentRound = 0;
-    chatWindow.innerHTML = '';
-    replyArea.innerHTML = '';
-    const scenario = scenarios[key];
-    chatActiveAvatar.textContent = scenario.avatar;
-    chatActiveName.textContent = scenario.name;
-    chatActiveSubtitle.textContent = scenario.subtitle;
-    chatActiveTag.textContent = scenario.tag;
-    document.querySelectorAll('.scenario-tab').forEach(t => t.classList.remove('active'));
-    const activeTab = document.querySelector('.scenario-tab[data-scenario="' + key + '"]');
-    if (activeTab) activeTab.classList.add('active');
-    scenario.intro.forEach((msg, idx) => {
-      setTimeout(() => {
-        if (myToken !== scenarioToken) return;
-        appendBubble({ ...msg, actorLabel: msg.type === 'customer' ? scenario.name : null });
-        if (idx === scenario.intro.length - 1) {
-          setTimeout(() => {
-            if (myToken !== scenarioToken) return;
-            renderReplies();
-          }, 500);
-        }
-      }, idx * 600);
-    });
-  }
-
-  document.querySelectorAll('.scenario-tab').forEach(tab => {
-    tab.addEventListener('click', () => {
-      loadScenario(tab.dataset.scenario);
-    });
-  });
-
-  setTimeout(() => loadScenario('dealer'), 1000);
 </script>
 
 </body>
