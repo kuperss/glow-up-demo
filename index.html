@@ -821,9 +821,9 @@
         <h3 class="text-2xl font-bold mb-3">光永續</h3>
         <p class="text-sm text-gray-500 leading-relaxed mb-4">
           以節能 LED 為核心，從產品設計、材料選用到包裝回收，<br>
-          每一步都走在永續的路上。連續 11 年榮獲中信品牌獎肯定。
+          每一步都走在永續的路上。
         </p>
-        <div class="text-xs text-orange-300/70 font-medium">節能 · ESG · 在地製造 · 中信品牌獎 11 年</div>
+        <div class="text-xs text-orange-300/70 font-medium">節能 · ESG  </div>
       </div>
 
       <!-- 光氛圍 -->
@@ -1201,7 +1201,7 @@
             </div>
             <div class="flex-1">
               <div class="text-xs text-gray-500 tracking-widest mb-1">你的學習進度</div>
-              <div class="text-xl font-bold mb-1">已完成 <span id="achievementCompleted">0</span> / 22 關卡</div>
+              <div class="text-xl font-bold mb-1">已完成 <span id="achievementCompleted">0</span> / 25 關卡</div>
               <div class="flex items-center gap-2 text-sm text-orange-400">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
                 <span class="font-bold"><span id="achievementPoints">0</span> 光點</span>
@@ -1515,7 +1515,7 @@
 
   // === Achievement section: read live progress from Firestore ===
   document.addEventListener('glow-firebase-ready', async () => {
-    const TOTAL = 22; // 12 quizzes + 5 AI scenarios + 5 HR (Stage5)
+    const TOTAL = 25; // 12 quizzes + 8 AI scenarios + 5 HR (Stage5)
     let data = null;
     try {
       data = await window.glowFirebase.loadProgress();

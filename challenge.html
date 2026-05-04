@@ -497,7 +497,7 @@
         <div class="stage-num">04</div>
         <div class="text-xs text-orange-400 font-mono-en tracking-widest mt-2 mb-1">STAGE 04</div>
         <div class="font-bold mb-1">AI 客戶對話</div>
-        <div class="text-xs text-gray-500">5 情境 · 即時對答</div>
+        <div class="text-xs text-gray-500">8 情境 · 即時對答</div>
       </div>
       <div class="stage-hero" style="transition-delay:0.2s;">
         <div class="stage-num">05</div>
@@ -521,7 +521,7 @@
       <div id="totalProgress" class="progress-bar-fill" style="width: 0%;"></div>
     </div>
     <div class="text-xs text-gray-500 font-mono-en tracking-widest hidden sm:block">
-      <span id="completed">0</span> / 22
+      <span id="completed">0</span> / 25
     </div>
   </div>
 </section>
@@ -861,6 +861,24 @@
           <div class="scenario-tab-tag">客訴處理</div>
           <span class="scenario-tab-check">✓</span>
         </button>
+        <button type="button" class="scenario-tab" data-scenario="dealer_gen2">
+          <div class="scenario-tab-avatar">吳</div>
+          <div class="scenario-tab-name">吳小姐</div>
+          <div class="scenario-tab-tag">經銷二代接班</div>
+          <span class="scenario-tab-check">✓</span>
+        </button>
+        <button type="button" class="scenario-tab" data-scenario="architect">
+          <div class="scenario-tab-avatar">葉</div>
+          <div class="scenario-tab-name">葉建築師</div>
+          <div class="scenario-tab-tag">建築師高端評估</div>
+          <span class="scenario-tab-check">✓</span>
+        </button>
+        <button type="button" class="scenario-tab" data-scenario="competitor_steal">
+          <div class="scenario-tab-avatar">黃</div>
+          <div class="scenario-tab-name">黃姐</div>
+          <div class="scenario-tab-tag">對手挖角防守</div>
+          <span class="scenario-tab-check">✓</span>
+        </button>
       </div>
 
       <div class="flex items-center gap-3 mb-4 px-1">
@@ -877,7 +895,7 @@
       <div id="replyArea" class="mt-4 space-y-2"></div>
 
       <div class="scenario-progress-line">
-        完成情境：<span id="scenariosCompleted">0</span> / 5　·　每完成一個 +50 光點
+        完成情境：<span id="scenariosCompleted">0</span> / 8　·　每完成一個 +50 光點
       </div>
     </div>
   </div>
@@ -1140,7 +1158,7 @@
   reveals.forEach(r => io.observe(r));
 
   // === Quiz Logic (Firestore-backed) ===
-  const TOTAL_QUIZ_COUNT = 12 + 5 + 5; // 12 (Stage1-3) + 5 AI scenarios + 5 HR (Stage5)
+  const TOTAL_QUIZ_COUNT = 12 + 8 + 5; // 12 (Stage1-3) + 8 AI scenarios + 5 HR (Stage5)
   let totalScore = 0;
   let completedCount = 0;
   let completedQuizIds = new Set();   // q1, q2, ...
@@ -1175,7 +1193,7 @@
     { key: 'dialog1',  name: '對話新手', test: (qIds, sc) => sc.size >= 1, desc: '完成第一個 AI 客戶對話' },
     { key: 'champion', name: '闖關王',   test: (qIds, sc) => sc.size >= 3, desc: '完成 3 個 AI 情境' },
     { key: 'hr',       name: '規章達人', test: (qIds) => ['q13','q14','q15','q16','q17'].every(id => qIds.has(id)), desc: '完成 STAGE 5 五題 HR 規章' },
-    { key: 'lighter',  name: '點燈者',   test: (qIds, sc) => qIds.size + sc.size >= 22, desc: '★ 22 / 22 全通關 · 最高榮譽' }
+    { key: 'lighter',  name: '點燈者',   test: (qIds, sc) => qIds.size + sc.size >= 25, desc: '★ 25 / 25 全通關 · 最高榮譽' }
   ];
   const SHOWN_BADGES_KEY = 'glow-shown-badges-v1';
   function shownBadges() {
@@ -1431,6 +1449,90 @@
         ]}
       ],
       finishMessage: '李先生回應「謝謝你這麼負責」、隔週主動推薦同社區鄰居。'
+    },
+
+    dealer_gen2: {
+      avatar: '吳', name: '吳小姐',
+      subtitle: '台中・燈飾店二代 · 接班 1 年',
+      tag: '經銷商二代接班',
+      intro: [
+        { type: 'narrator', text: '吳小姐 30 出頭，剛從爸爸手中接下店面，正煩惱怎麼讓老店有新生命。' },
+        { type: 'customer', text: '我接班一年，老客人都還是找我爸聊。我想做數位轉型——IG、官網、線上接單，但不知道從哪開始。你們舞光有經驗嗎？' }
+      ],
+      rounds: [
+        { options: [
+          { text: '老客人找您爸是好事啊，您慢慢來就好', correct: false, response: { type: 'customer', text: '我爸快 70 了，我不能等他不在我才開始⋯這樣店會死。' }, feedback: '× 安撫式回答迴避了客戶真正的焦慮——傳承斷層風險。' },
+          { text: '我懂。新世代學院剛好有「經銷商數位轉型」課程，我可以介紹您加入，再針對您店況做客製建議', correct: true, response: { type: 'customer', text: '太好了！那有沒有跟我類似的二代學長姐可以聊？' }, feedback: '✓ 提供具體資源 + 開放後續對話，是業務最該做的事。' },
+          { text: '您先做 IG 就好，其他慢慢來', correct: false, response: { type: 'customer', text: '我自己也會做 IG ⋯我要的是有經驗的人指導，不是這種建議。' }, feedback: '× 太淺、客戶感受不到專業差異化。' }
+        ]},
+        { options: [
+          { text: '我們有「經銷商二代社群」LINE 群組，已有十幾位接班人在裡面互相打氣，我加您', correct: true, response: { type: 'customer', text: '哇，這個我超需要！我還以為只有我這麼孤單。' }, feedback: '✓ 二代接班最大的痛是孤獨——連結同行就是黃金價值。' },
+          { text: '我們有業務可以全程幫您操作 IG', correct: false, response: { type: 'customer', text: '那等於我請你們做⋯我想自己學起來。' }, feedback: '× 客戶要的是賦能不是代工。' },
+          { text: '您要不要先進一批新貨打廣告', correct: false, response: { type: 'customer', text: '我問的是轉型，不是進貨⋯' }, feedback: '× 完全沒回應客戶的真實需求。' }
+        ]},
+        { options: [
+          { text: '下個月舞光有「青年接班人輕旅行」，我幫您報名，三天兩夜跟全台二代深度交流 + 學長姐分享實戰', correct: true, response: { type: 'customer', text: '我馬上跟我爸說！這個太對我胃口了。', }, feedback: '✓ 線下活動 + 跨區交流 = 二代最珍貴的收穫，比賣產品更有黏性。' },
+          { text: '您每月去開會就好，不必再上課', correct: false, response: { type: 'customer', text: '經銷商會我都去⋯但都跟我爸那群人聊，我想跟同齡人。' }, feedback: '× 沒有讀懂「同齡人」這個關鍵需求。' },
+          { text: '您可以多看我們官網', correct: false, response: { type: 'customer', text: '官網看 100 次也比不上跟人聊一次⋯' }, feedback: '× 經銷商最需要的是「人」的連結。' }
+        ]}
+      ],
+      finishMessage: '吳小姐約你下週再見一次，把她爸帶來，三人聊接班。'
+    },
+
+    architect: {
+      avatar: '葉', name: '葉建築師',
+      subtitle: '台北・大型事務所 · 醫療建築專案',
+      tag: '建築師高端評估',
+      intro: [
+        { type: 'narrator', text: '葉建築師正在評估一間 200 床護理之家的整棟照明採購，預算約 800 萬。他翻看著舞光的型錄。' },
+        { type: 'customer', text: '我手上這案有國際品牌的競品報價，他們的色溫穩定度數據比較完整。你們舞光在這個量級有沒有做過？敢做嗎？' }
+      ],
+      rounds: [
+        { options: [
+          { text: '我們做過很多大案，沒問題啦', correct: false, response: { type: 'customer', text: '「沒問題」我聽過太多次⋯給我具體案例。' }, feedback: '× 籠統回答對建築師沒用，他要的是 reference。' },
+          { text: '我們有彰化長照中心、台南某護理之家的實案，我下午整理 PDF + 業主聯絡方式給您比對', correct: true, response: { type: 'customer', text: '這就對了，給我看實案 + 數據。光是色溫飄移多少？' }, feedback: '✓ 大案客戶要的是 reference + 數據，不要面子話。' },
+          { text: '價格我們可以再殺', correct: false, response: { type: 'customer', text: '價格從來不是我評估的第一順位⋯你們業務都這樣談嗎？' }, feedback: '× 在 800 萬的醫療專案上談降價=不專業。' }
+        ]},
+        { options: [
+          { text: '我們的色溫飄移在 3,000 小時內 ≤ 50K，有第三方檢測報告，我下午一併寄給您', correct: true, response: { type: 'customer', text: '50K 在這級規格不錯。那 5 年後呢？光衰多少？', }, feedback: '✓ 建築師懂規格，給數字+佐證才有專業對話。' },
+          { text: '我們是台灣品牌，本土售後比較好', correct: false, response: { type: 'customer', text: '我問的是色溫穩定度⋯你跳過我的問題了。' }, feedback: '× 答非所問，建築師最反感。' },
+          { text: '別擔心，我們是知名品牌', correct: false, response: { type: 'customer', text: '你連基本數據都答不出來⋯' }, feedback: '× 沒回答到問題就是失格。' }
+        ]},
+        { options: [
+          { text: '5 年後 L70（70% 流明維持率）。我建議您在這案用我們 ESG 旗艦線，搭配 5 年延長保固方案，整體 TCO 會贏國際品牌', correct: true, response: { type: 'customer', text: '5 年延長保固這個有意思。下週我們要 BIM 整合會議，你能來嗎？', }, feedback: '✓ 講 TCO（總持有成本）+ 提供延長保固 = 直接打到建築師決策點。' },
+          { text: '我們可以送您一些贈品', correct: false, response: { type: 'customer', text: '⋯⋯', }, feedback: '× 高端 B2B 案最忌諱談贈品。' },
+          { text: '不知道耶，我回去查', correct: false, response: { type: 'customer', text: '你回去查回來再聯絡。', }, feedback: '× 雖然誠實但失機會——建築師預算窗只有兩週。' }
+        ]}
+      ],
+      finishMessage: '葉建築師當場約 BIM 會議，800 萬案進入主推階段。'
+    },
+
+    competitor_steal: {
+      avatar: '黃', name: '黃姐',
+      subtitle: '高雄・連鎖燈飾 6 家門市',
+      tag: '對手挖角防守',
+      intro: [
+        { type: 'narrator', text: '黃姐已經跟舞光合作 8 年。今天她語氣很不一樣。' },
+        { type: 'customer', text: '我老實跟你說，A 牌業務上週直接到我店裡，給我比你低 12% 的整批進貨方案，還含 6 家店面 LED 招牌全換新。我下週要決定，你怎麼說？' }
+      ],
+      rounds: [
+        { options: [
+          { text: '黃姐我給您一樣的條件', correct: false, response: { type: 'customer', text: '一樣？那我為什麼不選有招牌全換的 A 牌？你連他們做什麼都還沒問清楚。' }, feedback: '× 直接讓價是恐慌，不是談判。' },
+          { text: '黃姐我懂您壓力。先給我半小時聽完整提案的細節——他們承諾的色溫一致性、保固、退換貨流程是什麼？', correct: true, response: { type: 'customer', text: '欸對，他們招牌算便宜啦但 LED 是大陸品牌，色溫我也不敢保證⋯' }, feedback: '✓ 不慌、先了解對手提案的弱點，才知道怎麼回擊。' },
+          { text: '您去吧，做不長的', correct: false, response: { type: 'customer', text: '你這話說得我很不舒服⋯做了 8 年連基本尊重都沒了？' }, feedback: '× 情緒性回應毀掉 8 年關係。' }
+        ]},
+        { options: [
+          { text: '招牌品我可以幫您談到舞光戶外旗艦款，含 5 年保固。產品差價我們價格不能完全跟，但售後服務跟在地維修網路是 A 牌絕對做不到的', correct: true, response: { type: 'customer', text: '舞光戶外旗艦+5 年保固？這個我不知道有⋯' }, feedback: '✓ 把競爭從「價格」拉到「總價值」，重新定義評估維度。' },
+          { text: '我們也送您招牌全換', correct: false, response: { type: 'customer', text: '你們真的能送？我看你連總公司都還沒問。' }, feedback: '× 沒授權就承諾是業務大忌。' },
+          { text: '黃姐看在 8 年情份上，您先選我們', correct: false, response: { type: 'customer', text: '情份歸情份，但生意是生意。', }, feedback: '× 道德綁架是最弱的銷售手段。' }
+        ]},
+        { options: [
+          { text: '我下週帶副總、退換貨課長、客服主任三個人來您 6 家門市實地走一圈，做「8 年合作健檢」+ 升級方案。A 牌業務做得到嗎？', correct: true, response: { type: 'customer', text: '⋯這個我從來沒看過業務做。我等你們下週。', }, feedback: '✓ 把資源傾倒給客戶 = A 牌新業務絕對拼不過。把「人」變成你的護城河。' },
+          { text: '我請主管打電話給您', correct: false, response: { type: 'customer', text: '我不需要你主管打給我，我需要 8 年合作對得起這 8 年。', }, feedback: '× 主管出馬有時是反效果，客戶想要的是業務本人扛事。' },
+          { text: '您先簽我們，後面再談細節', correct: false, response: { type: 'customer', text: '先簽？我又不是傻子。', }, feedback: '× 急著收單暴露你不夠成熟。' }
+        ]}
+      ],
+      finishMessage: '黃姐當場決定：本週先暫緩 A 牌，下週看完舞光提案再說。'
     }
   };
 
