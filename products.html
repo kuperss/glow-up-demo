@@ -339,6 +339,65 @@
     margin-top: 0.75rem;
   }
 
+  /* === Product Library Search === */
+  .lib-bar {
+    position: sticky; top: 64px; z-index: 30;
+    background: linear-gradient(180deg, rgba(8,8,10,0.85), rgba(8,8,10,0.7));
+    backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(245,130,32,0.15); border-radius: 14px;
+    padding: 14px 18px; display: flex; flex-wrap: wrap; gap: 10px;
+    align-items: center; margin-bottom: 18px;
+  }
+  .lib-search {
+    flex: 1 1 240px; min-width: 200px;
+    padding: 10px 14px; border-radius: 10px;
+    background: rgba(8,8,10,0.6); border: 1px solid rgba(255,255,255,0.08);
+    color: #F5F5F7; font-size: 14px;
+  }
+  .lib-search:focus { outline: none; border-color: rgba(245,130,32,0.5); background: rgba(8,8,10,0.9); }
+  .lib-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .lib-chip {
+    padding: 6px 12px; border-radius: 999px; font-size: 12px;
+    background: rgba(38,38,44,0.6); border: 1px solid rgba(255,255,255,0.08);
+    color: #A0A0AB; cursor: pointer; transition: all 0.2s; white-space: nowrap;
+  }
+  .lib-chip:hover { background: rgba(245,130,32,0.1); color: #FFA050; border-color: rgba(245,130,32,0.3); }
+  .lib-chip.active {
+    background: linear-gradient(135deg, rgba(245,130,32,0.25), rgba(245,130,32,0.1));
+    color: #FFD27A; border-color: rgba(245,130,32,0.5);
+  }
+  .lib-count { font-size: 12px; color: #6B6B75; padding: 0 6px; }
+  .lib-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+  .lib-item {
+    background: linear-gradient(180deg, rgba(26,26,31,0.6), rgba(19,19,22,0.4));
+    border: 1px solid rgba(38,38,44,0.7); border-radius: 12px;
+    padding: 14px 16px; cursor: pointer; transition: all 0.25s;
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .lib-item:hover { border-color: rgba(245,130,32,0.35); transform: translateY(-2px); box-shadow: 0 12px 28px -10px rgba(245,130,32,0.2); }
+  .lib-name { font-size: 13px; font-weight: 600; color: #F5F5F7; line-height: 1.45; }
+  .lib-sku { font-size: 11px; color: #6B6B75; font-family: 'Inter', sans-serif; letter-spacing: 0.05em; }
+  .lib-meta { font-size: 11px; color: #A0A0AB; display: flex; gap: 10px; flex-wrap: wrap; margin-top: 4px; padding-top: 6px; border-top: 1px dashed rgba(38,38,44,0.7); }
+  .lib-meta .label { color: #6B6B75; }
+  .lib-detail {
+    display: none; margin-top: 10px; padding-top: 10px;
+    border-top: 1px solid rgba(245,130,32,0.15);
+    font-size: 11px; color: #A0A0AB; line-height: 1.7;
+  }
+  .lib-item.expanded .lib-detail { display: block; }
+  .lib-detail .row { display: flex; justify-content: space-between; gap: 10px; padding: 3px 0; }
+  .lib-detail .row span:last-child { color: #F5F5F7; text-align: right; max-width: 60%; }
+  .lib-detail h4 { font-size: 11px; color: #FFA050; margin: 10px 0 4px; letter-spacing: 0.1em; }
+  .lib-detail .pill-list { display: flex; flex-wrap: wrap; gap: 4px; }
+  .lib-detail .pill-list span { background: rgba(245,130,32,0.08); border: 1px solid rgba(245,130,32,0.2); color: #FFA050; padding: 2px 8px; border-radius: 999px; font-size: 10px; }
+  .lib-load-more {
+    margin: 24px auto 0; display: block; padding: 10px 24px; border-radius: 999px;
+    background: rgba(245,130,32,0.1); border: 1px solid rgba(245,130,32,0.3);
+    color: #FFA050; font-size: 13px; cursor: pointer; transition: all 0.2s;
+  }
+  .lib-load-more:hover { background: rgba(245,130,32,0.2); }
+  .lib-empty { padding: 40px 20px; text-align: center; color: #6B6B75; font-size: 13px; }
+
   /* Space match card */
   .space-card {
     position: relative;
@@ -872,8 +931,8 @@
     </div>
 
     <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6" id="flagshipGrid">
-      <!-- 拉斐爾磁吸軌道 -->
-      <div class="flip-card reveal" data-categories="商空">
+      <!-- D-UTMTTR8N 拉斐爾超薄磁吸軌道投射燈8W,自然光 -->
+      <div class="flip-card reveal" data-categories="商空" data-sku="D-UTMTTR8N">
         <div class="flip-card-inner">
           <div class="flip-face">
             <div class="flex items-center gap-2 mb-4">
@@ -881,11 +940,7 @@
             </div>
             <div class="text-xs text-orange-400 font-mono-en tracking-widest mb-2">MAGNETIC TRACK</div>
             <h3 class="font-display text-2xl mb-3">拉斐爾<br>超薄磁吸軌道</h3>
-            <p class="text-sm text-gray-500 leading-relaxed mb-auto">
-              6 公釐超薄、不開槽即可安裝。
-              磁吸結構讓燈具角度雙手就能調，
-              是設計師最愛的「商業空間神器」。
-            </p>
+            <p class="text-sm text-gray-500 leading-relaxed mb-auto">6 公釐超薄、不開槽即可安裝。磁吸結構讓燈具角度雙手就能調，是設計師最愛的「商業空間神器」。</p>
             <div class="mt-4 flex items-center justify-between text-xs">
               <span class="text-orange-400">DC 24V 系統</span>
               <span class="text-gray-500 group-hover:text-orange-300 transition">翻面看規格 →</span>
@@ -893,13 +948,15 @@
           </div>
           <div class="flip-face back">
             <div class="text-xs text-orange-400 font-mono-en tracking-widest mb-3">SPEC SHEET</div>
-            <h3 class="font-display text-xl mb-4 text-orange-200">拉斐爾規格重點</h3>
-            <div class="space-y-2.5 text-sm text-gray-300 mb-auto">
-              <div class="flex justify-between"><span class="text-gray-500">系統電壓</span><span>DC 24V 安全電壓</span></div>
-              <div class="flex justify-between"><span class="text-gray-500">軌道厚度</span><span>6mm 超薄</span></div>
-              <div class="flex justify-between"><span class="text-gray-500">安裝方式</span><span>明裝・不開槽</span></div>
-              <div class="flex justify-between"><span class="text-gray-500">驅動</span><span>無頻閃直流</span></div>
-              <div class="flex justify-between"><span class="text-gray-500">適用</span><span>商空・展示・服飾</span></div>
+            <h3 class="font-display text-lg mb-4 text-orange-200">拉斐爾 超薄磁吸軌道</h3>
+            <div class="space-y-2 text-xs text-gray-300 mb-auto">
+              <div class="flex justify-between"><span class="text-gray-500">瓦數</span><span class="text-right">8W</span></div>
+              <div class="flex justify-between"><span class="text-gray-500">色溫</span><span class="text-right">4000K</span></div>
+              <div class="flex justify-between"><span class="text-gray-500">光通量</span><span class="text-right">600 lm</span></div>
+              <div class="flex justify-between"><span class="text-gray-500">演色性 Ra</span><span class="text-right">90；R9 &gt;50</span></div>
+              <div class="flex justify-between"><span class="text-gray-500">光束角</span><span class="text-right">36°</span></div>
+              <div class="flex justify-between"><span class="text-gray-500">尺寸</span><span class="text-right">直徑44*寬120*長161mm</span></div>
+              <div class="flex justify-between"><span class="text-gray-500">壽命</span><span class="text-right">15000小時</span></div>
             </div>
             <div class="mt-3 pt-3 border-t border-orange-500/20">
               <div class="text-xs text-orange-300 font-medium">業務話術</div>
@@ -909,57 +966,16 @@
         </div>
       </div>
 
-      <!-- Ai 智慧崁燈 -->
-      <div class="flip-card reveal" data-categories="居家,智慧" style="transition-delay:0.05s;">
-        <div class="flip-card-inner">
-          <div class="flip-face">
-            <div class="flex items-center gap-2 mb-4">
-              <span class="flip-tag">智慧．SMART</span>
-            </div>
-            <div class="text-xs text-orange-400 font-mono-en tracking-widest mb-2">SMART RECESSED</div>
-            <h3 class="font-display text-2xl mb-3">Ai 智慧<br>崁燈系列</h3>
-            <p class="text-sm text-gray-500 leading-relaxed mb-auto">
-              整合米家、Google Home 智慧家庭。
-              APP 遙控、語音控制、調光調色、多情境切換。
-              年輕屋主與 IoT 案場的首選。
-            </p>
-            <div class="mt-4 flex items-center justify-between text-xs">
-              <span class="text-orange-400">米家 · Google</span>
-              <span class="text-gray-500 group-hover:text-orange-300 transition">翻面看規格 →</span>
-            </div>
-          </div>
-          <div class="flip-face back">
-            <div class="text-xs text-orange-400 font-mono-en tracking-widest mb-3">SPEC SHEET</div>
-            <h3 class="font-display text-xl mb-4 text-orange-200">Ai 崁燈規格重點</h3>
-            <div class="space-y-2.5 text-sm text-gray-300 mb-auto">
-              <div class="flex justify-between"><span class="text-gray-500">控制方式</span><span>APP・語音・壁切</span></div>
-              <div class="flex justify-between"><span class="text-gray-500">調光調色</span><span>2700K - 6500K</span></div>
-              <div class="flex justify-between"><span class="text-gray-500">智慧生態</span><span>米家 / Google</span></div>
-              <div class="flex justify-between"><span class="text-gray-500">頻段</span><span>2.4GHz Wi-Fi</span></div>
-              <div class="flex justify-between"><span class="text-gray-500">重置</span><span>壁切連按 10 次</span></div>
-            </div>
-            <div class="mt-3 pt-3 border-t border-orange-500/20">
-              <div class="text-xs text-orange-300 font-medium">業務話術</div>
-              <div class="text-xs text-gray-400 mt-1">「不用拉新線，原壁切就能升級智慧家」</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- 索爾崁燈 -->
-      <div class="flip-card reveal" data-categories="居家" style="transition-delay:0.1s;">
+      <!-- D-21DOP25NR2 21公分索爾崁燈25W,自然光 -->
+      <div class="flip-card reveal" data-categories="居家" data-sku="D-21DOP25NR2" style="transition-delay:0.05s;">
         <div class="flip-card-inner">
           <div class="flip-face">
             <div class="flex items-center gap-2 mb-4">
               <span class="flip-tag">走量．VOLUME</span>
             </div>
             <div class="text-xs text-orange-400 font-mono-en tracking-widest mb-2">SOL DOWNLIGHT</div>
-            <h3 class="font-display text-2xl mb-3">索爾崁燈</h3>
-            <p class="text-sm text-gray-500 leading-relaxed mb-auto">
-              CP 值之王。從 9 公分到 21 公分多種尺寸，
-              一體式設計、薄機身、好施工。
-              電料行最常進貨的舞光主力。
-            </p>
+            <h3 class="font-display text-2xl mb-3">索爾<br>崁燈</h3>
+            <p class="text-sm text-gray-500 leading-relaxed mb-auto">從 9 到 21 公分多種尺寸，一體式設計、護眼、好施工。電料行最常推薦的吸光主力。</p>
             <div class="mt-4 flex items-center justify-between text-xs">
               <span class="text-orange-400">電料行最愛</span>
               <span class="text-gray-500 group-hover:text-orange-300 transition">翻面看規格 →</span>
@@ -967,237 +983,264 @@
           </div>
           <div class="flip-face back">
             <div class="text-xs text-orange-400 font-mono-en tracking-widest mb-3">SPEC SHEET</div>
-            <h3 class="font-display text-xl mb-4 text-orange-200">索爾規格重點</h3>
-            <div class="space-y-2.5 text-sm text-gray-300 mb-auto">
-              <div class="flex justify-between"><span class="text-gray-500">尺寸</span><span>9 / 15 / 21cm</span></div>
-              <div class="flex justify-between"><span class="text-gray-500">類型</span><span>一體式 LED</span></div>
-              <div class="flex justify-between"><span class="text-gray-500">色溫</span><span>白光 / 黃光 / 自然光</span></div>
-              <div class="flex justify-between"><span class="text-gray-500">機身</span><span>超薄</span></div>
-              <div class="flex justify-between"><span class="text-gray-500">適用</span><span>居家・商空・走量首選</span></div>
+            <h3 class="font-display text-lg mb-4 text-orange-200">索爾 崁燈</h3>
+            <div class="space-y-2 text-xs text-gray-300 mb-auto">
+              <div class="flex justify-between"><span class="text-gray-500">瓦數</span><span class="text-right">25W</span></div>
+              <div class="flex justify-between"><span class="text-gray-500">色溫</span><span class="text-right">4000K</span></div>
+              <div class="flex justify-between"><span class="text-gray-500">光通量</span><span class="text-right">2500 lm</span></div>
+              <div class="flex justify-between"><span class="text-gray-500">演色性 Ra</span><span class="text-right">≧ 80</span></div>
+              <div class="flex justify-between"><span class="text-gray-500">光束角</span><span class="text-right">120 °</span></div>
+              <div class="flex justify-between"><span class="text-gray-500">尺寸</span><span class="text-right">直徑245*高100 mm</span></div>
+              <div class="flex justify-between"><span class="text-gray-500">壽命</span><span class="text-right">15000小時</span></div>
             </div>
             <div class="mt-3 pt-3 border-t border-orange-500/20">
               <div class="text-xs text-orange-300 font-medium">業務話術</div>
-              <div class="text-xs text-gray-400 mt-1">「老闆不知道進什麼？先進索爾就對了」</div>
+              <div class="text-xs text-gray-400 mt-1">「九成案場都用得上的安全牌」</div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- 奧丁崁燈 -->
-      <div class="flip-card reveal" data-categories="居家,商空" style="transition-delay:0.15s;">
+      <!-- D-15DOO12NR3 15公分奧丁崁燈白款 12W,自然光 -->
+      <div class="flip-card reveal" data-categories="居家,商空" data-sku="D-15DOO12NR3" style="transition-delay:0.10s;">
         <div class="flip-card-inner">
           <div class="flip-face">
             <div class="flex items-center gap-2 mb-4">
-              <span class="flip-tag">新品．NEW 2026</span>
+              <span class="flip-tag">商空．COMMERCIAL</span>
             </div>
-            <div class="text-xs text-orange-400 font-mono-en tracking-widest mb-2">ODIN COMPACT</div>
-            <h3 class="font-display text-2xl mb-3">奧丁崁燈</h3>
-            <p class="text-sm text-gray-500 leading-relaxed mb-auto">
-              2026 全新尺寸 7.5cm / 9.5cm 登場。
-              小巧外型呼應現代極簡裝潢，
-              是設計師對「無存在感崁燈」的解答。
-            </p>
+            <div class="text-xs text-orange-400 font-mono-en tracking-widest mb-2">ODIN DOWNLIGHT</div>
+            <h3 class="font-display text-2xl mb-3">奧丁<br>極簡崁燈</h3>
+            <p class="text-sm text-gray-500 leading-relaxed mb-auto">7.5 / 9 / 11 / 15 公分極簡無框。隱形等級設計，連接縫都看不到，商空、精品店、設計師最愛。</p>
             <div class="mt-4 flex items-center justify-between text-xs">
-              <span class="text-orange-400">2026.03 上市</span>
+              <span class="text-orange-400">極簡無邊框</span>
               <span class="text-gray-500 group-hover:text-orange-300 transition">翻面看規格 →</span>
             </div>
           </div>
           <div class="flip-face back">
             <div class="text-xs text-orange-400 font-mono-en tracking-widest mb-3">SPEC SHEET</div>
-            <h3 class="font-display text-xl mb-4 text-orange-200">奧丁規格重點</h3>
-            <div class="space-y-2.5 text-sm text-gray-300 mb-auto">
-              <div class="flex justify-between"><span class="text-gray-500">新尺寸</span><span>7.5cm / 9.5cm</span></div>
-              <div class="flex justify-between"><span class="text-gray-500">原尺寸</span><span>12cm / 15cm</span></div>
-              <div class="flex justify-between"><span class="text-gray-500">設計</span><span>極簡無框</span></div>
-              <div class="flex justify-between"><span class="text-gray-500">適用</span><span>無主燈設計案場</span></div>
-              <div class="flex justify-between"><span class="text-gray-500">主推對象</span><span>室內設計師</span></div>
+            <h3 class="font-display text-lg mb-4 text-orange-200">奧丁 極簡崁燈</h3>
+            <div class="space-y-2 text-xs text-gray-300 mb-auto">
+              <div class="flex justify-between"><span class="text-gray-500">瓦數</span><span class="text-right">12W</span></div>
+              <div class="flex justify-between"><span class="text-gray-500">色溫</span><span class="text-right">4000K</span></div>
+              <div class="flex justify-between"><span class="text-gray-500">光通量</span><span class="text-right">1200 lm</span></div>
+              <div class="flex justify-between"><span class="text-gray-500">演色性 Ra</span><span class="text-right">80</span></div>
+              <div class="flex justify-between"><span class="text-gray-500">光束角</span><span class="text-right">140°</span></div>
+              <div class="flex justify-between"><span class="text-gray-500">尺寸</span><span class="text-right">直徑170*高28 mm</span></div>
+              <div class="flex justify-between"><span class="text-gray-500">壽命</span><span class="text-right">15000小時</span></div>
             </div>
             <div class="mt-3 pt-3 border-t border-orange-500/20">
               <div class="text-xs text-orange-300 font-medium">業務話術</div>
-              <div class="text-xs text-gray-400 mt-1">「無主燈設計，這支會被指定」</div>
+              <div class="text-xs text-gray-400 mt-1">「天花板上看不到燈，只看到光」</div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- 馬爾防眩崁燈 -->
-      <div class="flip-card reveal" data-categories="商空,辦公" style="transition-delay:0.2s;">
+      <!-- D-7DOR12N 馬爾防眩崁燈7.5公分,自然光 -->
+      <div class="flip-card reveal" data-categories="居家" data-sku="D-7DOR12N" style="transition-delay:0.15s;">
         <div class="flip-card-inner">
           <div class="flip-face">
             <div class="flex items-center gap-2 mb-4">
-              <span class="flip-tag">高階．PREMIUM</span>
+              <span class="flip-tag">舒眩．COMFORT</span>
             </div>
-            <div class="text-xs text-orange-400 font-mono-en tracking-widest mb-2">ANTI-GLARE PRO</div>
+            <div class="text-xs text-orange-400 font-mono-en tracking-widest mb-2">MARS ANTI-GLARE</div>
             <h3 class="font-display text-2xl mb-3">馬爾<br>防眩崁燈</h3>
-            <p class="text-sm text-gray-500 leading-relaxed mb-auto">
-              UGR&lt;19 防眩設計，深燈杯結構不刺眼。
-              辦公室、商業空間、攝影棚的高階選擇。
-              「Ra≧90 高演色」是出貨的承諾。
-            </p>
+            <p class="text-sm text-gray-500 leading-relaxed mb-auto">深防眩設計、UGR 低、光源完全藏進燈杯。父母長輩、書房、小孩房閱讀的最佳選擇。</p>
             <div class="mt-4 flex items-center justify-between text-xs">
-              <span class="text-orange-400">UGR&lt;19 防眩</span>
+              <span class="text-orange-400">UGR 防眩</span>
               <span class="text-gray-500 group-hover:text-orange-300 transition">翻面看規格 →</span>
             </div>
           </div>
           <div class="flip-face back">
             <div class="text-xs text-orange-400 font-mono-en tracking-widest mb-3">SPEC SHEET</div>
-            <h3 class="font-display text-xl mb-4 text-orange-200">馬爾規格重點</h3>
-            <div class="space-y-2.5 text-sm text-gray-300 mb-auto">
-              <div class="flex justify-between"><span class="text-gray-500">防眩指數</span><span>UGR &lt; 19</span></div>
-              <div class="flex justify-between"><span class="text-gray-500">演色性</span><span>Ra ≧ 90</span></div>
-              <div class="flex justify-between"><span class="text-gray-500">R9</span><span>&gt; 50（紅色還原）</span></div>
-              <div class="flex justify-between"><span class="text-gray-500">設計</span><span>深燈杯防眩</span></div>
-              <div class="flex justify-between"><span class="text-gray-500">適用</span><span>辦公・商空・展示</span></div>
+            <h3 class="font-display text-lg mb-4 text-orange-200">馬爾 防眩崁燈</h3>
+            <div class="space-y-2 text-xs text-gray-300 mb-auto">
+              <div class="flex justify-between"><span class="text-gray-500">瓦數</span><span class="text-right">12W</span></div>
+              <div class="flex justify-between"><span class="text-gray-500">色溫</span><span class="text-right">4000K</span></div>
+              <div class="flex justify-between"><span class="text-gray-500">光通量</span><span class="text-right">890 lm</span></div>
+              <div class="flex justify-between"><span class="text-gray-500">演色性 Ra</span><span class="text-right">90</span></div>
+              <div class="flex justify-between"><span class="text-gray-500">光束角</span><span class="text-right">30°</span></div>
+              <div class="flex justify-between"><span class="text-gray-500">尺寸</span><span class="text-right">直徑81*高82 mm</span></div>
+              <div class="flex justify-between"><span class="text-gray-500">壽命</span><span class="text-right">15000小時</span></div>
             </div>
             <div class="mt-3 pt-3 border-t border-orange-500/20">
               <div class="text-xs text-orange-300 font-medium">業務話術</div>
-              <div class="text-xs text-gray-400 mt-1">「高 R9 才能讓食物與商品還原真色」</div>
+              <div class="text-xs text-gray-400 mt-1">「給最在意眼睛的長輩用」</div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- 雲朵吸頂燈 -->
-      <div class="flip-card reveal" data-categories="居家" style="transition-delay:0.25s;">
-        <div class="flip-card-inner">
-          <div class="flip-face">
-            <div class="flex items-center gap-2 mb-4">
-              <span class="flip-tag">居家．HOME</span>
-            </div>
-            <div class="text-xs text-orange-400 font-mono-en tracking-widest mb-2">CLOUD CEILING</div>
-            <h3 class="font-display text-2xl mb-3">雲朵<br>吸頂燈系列</h3>
-            <p class="text-sm text-gray-500 leading-relaxed mb-auto">
-              柔和雲朵造型、間接光設計。
-              依坪數選款，1-2 坪到 7 坪以上都有專屬規格。
-              客廳臥室主燈最熱賣的款式之一。
-            </p>
-            <div class="mt-4 flex items-center justify-between text-xs">
-              <span class="text-orange-400">居家熱銷</span>
-              <span class="text-gray-500 group-hover:text-orange-300 transition">翻面看規格 →</span>
-            </div>
-          </div>
-          <div class="flip-face back">
-            <div class="text-xs text-orange-400 font-mono-en tracking-widest mb-3">SPEC SHEET</div>
-            <h3 class="font-display text-xl mb-4 text-orange-200">雲朵規格重點</h3>
-            <div class="space-y-2.5 text-sm text-gray-300 mb-auto">
-              <div class="flex justify-between"><span class="text-gray-500">坪數覆蓋</span><span>1-2 / 3-4 / 5-7+ 坪</span></div>
-              <div class="flex justify-between"><span class="text-gray-500">控制方式</span><span>遙控 / 壁切 / Ai</span></div>
-              <div class="flex justify-between"><span class="text-gray-500">調光調色</span><span>三段或全段</span></div>
-              <div class="flex justify-between"><span class="text-gray-500">設計</span><span>柔和雲朵造型</span></div>
-              <div class="flex justify-between"><span class="text-gray-500">客群</span><span>新婚 · 換屋 · 翻新</span></div>
-            </div>
-            <div class="mt-3 pt-3 border-t border-orange-500/20">
-              <div class="text-xs text-orange-300 font-medium">業務話術</div>
-              <div class="text-xs text-gray-400 mt-1">「客廳坪數決定瓦數，先量再推款式」</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- 宙斯泛光燈 -->
-      <div class="flip-card reveal" data-categories="戶外" style="transition-delay:0.3s;">
+      <!-- OD-FLZ20DR1 宙斯泛光燈20W,白光 -->
+      <div class="flip-card reveal" data-categories="戶外" data-sku="OD-FLZ20DR1" style="transition-delay:0.20s;">
         <div class="flip-card-inner">
           <div class="flip-face">
             <div class="flex items-center gap-2 mb-4">
               <span class="flip-tag">戶外．OUTDOOR</span>
             </div>
-            <div class="text-xs text-orange-400 font-mono-en tracking-widest mb-2">FLOODLIGHT</div>
-            <h3 class="font-display text-2xl mb-3">宙斯<br>泛光燈</h3>
-            <p class="text-sm text-gray-500 leading-relaxed mb-auto">
-              IP66 全防護、高瓦數高流明。
-              招牌、廣場、舞台、建物外牆打燈首選，
-              耐候塗裝抗台灣鹽害氣候。
-            </p>
+            <div class="text-xs text-orange-400 font-mono-en tracking-widest mb-2">ZEUS FLOOD</div>
+            <h3 class="font-display text-2xl mb-3">宙斯<br>戶外泛光燈</h3>
+            <p class="text-sm text-gray-500 leading-relaxed mb-auto">10 / 20 / 50W 多瓦數選擇，IP66 戶外等級，招牌、廣告燈箱、庭院投射首選。</p>
             <div class="mt-4 flex items-center justify-between text-xs">
-              <span class="text-orange-400">IP66 防護</span>
+              <span class="text-orange-400">IP66 戶外</span>
               <span class="text-gray-500 group-hover:text-orange-300 transition">翻面看規格 →</span>
             </div>
           </div>
           <div class="flip-face back">
             <div class="text-xs text-orange-400 font-mono-en tracking-widest mb-3">SPEC SHEET</div>
-            <h3 class="font-display text-xl mb-4 text-orange-200">宙斯規格重點</h3>
-            <div class="space-y-2.5 text-sm text-gray-300 mb-auto">
-              <div class="flex justify-between"><span class="text-gray-500">瓦數範圍</span><span>30W / 50W / 100W / 200W</span></div>
-              <div class="flex justify-between"><span class="text-gray-500">防護</span><span>IP66 全防塵防噴水</span></div>
-              <div class="flex justify-between"><span class="text-gray-500">色溫</span><span>3000K / 5000K / 5700K</span></div>
-              <div class="flex justify-between"><span class="text-gray-500">塗裝</span><span>耐候抗鹽害</span></div>
-              <div class="flex justify-between"><span class="text-gray-500">適用</span><span>招牌・廣場・舞台・建物</span></div>
+            <h3 class="font-display text-lg mb-4 text-orange-200">宙斯 戶外泛光燈</h3>
+            <div class="space-y-2 text-xs text-gray-300 mb-auto">
+              <div class="flex justify-between"><span class="text-gray-500">瓦數</span><span class="text-right">20W</span></div>
+              <div class="flex justify-between"><span class="text-gray-500">色溫</span><span class="text-right">6500K</span></div>
+              <div class="flex justify-between"><span class="text-gray-500">光通量</span><span class="text-right">2000 lm</span></div>
+              <div class="flex justify-between"><span class="text-gray-500">演色性 Ra</span><span class="text-right">80</span></div>
+              <div class="flex justify-between"><span class="text-gray-500">光束角</span><span class="text-right">140°</span></div>
+              <div class="flex justify-between"><span class="text-gray-500">防護等級</span><span class="text-right">IPIP66</span></div>
+              <div class="flex justify-between"><span class="text-gray-500">尺寸</span><span class="text-right">長190*寬48*高225 mm</span></div>
             </div>
             <div class="mt-3 pt-3 border-t border-orange-500/20">
               <div class="text-xs text-orange-300 font-medium">業務話術</div>
-              <div class="text-xs text-gray-400 mt-1">「招牌外牆打燈，這支不漏電不掉燈泡」</div>
+              <div class="text-xs text-gray-400 mt-1">「IP66 規格直接報，工程商秒懂」</div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- 阿波羅高天井燈 -->
-      <div class="flip-card reveal" data-categories="廠房" style="transition-delay:0.35s;">
+      <!-- E-FLDB100D/2R2 阿波羅泛光燈100W,白光 -->
+      <div class="flip-card reveal" data-categories="戶外,廠房" data-sku="E-FLDB100D/2R2" style="transition-delay:0.25s;">
         <div class="flip-card-inner">
           <div class="flip-face">
             <div class="flex items-center gap-2 mb-4">
-              <span class="flip-tag">廠房．INDUSTRIAL</span>
+              <span class="flip-tag">重型．INDUSTRIAL</span>
             </div>
-            <div class="text-xs text-orange-400 font-mono-en tracking-widest mb-2">HIGH BAY</div>
-            <h3 class="font-display text-2xl mb-3">阿波羅<br>高天井燈</h3>
-            <p class="text-sm text-gray-500 leading-relaxed mb-auto">
-              廠房挑高 6 米以上、倉儲、停車場、體育館的高效能照明。
-              一支抵 4 支傳統金鹵燈，電費直接掉一半。
-            </p>
+            <div class="text-xs text-orange-400 font-mono-en tracking-widest mb-2">APOLLO INDUSTRIAL</div>
+            <h3 class="font-display text-2xl mb-3">阿波羅<br>大瓦數泛光燈</h3>
+            <p class="text-sm text-gray-500 leading-relaxed mb-auto">100 / 150 / 200W 大瓦數泛光，廠房、停車場、球場、大型外牆投射的主力。</p>
             <div class="mt-4 flex items-center justify-between text-xs">
-              <span class="text-orange-400">130 lm/W 高效</span>
+              <span class="text-orange-400">工業重型</span>
               <span class="text-gray-500 group-hover:text-orange-300 transition">翻面看規格 →</span>
             </div>
           </div>
           <div class="flip-face back">
             <div class="text-xs text-orange-400 font-mono-en tracking-widest mb-3">SPEC SHEET</div>
-            <h3 class="font-display text-xl mb-4 text-orange-200">阿波羅規格重點</h3>
-            <div class="space-y-2.5 text-sm text-gray-300 mb-auto">
-              <div class="flex justify-between"><span class="text-gray-500">瓦數</span><span>100W / 150W / 200W / 300W</span></div>
-              <div class="flex justify-between"><span class="text-gray-500">發光效率</span><span>130 lm/W 起跳</span></div>
-              <div class="flex justify-between"><span class="text-gray-500">色溫</span><span>5000K 中性白</span></div>
-              <div class="flex justify-between"><span class="text-gray-500">適用高度</span><span>6 - 12 米天花</span></div>
-              <div class="flex justify-between"><span class="text-gray-500">適用</span><span>廠房・倉儲・停車場・體育館</span></div>
+            <h3 class="font-display text-lg mb-4 text-orange-200">阿波羅 大瓦數泛光燈</h3>
+            <div class="space-y-2 text-xs text-gray-300 mb-auto">
+              <div class="flex justify-between"><span class="text-gray-500">瓦數</span><span class="text-right">100W</span></div>
+              <div class="flex justify-between"><span class="text-gray-500">色溫</span><span class="text-right">5700K</span></div>
+              <div class="flex justify-between"><span class="text-gray-500">光通量</span><span class="text-right">11500 lm</span></div>
+              <div class="flex justify-between"><span class="text-gray-500">演色性 Ra</span><span class="text-right">70</span></div>
+              <div class="flex justify-between"><span class="text-gray-500">光束角</span><span class="text-right">150°</span></div>
+              <div class="flex justify-between"><span class="text-gray-500">防護等級</span><span class="text-right">IPIP66</span></div>
+              <div class="flex justify-between"><span class="text-gray-500">尺寸</span><span class="text-right">長262*寬47*高262 mm</span></div>
             </div>
             <div class="mt-3 pt-3 border-t border-orange-500/20">
               <div class="text-xs text-orange-300 font-medium">業務話術</div>
-              <div class="text-xs text-gray-400 mt-1">「電費掉 60%，半年回本」</div>
+              <div class="text-xs text-gray-400 mt-1">「廠房 6 公尺挑高，一支阿波羅打到底」</div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- ESG 平板燈 -->
-      <div class="flip-card reveal" data-categories="辦公" style="transition-delay:0.4s;">
+      <!-- D-35NA24V-RGBDW 舞色幻彩軟條燈216P/米,5米 -->
+      <div class="flip-card reveal" data-categories="智慧,商空" data-sku="D-35NA24V-RGBDW" style="transition-delay:0.30s;">
+        <div class="flip-card-inner">
+          <div class="flip-face">
+            <div class="flex items-center gap-2 mb-4">
+              <span class="flip-tag">氛圍．AMBIENCE</span>
+            </div>
+            <div class="text-xs text-orange-400 font-mono-en tracking-widest mb-2">DANCE COLOR</div>
+            <h3 class="font-display text-2xl mb-3">舞色<br>幻彩軟條燈</h3>
+            <p class="text-sm text-gray-500 leading-relaxed mb-auto">5 米 RGB+DW 全彩，2700~6500K 調色，遙控+APP 雙控。網美店、餐酒館、咖啡廳氛圍救星。</p>
+            <div class="mt-4 flex items-center justify-between text-xs">
+              <span class="text-orange-400">RGB+DW 全彩</span>
+              <span class="text-gray-500 group-hover:text-orange-300 transition">翻面看規格 →</span>
+            </div>
+          </div>
+          <div class="flip-face back">
+            <div class="text-xs text-orange-400 font-mono-en tracking-widest mb-3">SPEC SHEET</div>
+            <h3 class="font-display text-lg mb-4 text-orange-200">舞色 幻彩軟條燈</h3>
+            <div class="space-y-2 text-xs text-gray-300 mb-auto">
+              <div class="flex justify-between"><span class="text-gray-500">瓦數</span><span class="text-right">8W（每米）</span></div>
+              <div class="flex justify-between"><span class="text-gray-500">色溫</span><span class="text-right">2700~6500K、RGB</span></div>
+              <div class="flex justify-between"><span class="text-gray-500">光通量</span><span class="text-right">800 lm/米 (2700~6500K)</span></div>
+              <div class="flex justify-between"><span class="text-gray-500">演色性 Ra</span><span class="text-right">80 (2700~6500K)</span></div>
+              <div class="flex justify-between"><span class="text-gray-500">尺寸</span><span class="text-right">長5000*寬10*高1.3 mm</span></div>
+              <div class="flex justify-between"><span class="text-gray-500">壽命</span><span class="text-right">15000小時</span></div>
+              <div class="flex justify-between"><span class="text-gray-500">型號</span><span class="text-right">D-35NA24V-RGBDW</span></div>
+            </div>
+            <div class="mt-3 pt-3 border-t border-orange-500/20">
+              <div class="text-xs text-orange-300 font-medium">業務話術</div>
+              <div class="text-xs text-gray-400 mt-1">「老闆，氛圍不到位是因為沒有 RGB」</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- D-PD40NR7 柔光平板燈2X2尺,自然光 -->
+      <div class="flip-card reveal" data-categories="辦公" data-sku="D-PD40NR7" style="transition-delay:0.35s;">
         <div class="flip-card-inner">
           <div class="flip-face">
             <div class="flex items-center gap-2 mb-4">
               <span class="flip-tag">辦公．OFFICE</span>
             </div>
-            <div class="text-xs text-orange-400 font-mono-en tracking-widest mb-2">ESG PANEL</div>
-            <h3 class="font-display text-2xl mb-3">ESG<br>平板燈系列</h3>
-            <p class="text-sm text-gray-500 leading-relaxed mb-auto">
-              輕鋼架天花板的標配。低眩光、節能標章認證、
-              學校公部門 ESG 採購指定，是標案常勝軍。
-            </p>
+            <div class="text-xs text-orange-400 font-mono-en tracking-widest mb-2">PANEL LIGHT</div>
+            <h3 class="font-display text-2xl mb-3">柔光平板燈<br>2×2 尺</h3>
+            <p class="text-sm text-gray-500 leading-relaxed mb-auto">辦公室、會議室、學校、診所主力光源。一片光均勻，不刺眼。多瓦數可選。</p>
             <div class="mt-4 flex items-center justify-between text-xs">
-              <span class="text-orange-400">UGR &lt; 19 防眩</span>
+              <span class="text-orange-400">辦公主力</span>
               <span class="text-gray-500 group-hover:text-orange-300 transition">翻面看規格 →</span>
             </div>
           </div>
           <div class="flip-face back">
             <div class="text-xs text-orange-400 font-mono-en tracking-widest mb-3">SPEC SHEET</div>
-            <h3 class="font-display text-xl mb-4 text-orange-200">ESG 平板規格重點</h3>
-            <div class="space-y-2.5 text-sm text-gray-300 mb-auto">
-              <div class="flex justify-between"><span class="text-gray-500">尺寸</span><span>60×60 / 30×120 cm</span></div>
-              <div class="flex justify-between"><span class="text-gray-500">防眩</span><span>UGR &lt; 19</span></div>
-              <div class="flex justify-between"><span class="text-gray-500">色溫</span><span>4000K 自然白</span></div>
-              <div class="flex justify-between"><span class="text-gray-500">認證</span><span>節能標章 · CNS · BSMI</span></div>
-              <div class="flex justify-between"><span class="text-gray-500">適用</span><span>辦公・會議・教室・標案</span></div>
+            <h3 class="font-display text-lg mb-4 text-orange-200">柔光平板燈 2×2 尺</h3>
+            <div class="space-y-2 text-xs text-gray-300 mb-auto">
+              <div class="flex justify-between"><span class="text-gray-500">瓦數</span><span class="text-right">40W</span></div>
+              <div class="flex justify-between"><span class="text-gray-500">色溫</span><span class="text-right">4000K</span></div>
+              <div class="flex justify-between"><span class="text-gray-500">光通量</span><span class="text-right">4000 lm</span></div>
+              <div class="flex justify-between"><span class="text-gray-500">演色性 Ra</span><span class="text-right">80</span></div>
+              <div class="flex justify-between"><span class="text-gray-500">光束角</span><span class="text-right">160°</span></div>
+              <div class="flex justify-between"><span class="text-gray-500">尺寸</span><span class="text-right">長600*寬600*高32 mm</span></div>
+              <div class="flex justify-between"><span class="text-gray-500">壽命</span><span class="text-right">15000小時</span></div>
             </div>
             <div class="mt-3 pt-3 border-t border-orange-500/20">
               <div class="text-xs text-orange-300 font-medium">業務話術</div>
-              <div class="text-xs text-gray-400 mt-1">「ESG 採購一張紙說服老師主任」</div>
+              <div class="text-xs text-gray-400 mt-1">「辦公室一場下來，平板燈最划算」</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- D-T5BA1-NR10 T5 一體式支架燈1尺,自然光 -->
+      <div class="flip-card reveal" data-categories="辦公,居家" data-sku="D-T5BA1-NR10" style="transition-delay:0.40s;">
+        <div class="flip-card-inner">
+          <div class="flip-face">
+            <div class="flex items-center gap-2 mb-4">
+              <span class="flip-tag">支架．BRACKET</span>
+            </div>
+            <div class="text-xs text-orange-400 font-mono-en tracking-widest mb-2">T5 STRIP</div>
+            <h3 class="font-display text-2xl mb-3">T5 一體式<br>支架燈</h3>
+            <p class="text-sm text-gray-500 leading-relaxed mb-auto">1 / 2 / 3 / 4 尺四種長度，廚房、工作檯、層板、櫥櫃下最好施工的補光神器。</p>
+            <div class="mt-4 flex items-center justify-between text-xs">
+              <span class="text-orange-400">走量神器</span>
+              <span class="text-gray-500 group-hover:text-orange-300 transition">翻面看規格 →</span>
+            </div>
+          </div>
+          <div class="flip-face back">
+            <div class="text-xs text-orange-400 font-mono-en tracking-widest mb-3">SPEC SHEET</div>
+            <h3 class="font-display text-lg mb-4 text-orange-200">T5 一體式 支架燈</h3>
+            <div class="space-y-2 text-xs text-gray-300 mb-auto">
+              <div class="flex justify-between"><span class="text-gray-500">瓦數</span><span class="text-right">5W</span></div>
+              <div class="flex justify-between"><span class="text-gray-500">色溫</span><span class="text-right">4000K</span></div>
+              <div class="flex justify-between"><span class="text-gray-500">光通量</span><span class="text-right">575 lm</span></div>
+              <div class="flex justify-between"><span class="text-gray-500">演色性 Ra</span><span class="text-right">80</span></div>
+              <div class="flex justify-between"><span class="text-gray-500">光束角</span><span class="text-right">210°</span></div>
+              <div class="flex justify-between"><span class="text-gray-500">尺寸</span><span class="text-right">長312*寬26*高37 mm</span></div>
+              <div class="flex justify-between"><span class="text-gray-500">壽命</span><span class="text-right">15000小時</span></div>
+            </div>
+            <div class="mt-3 pt-3 border-t border-orange-500/20">
+              <div class="text-xs text-orange-300 font-medium">業務話術</div>
+              <div class="text-xs text-gray-400 mt-1">「廚房層板補光，T5 一體式裝完就完事」</div>
             </div>
           </div>
         </div>
@@ -1302,6 +1345,42 @@
         </div>
       </div>
     </div>
+  </div>
+</section>
+
+<!-- ===== Product Library (1,359 SKU 即時搜尋) ===== -->
+<section class="relative py-32">
+  <div class="glow-orb" style="background:#F58220; width:500px; height:500px; top:10%; right:-100px; opacity:0.1;"></div>
+
+  <div class="relative max-w-7xl mx-auto px-6 lg:px-10">
+    <div class="text-center mb-12 reveal">
+      <div class="section-eyebrow justify-center" style="display:inline-flex;">PRODUCT LIBRARY · 完整產品庫</div>
+      <h2 class="font-display text-4xl md:text-5xl lg:text-6xl leading-[1.1] mb-4">
+        <span id="libTotal">1,359</span> 支產品，<br>
+        <span class="text-orange-300">客戶問哪一支都查得到</span>
+      </h2>
+      <p class="text-gray-500 max-w-xl mx-auto leading-relaxed mt-6">
+        即時搜尋型號、商品名稱、類型 · 點開看完整規格 + 適用場景 + 銷售切入點。
+      </p>
+    </div>
+
+    <!-- Sticky search bar -->
+    <div class="lib-bar reveal">
+      <input id="libSearch" class="lib-search" type="search" placeholder="搜尋商品名 / 型號 / 類型（如：拉斐爾、D-21、磁吸、戶外）">
+      <span id="libCount" class="lib-count">—</span>
+    </div>
+
+    <!-- Category chips -->
+    <div class="lib-chips mb-5 reveal" id="libChips">
+      <button class="lib-chip active" data-cat="">全部</button>
+    </div>
+
+    <!-- Results grid -->
+    <div id="libGrid" class="lib-grid">
+      <div class="lib-empty">載入中...</div>
+    </div>
+
+    <button id="libLoadMore" class="lib-load-more hidden">載入更多 (還有 <span id="libRemaining">0</span> 筆)</button>
   </div>
 </section>
 
@@ -1815,6 +1894,169 @@
       });
     });
   })();
+</script>
+
+<!-- ===== Product Library Logic (fetch products.json + search + filter) ===== -->
+<script>
+(function(){
+  const PAGE_SIZE = 24;
+  let allProducts = [];
+  let filtered = [];
+  let displayCount = 0;
+  let currentCat = '';
+
+  const elGrid    = document.getElementById('libGrid');
+  const elSearch  = document.getElementById('libSearch');
+  const elCount   = document.getElementById('libCount');
+  const elTotal   = document.getElementById('libTotal');
+  const elChips   = document.getElementById('libChips');
+  const elMore    = document.getElementById('libLoadMore');
+  const elRem     = document.getElementById('libRemaining');
+
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+  function safeText(s){ return (s||'').toString().trim(); }
+
+  function buildCategoryChips() {
+    const counts = {};
+    allProducts.forEach(p => {
+      const t = safeText(p['類型']) || '其他';
+      counts[t] = (counts[t]||0) + 1;
+    });
+    const sorted = Object.entries(counts).sort((a,b) => b[1]-a[1]).slice(0, 14);
+    sorted.forEach(([cat, n]) => {
+      const b = document.createElement('button');
+      b.className = 'lib-chip';
+      b.dataset.cat = cat;
+      b.textContent = `${cat} (${n})`;
+      elChips.appendChild(b);
+    });
+    elChips.addEventListener('click', e => {
+      const btn = e.target.closest('.lib-chip');
+      if (!btn) return;
+      currentCat = btn.dataset.cat || '';
+      elChips.querySelectorAll('.lib-chip').forEach(b => b.classList.toggle('active', b.dataset.cat === currentCat));
+      applyFilter();
+    });
+  }
+
+  function applyFilter() {
+    const q = (elSearch.value || '').trim().toLowerCase();
+    filtered = allProducts.filter(p => {
+      if (currentCat && safeText(p['類型']) !== currentCat) return false;
+      if (!q) return true;
+      const hay = (
+        safeText(p['商品名稱']) + ' ' +
+        safeText(p['產品型號']) + ' ' +
+        safeText(p['類型']) + ' ' +
+        (Array.isArray(p['適用場景']) ? p['適用場景'].join(' ') : '')
+      ).toLowerCase();
+      return hay.includes(q);
+    });
+    displayCount = 0;
+    elGrid.innerHTML = '';
+    renderMore();
+  }
+
+  function renderMore() {
+    const next = filtered.slice(displayCount, displayCount + PAGE_SIZE);
+    if (next.length === 0 && displayCount === 0) {
+      elGrid.innerHTML = '<div class="lib-empty">沒有符合的產品。試試其他關鍵字或分類。</div>';
+      elMore.classList.add('hidden');
+      elCount.textContent = '0 筆';
+      return;
+    }
+    next.forEach(p => elGrid.appendChild(buildItem(p)));
+    displayCount += next.length;
+    elCount.textContent = `${filtered.length} 筆 · 顯示 ${displayCount}`;
+    const remaining = filtered.length - displayCount;
+    if (remaining > 0) {
+      elMore.classList.remove('hidden');
+      elRem.textContent = remaining;
+    } else {
+      elMore.classList.add('hidden');
+    }
+  }
+
+  function buildItem(p) {
+    const item = document.createElement('div');
+    item.className = 'lib-item';
+    const watt = safeText(p['消耗電力']);
+    const cct  = safeText(p['色溫']);
+    const lm   = safeText(p['光通量']);
+    const ra   = safeText(p['演色性']);
+    const ip   = safeText(p['IP等級']);
+    const beam = safeText(p['光束角']) || safeText(p['發光角度']);
+    const size = safeText(p['尺寸']);
+    const life = safeText(p['平均壽命']);
+    const volt = safeText(p['電壓']);
+    const driver = safeText(p['驅動器']);
+    const scenes = Array.isArray(p['適用場景']) ? p['適用場景'] : [];
+    const usage  = Array.isArray(p['使用用途']) ? p['使用用途'] : [];
+    const pitches = Array.isArray(p['銷售切入點']) ? p['銷售切入點'] : [];
+    const audience = Array.isArray(p['建議客群']) ? p['建議客群'] : [];
+
+    let metaBits = [];
+    if (watt) metaBits.push(`<span><span class="label">瓦</span> ${esc(watt)}</span>`);
+    if (cct) metaBits.push(`<span><span class="label">色溫</span> ${esc(cct)}</span>`);
+    if (lm) metaBits.push(`<span><span class="label">流明</span> ${esc(lm)}</span>`);
+    if (ip) metaBits.push(`<span><span class="label">IP</span> ${esc(ip)}</span>`);
+    if (metaBits.length === 0) metaBits.push(`<span class="label">${esc(safeText(p['類型'])||'—')}</span>`);
+
+    let detailRows = '';
+    const addRow = (label, val) => { if (val) detailRows += `<div class="row"><span>${esc(label)}</span><span>${esc(val)}</span></div>`; };
+    addRow('類型', safeText(p['類型']));
+    addRow('瓦數', watt); addRow('色溫', cct); addRow('光通量', lm);
+    addRow('演色性 Ra', ra); addRow('光束角', beam);
+    if (ip) addRow('防護等級', 'IP' + ip);
+    addRow('電壓', volt); addRow('驅動器', driver);
+    addRow('尺寸', size); addRow('壽命', life);
+
+    const sceneHtml = scenes.length ? `<h4>適用場景</h4><div class="pill-list">${scenes.map(s=>`<span>${esc(s)}</span>`).join('')}</div>` : '';
+    const usageHtml = usage.length ? `<h4>使用用途</h4><div class="pill-list">${usage.map(s=>`<span>${esc(s)}</span>`).join('')}</div>` : '';
+    const pitchHtml = pitches.length ? `<h4>銷售切入點</h4>${pitches.map(s=>`<div style="padding:3px 0;">▸ ${esc(s)}</div>`).join('')}` : '';
+    const audHtml   = audience.length ? `<h4>建議客群</h4><div class="pill-list">${audience.map(s=>`<span>${esc(s)}</span>`).join('')}</div>` : '';
+
+    item.innerHTML = `
+      <div class="lib-name">${esc(safeText(p['商品名稱']))}</div>
+      <div class="lib-sku">${esc(safeText(p['產品型號']))} · ${esc(safeText(p['類型']))}</div>
+      <div class="lib-meta">${metaBits.join('')}</div>
+      <div class="lib-detail">
+        ${detailRows}
+        ${sceneHtml}
+        ${usageHtml}
+        ${pitchHtml}
+        ${audHtml}
+      </div>
+    `;
+    item.addEventListener('click', () => item.classList.toggle('expanded'));
+    return item;
+  }
+
+  let searchTimer = null;
+  elSearch.addEventListener('input', () => {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(applyFilter, 200);
+  });
+  elMore.addEventListener('click', renderMore);
+
+  // 載入 JSON
+  fetch('./products.json', { cache: 'force-cache' })
+    .then(r => {
+      if (!r.ok) throw new Error('fetch failed: ' + r.status);
+      return r.json();
+    })
+    .then(data => {
+      allProducts = Array.isArray(data) ? data : [];
+      elTotal.textContent = allProducts.length.toLocaleString();
+      buildCategoryChips();
+      applyFilter();
+    })
+    .catch(err => {
+      console.error('Product library load failed:', err);
+      elGrid.innerHTML = '<div class="lib-empty">產品資料載入失敗：' + esc(err.message) + '</div>';
+      elCount.textContent = '錯誤';
+    });
+})();
 </script>
 
 

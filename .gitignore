@@ -20,6 +20,8 @@
 !login.html
 !firebase-app.js
 !firestore.rules
+!舞光_產品資料.json
+!products.json
 
 # Re-allow assets folder and contents
 !assets/
