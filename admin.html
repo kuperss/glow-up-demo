@@ -1,0 +1,1331 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>主管後台 | 舞光戰將點燈計劃</title>
+<meta name="description" content="主管後台 - 章節管理 · 學員進度 · 數據儀表板 · 題庫管理">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Noto+Sans+TC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  :root {
+    --glow-orange: #F58220;
+    --glow-orange-bright: #FFA050;
+    --bg-base: #0A0A0D;
+    --bg-card: #131318;
+    --bg-elevated: #1A1A20;
+    --bg-sidebar: #0F0F13;
+    --border-subtle: #25252C;
+    --text-primary: #F5F5F7;
+    --text-secondary: #A0A0AB;
+    --text-tertiary: #6B6B75;
+  }
+  * { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    font-family: 'Noto Sans TC', 'Inter', system-ui, sans-serif;
+    background: var(--bg-base);
+    color: var(--text-primary);
+    margin: 0;
+  }
+  .font-mono-en { font-family: 'Inter', sans-serif; letter-spacing: 0.05em; }
+
+  /* Layout */
+  .admin-layout { display: grid; grid-template-columns: 240px 1fr; min-height: 100vh; }
+  .sidebar {
+    background: var(--bg-sidebar);
+    border-right: 1px solid var(--border-subtle);
+    padding: 1.5rem 1rem;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+  }
+  .main-area { display: flex; flex-direction: column; min-width: 0; }
+  .topbar {
+    background: rgba(10, 10, 13, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border-subtle);
+    padding: 1rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .content { padding: 2rem; flex: 1; }
+
+  @media (max-width: 900px) {
+    .admin-layout { grid-template-columns: 1fr; }
+    .sidebar { position: relative; height: auto; padding: 1rem; }
+    .sidebar-nav { display: flex; gap: 0.5rem; overflow-x: auto; flex-wrap: wrap; }
+    .sidebar-section-label { display: none; }
+  }
+
+  /* Sidebar */
+  .sidebar-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.5rem;
+    margin-bottom: 1.5rem;
+  }
+  .sidebar-section-label {
+    font-size: 0.65rem;
+    color: var(--text-tertiary);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    font-weight: 600;
+    padding: 0 0.6rem;
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+  }
+  .sidebar-link {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    padding: 0.55rem 0.7rem;
+    border-radius: 8px;
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+    margin-bottom: 2px;
+  }
+  .sidebar-link:hover { background: rgba(255,255,255,0.04); color: var(--text-primary); }
+  .sidebar-link.active {
+    background: rgba(245, 130, 32, 0.1);
+    color: var(--glow-orange-bright);
+    border-color: rgba(245, 130, 32, 0.25);
+  }
+  .sidebar-link svg { flex-shrink: 0; }
+
+  /* Buttons */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.55rem 1rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--text-primary);
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, #F58220, #FFA050);
+    color: #0A0A0D;
+    font-weight: 600;
+    border: none;
+    box-shadow: 0 4px 12px rgba(245,130,32,0.25);
+  }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(245,130,32,0.35); }
+  .btn-ghost {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border-subtle);
+    color: var(--text-secondary);
+  }
+  .btn-ghost:hover { background: rgba(255,255,255,0.08); border-color: rgba(245,130,32,0.3); color: var(--text-primary); }
+
+  /* Card */
+  .panel {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: 12px;
+    padding: 1.5rem;
+  }
+  .panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+  }
+  .panel-title { font-size: 1rem; font-weight: 600; color: var(--text-primary); }
+  .panel-subtitle { font-size: 0.78rem; color: var(--text-tertiary); margin-top: 0.2rem; }
+
+  /* Stat card */
+  .stat-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem;
+    transition: all 0.3s ease;
+  }
+  .stat-card:hover { border-color: rgba(245,130,32,0.3); transform: translateY(-2px); }
+  .stat-label {
+    font-size: 0.7rem;
+    color: var(--text-tertiary);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+  .stat-num {
+    font-family: 'Inter', sans-serif;
+    font-weight: 800;
+    font-size: 2rem;
+    line-height: 1;
+    background: linear-gradient(135deg, #FFA050, #F58220);
+    -webkit-background-clip: text; background-clip: text;
+    color: transparent;
+  }
+  .stat-trend { font-size: 0.75rem; margin-top: 0.4rem; }
+  .stat-up { color: #4ade80; }
+  .stat-down { color: #f87171; }
+
+  /* Table */
+  .table-wrap { overflow-x: auto; }
+  .table { width: 100%; border-collapse: separate; border-spacing: 0; }
+  .table th {
+    text-align: left;
+    padding: 0.6rem 0.9rem;
+    font-size: 0.7rem;
+    color: var(--text-tertiary);
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .table td {
+    padding: 0.85rem 0.9rem;
+    font-size: 0.875rem;
+    color: var(--text-primary);
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+  .table tr:hover td { background: rgba(255,255,255,0.02); }
+
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 500;
+  }
+  .pill-orange { background: rgba(245,130,32,0.12); color: var(--glow-orange-bright); border: 1px solid rgba(245,130,32,0.3); }
+  .pill-green { background: rgba(74,222,128,0.1); color: #4ade80; border: 1px solid rgba(74,222,128,0.3); }
+  .pill-red { background: rgba(248,113,113,0.08); color: #f87171; border: 1px solid rgba(248,113,113,0.3); }
+  .pill-gray { background: rgba(255,255,255,0.05); color: var(--text-secondary); border: 1px solid var(--border-subtle); }
+
+  /* Progress */
+  .pbar { height: 6px; background: rgba(255,255,255,0.06); border-radius: 999px; overflow: hidden; min-width: 100px; }
+  .pbar-fill { height: 100%; background: linear-gradient(90deg, #F58220, #FFA050); border-radius: 999px; }
+
+  /* Bar chart */
+  .bar-chart { display: flex; align-items: flex-end; gap: 0.6rem; height: 180px; padding-top: 1rem; }
+  .bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 0.5rem; }
+  .bar {
+    width: 100%;
+    background: linear-gradient(180deg, #FFA050, #F58220);
+    border-radius: 6px 6px 0 0;
+    min-height: 4px;
+    position: relative;
+    transition: all 0.5s cubic-bezier(0.16,1,0.3,1);
+  }
+  .bar:hover { filter: brightness(1.2); }
+  .bar-label { font-size: 0.7rem; color: var(--text-tertiary); }
+  .bar-value { font-size: 0.7rem; color: var(--glow-orange-bright); font-weight: 600; }
+
+  /* Donut */
+  .donut-wrap { position: relative; width: 140px; height: 140px; }
+  .donut-text { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+
+  /* Page section toggle */
+  .page-section { display: none; }
+  .page-section.active { display: block; animation: fade 0.3s ease; }
+  @keyframes fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* Form */
+  .form-input {
+    width: 100%;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    padding: 0.6rem 0.9rem;
+    color: var(--text-primary);
+    font-size: 0.875rem;
+    transition: all 0.2s ease;
+  }
+  .form-input:focus {
+    outline: none;
+    border-color: var(--glow-orange);
+    box-shadow: 0 0 0 3px rgba(245,130,32,0.1);
+  }
+  .form-label { font-size: 0.78rem; color: var(--text-secondary); margin-bottom: 0.4rem; display: block; font-weight: 500; }
+
+  /* Drag handle */
+  .chapter-row {
+    display: grid;
+    grid-template-columns: 24px 60px 1fr auto auto;
+    gap: 1rem;
+    align-items: center;
+    padding: 1rem 1.25rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: 10px;
+    margin-bottom: 0.5rem;
+    transition: all 0.2s ease;
+  }
+  .chapter-row:hover { border-color: rgba(245,130,32,0.25); }
+  .drag-handle { color: var(--text-tertiary); cursor: grab; }
+
+  .activity-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.8rem;
+    padding: 0.7rem 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+  .activity-item:last-child { border-bottom: none; }
+  .activity-icon {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    background: rgba(245,130,32,0.1);
+    border: 1px solid rgba(245,130,32,0.25);
+    color: var(--glow-orange-bright);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+
+  ::selection { background: rgba(245,130,32,0.5); color: white; }
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg-base); }
+  ::-webkit-scrollbar-thumb { background: rgba(245,130,32,0.25); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<div class="admin-layout">
+
+  <!-- ===== Sidebar ===== -->
+  <aside class="sidebar">
+    <a href="index.html" class="sidebar-brand">
+      <div class="relative w-9 h-9 flex items-center justify-center flex-shrink-0">
+        <div class="absolute inset-0 bg-gradient-to-br from-orange-400 to-orange-600 blur-md opacity-30 rounded-full"></div>
+        <img class="relative w-9 h-9" style="filter: drop-shadow(0 0 6px rgba(245,130,32,0.4)); object-fit: contain; display: block;" alt="舞光" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAACiCAYAAAAX4MJWAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAFQMSURBVHhe7X0HmBzFmbYv+nz2YZwu28f9Pvt+h98EabVxNq/CKgeiAIkMAttgkYSkzavNOWp3tStt0GpX0q4SCCwwtsGAbc4By8anOxsbDEJIO9PTYWY2Tf3fV13VU93TE1aJFcz3PO/TvbMz3RXe96uvqquqPxKzmMUsZjGLWcxiFrOYxSxmMYtZzGIWs5jFLGYxi1nMYhazmMUsZjGLWcxiFrOYxSxmMYtZzGIWs5h9uIwQ8he+oS1fljs33C093fxF9vF5NbjHx90HKr6s9Hwn092xYZ3Ss7FEarq9xlVzU52rdm2jVLO2Rmq9t1rp3VQodTxwg9y3NcX/g94r4HcfZZeIWczOjwGp/kzdcc835NrV97hLFw1Ixdm/JeVZxF296ln/Uw1/x752Tgb3+JjcvsEhVV6/RSpddkQqWvQH59ascW9BJpkuzCCkMJ2QgjRAagCF8HdRBpkqzCRafhZx5eVorqLF/+PetnyfXHPjo1r7t+f5/f6/ZreIWcyiN+ex4cvcTbcslstyG6XC7OPufCBbaTrxlwDxylKIu3T+r8jx5z/Ovn5WBqT/c+/2B7KUspWt7sL5v/fk60Sfzksh2hNJxP14EnEBnI8nhwH+P4lIABnggd/58xz0OmpeBpGLF/5WrlhV62m+Oxnvx24ds5gF28mTJ/9Wa7ljibxtyU53QdZb40XgdYtTiS8/mbi3JJExgK8wmSjFGaelgcf/nf1sxuZ6fvSTSsP6h+Ti3F/4kPTgzT2bk6Mg+8yAovDCdbHl0LamE6lg/mtK5bVFys6H/x9LSsxi9pGPqN0PXi2Xr65yF8z/3QSGG0WpQJgU4twMhOQA8rvzkomvJI04oWVgP52RnX799U+otTdtlPNz3kAPPb5FJ/2YDXnPJ8Ye0+/j25JCwybX5vQpqXjJc2rT+ludr756GUtezD5MBuHAX3pa71gjlyx+xr01E0ifRjxbgTAQQowBTOSHz9H7k7JUcqZyeQW7xIxMarzzBqVw4X8TaFXQK9sR9WIBQ6spELgfxC4XLPijUn19kWuw7N9YUmP2QbbTL774CaXmxvvlooWvYedxCuJl1xNAcAoL+YH0lPyA6RLwoqXzf4zCYZeKys4MlfyzWrZ8CDuy6PH1mD2YlO8PsM8AIRK0RnJelqRUrG6Td235vyzpMfsg2anjxz+u1Kz9tlIw/3/QC2M4gKHHmU2c/LoArOR3bk0ian4iUUvSfM4Zxs7ulrty1cL5b5HCVD3UgVDEnojvL8YeSyLKJmjhoC8ib830uMtXdbj7tnyZZSNml7J9j5C/kJvW3aMULjiBns67mREfK94gvg478ju3JhJSnkqcdWueYJeMyqTaGzd5wOv74Dp4Lw5rvI/kE/9+P4FpkZkQlLxMVa1cU6MdbvtnlqWYXWqmogcuXfwTPxDfB3E3ko/C4vXNnh/IwMg/BuTH0Ecqzf4phD5/wS4b0aSaaztwyFSG650RBEbvy9NggR0h3y9gehRIK44eqQU5p9T6WzfhCBnLXsxmu52G5lspW7lvvCCDTOJoDng2wwNHDHkQiRQyhD6eEseUu/32BHbpsAYi+Yi7Ylk/KU0j0uZE4x46hPtCGjD0srYM6IFnS4ugpyeZaJBe+kyhOPc37uY71/mf/GbswdpsNXzQo9be9IhWkC2R/FQ6Ds4rNCL5Dc+vk9+Zh6EPhEvluV3s8hFNql65i5SlERdcb4xfm8EkAA5BCLwlQBhEnAViQBHQZwnbMolUvPhXp7vu/yeW3ZjNJpP6ts5VSpf+iHorJBdUHCcUJZiJfAI5LfE+wpWXRLRCiIdL0iRtf/m/sFuEtTM1qypJOZAfQyd+TRQVnpuEECwG2hHnYGkOAH4Hx4sNLD8sRyxPpSD7d3LdzfeeOHEi5v1no0HlPKoWZHlxCgEPIziBDHIZhBPIaCE/Eh9BvX8FXKtmRSG7RVhzNd60zg/kl+F3RgtCr8mvD0AxCEKg97cRAwWkN2TLcIFbBbyPG+7NRoTcSuWaAnxyzbIas9lk+PBGK1t2FCeEYaeNDjMy8iN5KPkNYumEMwjIiWlDfk8R/F2a8Z77WNOn2a1Cmtr70DfUbekeT6EeNrko9GuahYCA+9FWAQF/m4TAIaYZYBGDiaxM7OJn5wIsvwnoM/nyoANfsrj3vV2Pf4llM2azzVwtdy9XC+efxFgfH+hwcuCRIhT5Da+PYCRFzw0dXmd+AgWpdBBX3cp8dquQhiGBq2Lhz/3b4Prst3gdLgIKQwgI8d6AkCESh5AHJgQjfwKsRJ4pkPh0+LMwjUCZHnfX37KIZTFms9Hc1dcX+Qoy9aFNjPWZFzRIYSG/QTAkHCUfnAMhkZw6UQMC0IoTiVSS5lL2V32O3S6kSU1rniDVqcRVANdh4CJC0OtyMZiEoGNMEAQNxwQhIMKJwVYArEWYSauAv8eRMpw5qlaurnr9xRc/wbIXs9lm0ktDn1LKVozgk1wZSSBUtEEISn5OGIFQFvI7uYem5GeEBQJT71+ztIndMqS5hjZeoZalyloJ/B6JjyFQCCHQa1Mh6GKgLY4hBEwPQk/fGKZTEAEiQH4bIXCw/NOyEMslhBjQcdBYH71+0cLXXK33ZrCsxWw22pm+TV+Ri3N/hZ0zOm1YiPcRNEam5OcIECgQ9jDSUdLDZ8zrc9K6IfaXtzkm5F3fjjgfxlmzuJtUpxBXYQKRAHh0IgrwCNcVxOCyFQMTnyEEBE8nwCY8oqAiCAic55f2ExCsLBCU7DYCQPLjVBAvxvrlK+twmgjLVsxmo51puS9HK5x/ehqa6tBeH6GTwyALEsjw/DrJ7Lw+Akk7XQHfK8s6ym4b0s6AQJTytHGlFH5fHE+c2GkGSHANhAsFAGIYo0f9+sZ9BCHQ+xtigLSaxIDAz3j6ASGFYIEgBN4q8PJCQWC/SS3Iectdu34Jy1LMZqu5mu9cp+VnjuvxPlS8UJlm8iMEghheH486oQyicfIxUiJRkbT+KgeRm9esZrcOaa7a3BZSm0KcxSiAAJxFcEQxwLVEIVhFwBFKCMFi4HlhsIZJIcRAO80IKCcUAw15MHwszj369q78z7PsxGy2mqth/aO4Ygofx/POrkF8rNSQ5OdkgXMkkOhlBfJjmKKTP4F4S+H/JaknyfPNYcMBaajmU1JF6mlPWYD4VqAwgsUAn9FWAY6CCKxCoGnDFoql2SwEBM8bwFYI5jLBI85H0uC7uNjHVbZy20cIYbmJ2aw1Z/26MlKcRYfn8GloOOIHeX7q/RE6aTihDIIh6RBARiQmkpRUpRCpesEOdvuQJrVddzeph9i/NF5HCfyeEh/uI4iAA4VAxUBFAGJA0sMRW4Uxlo5QQqBpRREEiYHnTxcC7TjzfLNyEMk/WZBC1MIMxVl7800sGzGbzeaqvbmAFGXSlUvo+aMKeSj5dUJw8uvEh3NOJgQSjRIQO686GSUg6hQIwNl6w1KWhJDmqs153l8D1+ECMACfGWKwAW0REOye7N48RKKCFMTgws40S7fYggUPp2JeeZ5RCAg4Z2VCih1EKc46cbrlrrksCzGbzXameu0DkwXpEK8GvD7vzM0o3kfYen34nHl9SkYgp7YNvrMtdYy8MHA5S4ateQ9uvkKqcvjU8ngiwW8QwULgYtCvHRJ4bxsx0JBMFAIXAUceAj5ngrATgz7FA8i/DTq7pTnfe3f3pr9nWYjZbLYzjXesHC/MoquTkPAmzy8Q30x+JL6F/EgO4ckuJz8flaGEQ2/MyOivgu9Xz3+SJSOkKR2rN5AmCH9AAM7yeRBPI1AMQHqErRAQcD+R/CK4EABcCLoYGEQxiK0C5osKAWEWgwSf4fpluWzh4JtvvvQ3LPkxm83m6nniSrUgW8E1qiL5qfePlvwGGeA8iPx4zsIegfwIUgOkbl7xMEtKSJMacg6TBvhNBZAbRKBjHnGCCMILAQH3pWIw39sEHiZBGmk66TMFBOSB/s0giNsA5hmAaxhIRRpxVy5pZ8mO2Ww36bUXLpeKF/92EgjNR3roOLYp5EFAJTPyYzOvTyXQyY/TkKkXtPH8emc32PMj3EBILw5/dt+ZwpJja85j2y9z1qS8560Br1/BAcQ2xAB/G60CAgRhKwRABCHwjjMC02wSA8uTIQb8G/KKc5Fk+J6/zEGkysVntXNFzN4nG6u4rhcXjvNxfur1LeQXia97fQRUPpKfhwCWJ7u659RJpD+sspANQhOtDEhVmTbm//FI2Jmf8o5bUscbkolcOQ8IpsMkAlsxwDltGeBeGA4FiQHTwCCmS4DdQzYaIlFB4FHPqwzfIRUOaI1yNrMknxfzH3/6U1rvt+e5W25bL9ffWOmqWtnrLFt61Fm27CXntqU/oShd/rKzdNnTrm0re6W6m+vc2x94UOrdmu35r+e+gKvkYhbGxlofWDNVkGFsEEURsrPLia+TnxPfhR1Dwesj9HjfPuShQNIBAaeq4ViX8xJLTkhzt+Y+TFqTiFQVEIAIV0UcAM7tBMGEQMOjkJ1nTBOkNWx/gYGJgAoB8ohTOJD8Uvn8GS3cD2XawLeukRtXb5Ircp+WSrJOqcUZ0KFOJ6Q0lY4qTRUmk/F8BE6dhuPWFDKVl0L8BfqepbjfkLcgC9K3UHVXrnlVbb6tWh3Mz/H7/bF1xaK5fj76SalwwZs+IPZp7vkFrx9NZ9cu5KHxPgV8JyT5deKROiB189IOlqSQ5mrM3ENawAtXA9lRBBw2YpBYy4Bi4IKgnWYWImFfgfYXTALgwLSxNFrTLYIJgXr+agcZq1xQwJJ6VqYdqPgnpXH1g0rF/JeV0jRCKlPJdGkS0aA8sVNNyx3rgNWH3h8T6oo5L2zBcXo6OjT58UQyDt/FCXcoCLl02e/UljtrtGPdsSFZtDMVa6pxRzYa81u8fvjOLgt5LJ7fGu/TB1BW4lCCBQhHGlKIu33Nt1mSbA2a8T+TGhy/mmoE7w0CMIAC4Ec7ISCoAHRBcCGIYtBbBjgKaQoA0hpGCPj8gnbg6xY3s6TO2KShh77oqV9Sq5ZnjOHU7sltycSNZcfLFco48OwB6iBKEYjTVhAoCNy4F1sId8H8aa3u5kPqSGUOS8aHz9yD+V9S8jI9OK1ZJ79YmFDYlPhIeChAFvKYyG+N9w3yI0J4fgv5JSDfZD0IYMdNC1mybE098vA/uOqTFE/9POKGTrC7Bn4rCoGDtgpxQSLg4VHEjnPIUSSWdosYcD6SVJWzkyVzRqa8vPvvteYVlWpFqowi0uD61GlA+fF+RUAEcG4SgS4AqwhoPXIBCOQXgZ9LjyUSnNjoK8whSv3NT2qH2+JYsj485ixbNUA7vibPD4XECzZsZzfg9RGR4334XCQ/kgzILyMhq5Knld0bvsqSZWta33VzPU3QpNcBuWsRuhCkSGKwCIHDTgyBVkFPX+gHbZB3EAKpBU9dk/MM7oTBkhm1uTvX3uqpy3oLp3TQh4C8nFhYFSwCLHu9DvRWGOrEJIJA/dHRO0Z0OwFw4BN+FIIfhCAXzp9Q2+6pdRLy4diod2xP6dfceVlTksnrBwo06MkuFL5OfESA/LrXh/8x0BETkfgIId6nYORHsmlVcKx2jJFD1Z9hSbM1uWvVKtKeRNyGABhq5jIRhBECgPYZwghB7CsYrQO0CCgKbKXE/oITQGoh9q9K/7n/lb4ZvZzjnacaPqu2Lh4kDQ4yUalfizoGsbxYWVKnIooAQyGsA+aMRBFYQ6FoBMCBQsC+AvYTtKo1v1aeas9kyf3gmqtydTON/YVCC0V+3etjJbCKsJDfGBqMhvxAJvrQCgkGRBuvxZg+5b/Bi4bd9U1uS7+bdCaCAOYCgOwAbAVMYgBEEoIeIgFMQoDwSBCDIQKAua8AACFMVicQpdrxjrTvwRm9n0Dqu2uupzHztwRaMgmvKbYuYmgFrYBepsK0DF7u3BGJLQGrN5MIMKxFclvIHg7YZ5iE66jFC6fcPY98hyX7g2fy8wOfGSvIHlOhM6UXml6AtBAp8RF6IRsPt6gABPJDxRghD55HivfRgzLPT0nFCDZZB2StcfyCJS2kyW3ZT5Au8Lr1cRAGoQgQQHgKIHGQEAJimGmIJLYKhhggzZhubLG8Ncnjzq6bHCxpUZmzY/UyX6ND8ddD/uk14R7oCISWxSQCVrY0FGIi4OVPHZGpFQAYImACAGB/gItgJq2Bgq1BcTZxt9wTcVnqJWmuxnV3kpJ0VlCM/KZ4H8+Zp7EQ3/D8BXolode3Lkqxj/dZhYPnDxBrHpkGQkhNOS+ypIU0pdXRTLoSdAGYIArBLAIDphDJRgwgBGNY1SQG7DjzzjMICUIW0gRl1rz0XpasqEzacf1dvsbk6XEQKhcXXo86AigTySgroQwR3LmgCHjZ87rAegkjArofqlUAbFZvJOB3sW9AN+RqXD8MrfOMtqOf9TZWsviZ6ULh7SvWIU6EXcgDlUGbZO75bUMe+MyO/ILX5+RHkpEmCKHq0g+xpIU0qTlpB+kCEjYC4Rt0WMVgbhWQ/HCPUGKwioDDVgg6aUkLhC71OVFv04jm6lxzx3Srg3iR/MJ1eTlwERjlZRWB0Ck2HBCtEzi3hkIhOsV0kIMT3DI0GhbwXVy95qpZO8iyc+mb95mOK1yFWR5lCxQcJT8rPCPkYQVrS369MkKGPDbxvu719Qrn4/EisUgzCKA+ZR9LXkiT2x07DQFwNMzRxYDkDxKDCLiXRQiBEAn+ZxGBC8GFAMD+AWnE1if1Vf+bQ1HP7HRuX7bU15w45avXr2kIjOVdFIHpoZwYCiF4meNRaAWMgQlRBIYAOJgIgNBcBNbnA6Ggtxr6QzRXza2tLFuXtrnb7lyH24bTgqLER+iFiIWpI1DInPw03qdhD5zbrbwSvT6eM8/P432d/HpIYQgAyECf7DY49rPkhTR3e0pfkABMQgiIQRQChkg4dBqNEGiIZOkvuKriwHvHE60+WZX7bvsKS05Ecw7cluxtSfaMN8E18B7CNQMC0MvGiUcoq1AioOWNoSaGQhYRBHWKQz0kY62A0RLMABKKoDiTjDXe9QjL3qVrUuXKLlLiMBFf9/x8fF8vXOvKrbCe30R+gOH5AczLmYjPyC9Vx1EBuBsckVuA7Y5e0g0CaAKSI+yEgGBioMQXhWB0nBFmEYhioGGT0HFG4uL8o7G2ZXeypEQ0574NX/C0pbztb4Vr8evjtUURsJZAdwq6CHB0zPTcQSxjHBkC2PYHaKeY1yXUa5hQaKYjQwj8Pq4P0fIyp10dGy/dvYtwqNFVsuCX4xj/i+RHj2/x+pz84vz9IPLTkAfBKox6fQB6fYvnF4lPwwtGBNIKLUBT6ghLYkiT21O6SQ8QsxkIzBFWDOZWwdQyGH0FPEI6aF8BwchKAX9Dq0DaIO5vyhhmyYhop44Pf1xtT/sx6YC0spaHX1MPt1gLwwSgi0AvK2OgwGgJhLJGoAiYQ7LrFJunSwSL4Ay2CGLHeAb9ARwdmoDWxV248I/yD4c+y7J7aZnnWP3nxwoyvAprMo14n8/nwRDHID+cAwzyixWBsMT7dHIZr0BKeoReuSL5DQ8IQC/rb4HftWR/jyUxpLnbEzvIzngitwBpRRGIYrAVAkIXQlCrAAgaTmWEdQEmIHxRm1JOKvs3RtyikZu7a8Eg6UlgrRC/h1UEDFWQdyYAY2QMHYfp6bNQ5gisDxQAdU6srqgI4FwIhehwNhOBKRRCIKEtBI8GKAKcR3SmfHUfy+6lZfL2+1K9xWl0ZmFgvS4vQChcLEwAdnaR+BKO8li9PsajgtfHITx8Uho80gMVXomAysVKDiI/AAgx1QzH5rRXWRJDmtyVVk96QQCtQOYWBBCXigFIZRVC2FYBjgbMQtCHVBHziALAJ89jO1Zcy5IQ0Vw7l28kPYlEhntJeD9DcHhNexFgH8MoI1524foDWB+0P8BG5KwioAJAAPlD9QcASGgXBYS+QeCkh98a57po8IUnEwUZROq4fz7L9qVjUvsd9+I61cBIDyO+QH4e73PPbyY/QCQ/eCqd/ABTvK9XqAGB/G4IAWh8zcgw2QznjcmvQ3jGUmlv8o6Mx0hfPFFAACgCDioGUQAiohADJScTQUAM0DfpAC/ekrGX3T6iyXtudfi6Eqe8reZ78FbHaGGoACDvrDwoeDjEQiE6cIDgAsAyF0eGaCgEdQd1xEMhLgLsD7jBseFbNfGN+lNFDrp+gJSkAtKIvyQdPksn4wXpxJufDt/LgNgegEeAJy+d+PLSyAT8D9cU4LMAfE8Zen58nS2uOyD5IIiCBb/1X2prnV21qwtImcNMfoP4UIjU88NnUZCfAoiPlYUduMDDrYBHsyc/nDPyI3xNQIimlHddP+8J+wIIuSfjTtKfQOS2uURhiFoIiFBCYJ1mo1UAso5Dq6S1JDmdw9+Kauc26YWyy9Wu5N/5u8DzW+4lYSjEWhpzKwBHVi7mVkAQAToWsbzFuoBWAOvKDS2yrxRCk3IgZkUKmcLlmAXQxytMG3MWZ/7WuW3h96Rti3qdZUvKXOVLNkoNN98rNa6/bqxyzQJX7c0Zzu0bkp2t96YgZDxvuCVVKluV5ay8aZnceNvtzrJV33JVrC52Fi/rcBUvPewqWPBjZ17OmxPFC6DM7/kWK4JLw8aqljaRcoeZ/EB2/eEWkp5BLGhEiJmcfIgzktenoCMrcOTkpx4xjniAdFJD0rj3SPh5NfLgimWkFwSw/RribgdSUTAh2IkhUssgisAAknUuwSkXzu2L72e3jmjyjsxBbJ2M0Mx6j6j6AwCrCHjraohAXz89Xp5EcFNgUgVkL06ckEpSfu3alr5HKsvZ7KpZvsrZePM35KcaPhtpftXZGq4q8w0VfVnu2fSf7KNLw8ZKsnrRU4ghD4/39SFOG/Jbvb440gOVhJ4fm+5w5NfH1+GcVzyEAkgEDA9U8I7jbclE3nNHEkumrUnD117j3RFP1A4g2XYgFMANYpDbEXOMVoEKQhCDTIUQQgxIUtFbA0gnpLMl6WUgz5+xW4c198DK9aQvgWggxoAA2fW5ABBMBOIwrP4MAsrGRgS8RUUnI0N4OVWdSEh9MtEqoKzKHL91V2Z0SBVZN/maVnwJ0jrj6dgfSnOWLxghZdDxEcgfbbyPoB0zC/mtnp825wb5WbxPx9et5A+AdCURdWjd7SyZtqY8k/85qXOe27cDCM8EwIFCcKMQ2gQhQCxuEgIlpkBOGyGogHGI/eX+68KKkZvnuY1f8OxMck3sgOsyERr3Ea9tiAD+T/MM56w8KGxbgjgyUZtA5x4p1UmA1FfUmsytWsd18eSnP/1gzc25WOaqzD2EAqCdJ+756aiCQHo78nPiA5xn2dnVya97QE58Pe6eQwh4drl3TdhtRLCTLHcn/Wp6FwrgagY8DwgCRaCDEzIgiGAhCCQFYOyOzxlc7Rm72S0jmtybeYQMwO/xfpgGdj/9HoFrW1sBmndLS8DLTamdR0hzApluBKdQ6/i1t2VhibbrljnsljE7F3OVZg5gRyn8ZDYkPgLIwMivj+8DLDM5TcQ3hT3Bnd1Q5EdikE74u2fRKEtmSFN2OvYh4eROIH0nCKCDwRCDLgSrGHiIFK6v4G2LI1pHoiqN3PV/2O3Cmntozc1kMJ4oPB3snvQeVhFYWgE+6kQFwETgbdCHXZX6JJ/alDHs61q5FEQf8/Tn06SKnO2kMiV0yBP0cAuEAsQ3d3bh8xBenwKJL4Q8nPwB4nPyB0gxBfGzuyPjtUhxtzqQs4XsgZiYCiAANxOCQomIQkCEEkKgVeBDqm4APmOQunKq2K3CmvvYtk8ru5LemcTWiIuR3RPvRcXGr81bAZtQCB0CjoKRjkToCyWMedoy65Xem7/GbhOz823uhpXluAV5tEOcGOtHHOkxBAAEoiM9IvGD430a/+IYPCcDwINEaU/RtFcawr4QW923apF/N3jdLiAZIEgIQEQqBlOIpAvBKgixvzDeCfF/R4JTeTa6DWzdu7ObyTDkRUyDIT6zCFBcQSKAlk+Dc9KZQDwtSU5vR3aptv+bUb0MPGbnYO72tQ+TGoeZ+JaQB7cS1Du7GPIAsY2wB0gtPNk1eX3bkAfJr3s66u2o5wcysLDHABADpzdM7YDmf98tWSyptqY9+9A/KzvjVd9OIBp0hg0hdAG5OxGMjCgGICSHtVUICAHOQQikH0S1c2FUL+RWj6y70tcfN+nbCS0OdsgFEej30q9thF3YEvD+BpBeQeJ3xYPo4yd8O+a3uQbv+Td26ZhdaJN77181XZ1K97KxJT8Sn3d4MdQxPL9AfEvIgx3diPE+en0r8Rn5OXCej7Rz8SaW1JCm9Ca/QgaA+CgAhoAYgHRUDAFSGsSk5AwWw/iOOUTtSnzP/1LNp9gtwprcn/osGYLfdqMAdBGYWqMQIpBABFMdccTfBV6/M/2Qq++6q9klY3Yuhh0lQFQPPHwjW/6vqyx1SkbiW+J9caSHD3PqD2TM5DcWdnCYyK+HPMGdXUZ4DgwFBPJjR5T0wG92pB9kSQ1p6mB2DRkGTwoEVBGchJyIDCZSiuS0iIHshj5F7/w8dvmwph1YuYLsm0c09P4oACoC/d6BloBfn4kAWhgP9HGwj+HpSv69snNp1HOLojX/j6o+5+lflyR3LL/d3bSwxFWfs0uqyz4k1S141lWT812pbuFhqWF5r7t5dbHadfs6beSJuA/MFonSju9skVrvjug50cgbb3zUVZH1hq/cjvwY8iDpueeHvznxDfIDyRnxrZ5fJ75OegPY2bPE+3bkRw85QR9wJb5Djod/P5g6cv1iMhRP1B6BhCgESkaBkEwQdi0CBZB0vPsaEFD8GfmpTRGn94KT+St1d9Jx/xCQGwSg9sC1+f35PY1rA0BcGGJNd0N41w3k705rws4zu9w5mfbUo/+i9axapW5f1KA0Z/xIbnCc8TYmE9KMSCKkMYn46xLIdG0C8Vcj4LMqQE0KIdVpRC1PhzrO+YNat6Lf03nHddLxp6Nq/WadQaX8+ZmChb87U5T7Gvsookl1i/aTmkRGfhzl4eQHGCEPkj7g+c0zOZH4IJIInV3d61vIbyI+Qic/hgkqeMnJbvDGe64Lu9sC+XndJ5XehNOTfUBeIKGJiAYhAV14BCJaxCAKggxCOndllLFLhzVtdPnd5EAcUXuvIsouuDYIMEgEQquDI1JkII74epL+qO1eFvG1T5HMN3LLl3w9C7+tbc/8ntqc4sYhU7IdSN4M4oLyl9EZYV1h3WEdYn1i3bJ6Nvp8RYlELoQwrCSRzh/yV6QRuTznbU/jmjp5pDziu5lnlcl9m1ImC7OItDVj3L2v4j/Yx2HNvf36b+FuZHTlEQ93WEeXe37D61vJH0W8r5M/gtdv1olPgTEyAMMF0g9C6sksYkkNacrutH1kL8TujIQU4M1NIjCIycGEwIjq64Hfd8cp2uF7/pldNqS9+dLQ36iDib+bHgby914JYCIQWwIqOrgHwAtpIYPziLc/7cDpA/f/E7vMjA1bDG9v7u2ervRn1dZEH9mRQEg7XLcRyhnKnZY/1gevH15nUI/6Mks7AQDog1BwgjgjIB/EAJ+R8lSilGR61NrVLa5nGq9gSZjd5qy4vg2nqeKiZXfdunz2cVhTDhZ91V3tmFKA9DjEieDkl8J1di0jPYbXj9TZtQl5cGiQe34EfZIKAvDvhPOupIhrAzwHlt1C9scBCYGIO6+iIYnChcBgEoFFCAiyB9K8yxHVnp7aIfD+h6CV6of79TERCAIQRTDdN4dM9kGItnvBWb8jQNl/+9e8u7JrPJ0QEu4EcnZCvwPLDsvTeIZgEQDWF4IJgMIQAAD7fFwEVABwBAEY7z/LSyJKHrQK21KJVjp/zN1y+0aWnNlp5O1XP3Y6b/5b+Doj+gLrwtz/wTiV/TusOesWvDJZqxcSEl+P90OTnwpA9PyM/Nzz0yWHtLMbLfl14uMoCRKfTmqDTqMGoYO2I27K91T4xef+H+V/Tu2Pl8aRkEhEABUBFYJISgZREEBSDxwn+uYRz8iNCeySIY0cP/5Xyp74//HvuzIgAJMIroJ76dcmg3OIry/+lLZv1Vm9/V07uC7e15vR6+mK9+HsUtovwnLDcuRleoEEwFeT4Rt/PPnQlyhNJ2rViu+6Ds7S1sDZvsHhzceXWuireibxBcxdD61i/w5rUscND5BmCINQAJz0IcgfHO9zsIownuxayG8iPnyXhzzM83Py8+FIOjSJcTOEDvJAduTh0D2pw2Q/EBtbAR6ScNiIwfDSSNTdcK9dSS+zS4U1z8HcG8jhOcSzGwQwgBAEIIRCZN9c4htI+tV7g9d/if00alMO3/s132DOgA+9fX8c8QDxaRlBWRllGCSAuUwAUC+8vgwBMBGgAPjySkEAOBNAXEyjCwCOfCXZVuDUZuhjFOGO1fPfHtuxMezO3e+LObetyMPQhy9Xw7eDjJUsi7i2Fs3/wx2fddekOz1YaCHIb7d4hZMfK8BEfpH4CIP88H8h3sepB1ixPOSxkh87j9O98L+epJ9Da8ZSa2/akdXLyAh0SvuQiBxIyBBiAHAhkL3ziDqUG3b2KRqk4c+U4YT/8h8AL28IQGgJ4J7YKSYjc0EgycfkH5bOaLG481j5Zd49OWW+3kSN7J4LLSAOn+qjR4YA+HwiXrbgaGj5sxZAF0Gg3kQB0Kf4OMJnbQFwDhgTQSgB8GWUPmgZtOLsqTNt90Usr4tqzrz5z+ISNS4AXKvpyc8Ez7Y5mX0lrLnaljfRnc7syA8Fakd+U7zPn+yKxI8q3scKFskPlc7Ij9AgPvftgph39KZrWFJt7Y03ej6q7E74/RR2TLlHFsUQJAT4G0Qw0Q9C6I1/j/w8P+wKNDT18PL55CAQcw9cb/BKogkiwHuiEPD/nuG00RMnnvxr9rOozDe6fPn47uQTZHgedMihTDD/WA5UAHDeppdb0IS6sxWAZSTIKgC6K4hFALoIkom6JYmMF2URV9uGqLeGuaAmHWm9/MzmjDMqW9yMwAXL/nwHGStaHPFhEpr3aP6/KfUOxSMWHoNIfpy3TsMdE/n1pX6RyM89Px3poV4fwcmPRzZVgZGfj6KQIbjPQGY9S2pI0/bnFJCDIC4UgAlWISB0IZD9IMTdaW3sEmFN2Zt0mByC3wH5ObgIvLuB/Aeg3zKU2oHD0ewnEe1Px7Z92jec2YWT+own2mxolk/bMAkAIQoAYNQDE4EhAGsIhAMctgIAQB/AJABTKwCcMnaU0PcZVeHcWwgiaLx7OcvK+2dy670pWl66sHpfhwTARc1j27+ZyL4a1twdK8pxPDlAfIj3GfFpwVrG943Orkh8hEh8BCM+9/qBzi4Sn5EfKtuO/AicZanuTDh5+sWKT7Ck2prn6fv+1bMnTp3YA94YYnNTJ5WDCwGgQbgyMQge+9CaiJ1f37O3fcW7d86EdyhAfoQK8ABov2A4ZUa7JysHb8gYH0o6gSL0YFjGOuXi8wPqFIQwyE4AgX6AfQtAYQgAxMAFwMMgy1BocBiEAgAwAVARbEom2mZAQZYqdT/+/r5fzFl5wwZcrS+SH4H7tkxDX+BM4aLvs6+GNfLq8GVyY/ofJxuxowuFFZH8UBki8REm8uvE12EmvxjyIPFpky+SHzyhPk4PIQp2VKEVUIYX38SSGtLU4dRechB+w+NzJoQgMYAAcBzf3Tfvl5H6F2jqaFYdeRLSK5CfCgDCIXIYBLo3eUbvBPMcyH14fChuitAnyZA+NnLEh2ZDCYC2AjMRgNEKQJ3ik318yEkFAIgoAAx/rAIQRAAcm9yagptj/a/00tD79/RYKlleh1tVWAWgb3+dRKYKM4jUeMd17OthTe69ebm/LZkorDB18iP0QqYFbXR2LQIQyU/jfahA5vmxCade30J+Gucyz69Q8sPnNAzQyU9JgQIYhN/1pvyIJTOkqUfXXu3bO4f4kJyGCJgQjFYBrgkiwJBF3pu1hf00pPlPNPydNhz/7uQ+M/kR5Kk5RB3NHGJfjWhvv3rwY97RLBBpHBmH8EmmYRmkh41Q6SKAvPJWAMvGKoCgjrBZAKZtFwUB6GEQI78oAAQTgBgGmTrCJgHoIuDvG8DBlzMlK/pZFi++jRUuOjAN8b6dAHC7O+8WXPSy4C3ppejmeDi3L+rGRRnc8xt72VDiIyzEt4n3xbAHd2swkx+PAeJTYIUzz6/gjExGfAQ+1fXshFBocB6EKzdG7NTLe1OeIQevovG5ZhJBQAwYs3sH504qz90Z9l1kaJ6jq24mR6AFs5L/8NXEM+p4MtrnLe8dfeIfvSOpL2KLoUEajJAM+iT8KTYXgBEGCQIIrCwDmAQA/0PnJDqtMP0A+44wisDcD0AB4B6xVASmTbUCYRDfHAudrKvpnhUsqxfXnAULfjwBTVEoAWAi8fVHzsrrOtlPwpr/9Rc/obZl/QIfs5s9v17YkciPlRQgP3w/AvmNeJ+SH8IJwfMj+SkxgCA43UEZcET0tupzt+b4D8URDUiKw5VUCBYxkP1Avj2Jr7CfhDV5f+p3UVAG+eFa5BAIaH/KT0/+oiqqWZTK89/62vho8gm8Dk1DP1xHFAAblj1bAdBllVBX5yoAvrucIQAxDDIJAI5MAAjcJ3Qsf+Hv/Cd/cXFnlaL3cebl/K8XOiShBIDnEiR2vCiDOLffH9VELPfhR/7D05Z6Gnc0poVLiY8QCj4E+ZH4IvkDIQ+eI/HN5OcCoOTnxAcy6MQHYAcRwgQvhC6egTk+99G1X2bJDGnKvtQfItkwZseOKhcCP5JD0KqMZDzMvh7SvC88+O/a3jgf7/zK+NsDVxHf/vg/aM8/GtWqLfXY7Vf5RhPf4SLiIhQFQPNoEgCUl0kAcM5GgsQFNboAdCeFzipURxinsRshUAgB6A/E4JwJILgfYG4BrBvrYj/UVX/bxd0ynRx//uPOzel/0jaHbwEwsd68ZOIuyjmpfbcrqglZ7sH1id72FG2qDQpV9Pwm4kNh41Hw+gj0WGbyQ0WKIQ8jP+3sUvLrxDeTH77PyI+QcdhyBL6/O6WbJTGkeb57S+r0AWgF2Ji9CB+Q2bPnmkn5yPURZzuqh5Y8TI5AvuB3KKbJ/fD7/XNl6bu3R7Uzg+vo+qt9I/GnUDQoHhQjFaKNAAItAADLhpdVR0AA1LFYBQCOSdxykbYCYj8ABEDBBRC2IwzEBwFYp0TYCeDMpiSTALz4ed78P5Hjx8NOYT+v5vr56CedWzNO4pBUJAHg+C0pckAhLPluNCMfaO49dywZ70jRpttRBKzQDfIDhGkNtHLsOrtIfBvyGwgR8uDoCCc/faoLZPFB7OwZnDvue/KWiFMMlP2OgxinW0du/KNwraH4n7GvhTV1n+Nlgt+H33lAOPigSzm4eA37d1hTj91y1fho/Luc/HiNgACwQw75wmcUFgHQVtBOAOBUZocAdBGgACi3ECzSoK1A0x3rWRFceHM9H70AuHJJKfQHqq+NascDNGf/rQ5fp+M90gXhkEh+cVoDJT98hrEqDXX40Ux+HOkJGe8Lnp+HPZQc6CUR6DEBdPRmKDXiltzKd9d/3bc/btI7rJOPgxyBTuhoRjX7WkiTn3/gPz17505i+IPExWFQ90h2Oft3WFOee/CrvhEIewTymwUA4EOztBWAvPIWAMFaRlpuWIZYllwAUN7B/YAwArD2A+wEgMD4P6gjzAUAR6sA4MhHgjjnpqAveqZg0Q9YMVx4c7567DLnlpkJwA0Z8Zemk9P1a+9jl4loY4e/9TXvjvSf4VpdBYfhWLwf2vPD0eT54TOsUOrxOVhlCwJA4stIelvyw3eANDjEOb43bnoiijBEGc1pJU/CdTkBISTyH5hLvE+uyWZfCWnagZwHMfyhcf9huPe+1GfZv8Laqecf/gffaNL/0j6IQH6OqATAykpvAXQB0LKNVgBiPyBaAdApEVYBIPm5AIBTJgFgKwCcEjjnhr9dm9Mn3LvyZzwJ8KyMvPG9j45tzviDJ4o+ABcAZkIFZXuK06elzrujej6Ahm870XZmd+Oc9KkuvSIo+e06uzYhD433LcTnIQ+OgtD5OZT4ABbycK+P0Mfy4TMAPuySh5KfYkkLaTghzbsv/t0piN2RfBP7riTuoXnvOV8tv4x9JaSpe5Oex4lv0yNXEe++eX/SXnwkYt/pzTeH/sYzkvoyOax3wK3kR2BHPFgAcDT1A1iZWQWAe46iswnzLICLILgjDEcaBsG58dINqwCA7IIA6PsiuACCRoIYr5BfAu/oS/Qqr/s2K5ILaxjLOwsWvuZDdQqJoAgjgDGApyCZeLZlTpzpvG8lu1xUpgyuutG3I+kPuH2IBzy7mfxQWUHkh89Zhap45ORH4mOF05AHCMDJzz0/Jz4CyEJJA0AP6gUi+SEUUo+sWcCSFdLUw8vuRE9Owxh8Srwv+QD7V0jz/OA7/6oNzfVMgWAmR0DoRxaH3aKFmzqauUdscexAR6JoXvT82QsAytAqAHQsGAbhOweC+gG6AMRWIOxQqO3qMCYA9mYgXQBwLvYDDAEwAK94R5jzDp9JuQoWRTUH7byYs2DBc+JMUANhBEAzARnyFoAQtmWOuzrvnpEI3nkKPGt/Tq23O8FLBuYRL5I8jOe3hjxGZzeC59eJbyY/go7Fg3fW9ia9dvz48YgPopT9Kd/HsXucs6MdyPom+zikqYeW3EwOz4W4H9I4klnJPg5ryujiAvLUXKINfsOW+BzRCiBoKJQLAPtatgIItAJnK4CIQ6EWAfA+gCgAD4TjpzdnvHXRXpgxVrxkJy6FNJEfEUEAmCFc8eOFTHtK0yadrWtvZZeM2pS9t37VN5DV6e2JV3FR+fQuqCDqudjRjvzc8yP5seJFrx9Efp34nPxIHpFMdIjy4OLvsOSENOX79399fGTeOBmFluBo5D141P2pveQ5EMtw/H8REllg2tEblk5D3wKHWMX02cF2KBSFHyQAOKdlCQIQdpagYSf2A0wCgL8t/QBjcQwKwBABmxYdoh+gv3lSDIFEAcDR2g9AXll458bj5vRppf/Rr7PiubDm3LbqCXExjIEoBKDHdolEA9VPlqdCgd4YcRG6nXmf3vBFz+7MPM+uhN9M988jOL3X3zeXeHiF2pA/uLOrEz8U+annt5BpfC+EQ/viJO/Lj0XcUU0ZXVCs7I33+V8K/3JrXFugDs3708SBOdPRiMX7ysYrfCOJZ3g/IxpwAQT6AQAsi51CeSH5bR6ImQQQoh+AAgg/EgTgD8QsI0HGUCgTgX1HOMAn5BbyDbnGuTeF7w1ruiOq4eJzNnfD+iX4DieD+BxRCgAzOAYZlSH2I1VpRG1Yvu+dH+44q1df4pNp794lmb5+R4O2c96vtZ0QRgzH6RicQyb7ryHeXhACIkzIwwnCiY9e045I2NHEERplX2rE3aRPHW/+uPrUioitnPb0jXHkWDxR92dEHCqG/P45feoMaQjV6bWDkT8bARjzoMIIAFfTBS+Ogc+xHwACwDlctBUIJYDyePu1Aej9z0IAlGMoACYCUgB8rLj+4rwyydlf/IWxzelemSlxZgKAjGIGWXOHb38nlRDHVeecUHpuz2S3OCtDcoyPrvm6d0/mHdqAo0vtT3hJ6Y17W+mdMzG5B4SxD7B/DiGjcERACIFj/OTgNToOwTnE7BQQ6oTEk4DvJxDt4OJ72a3PyZSR9ErvaNLpaGJYz+j8GvLDeEgHpJenNRIwzZi3A/AbnnfoaNPy2AsYAmeBgJAS10TjbnW4pxBuE0P6ALsAO+GePVBX3QDcHqULAZ91JBLSDufteAS0JuloAeAmWU0IIGgjHOvhWIdI0TfJohtlOeirlkglIpWQCjhCZEDK0hjS6XMkihKGYvisiAFfoAfRCKnKAT4tDPuOh/NmOBI0tjXn1aAJcWchAFQ9vilmsgw6xxWpRGtaUXXmlaf+jt3qnO30i498wntw6RflA8scyp60Neru5FvVoZQ75T2J91mhDCXfrwwnPBAK2t7EDeq+1Ee0kexC/9GsYvXA/PPyBBKf9MqHV6ewP0MaPktX9zlu9x9K/CamRRlKuD96JG7QhhPu1vYk303zOwDoS7lP7k+6R96FgPOdKfcipJ7kDXI3/A1Qdjg2yF1QXp0pd8nbHXdL21Pvk9odG6Q2OLbC91oc98jN8Hlz2r1SU/oGqTnjXqkx/T6pAf6u48i411kDn1Wl3+esTN/grMzc4CzPvF8COMsyHqDYBn9XLXrcVbOsxFW1tNhVtTyACh1j5ctKxspXULi26RgrXV7qAkzWXFsula6M+KzlvBl0hGtReUj2cxUAjQGhKVQgNkSvoFVnnVC7Z95BjlnMLpq5W+9aiC8sNi2LPAcB0FiQxYUTFdCU1jmI1jD/BW3nbe/PnO+YxSycnX7xwCcgDHoHN8Y6WwEYb4u0CABHCfA9AdM1CWSqwUHUxqyXvDuvW3/mxPkLjWIWs3M257bV7fg8wAiDzqMA6GgBjhqUxZOpOgiNmlOI2pD2B60tt9ozcAt8EN1rRGMWswtm7p5H47X8TLpE7UIJgL6sGYfRKuaRcXyDYWsi8TQmEbkp9TW1LbNa3bV6sXYg8pyZmMXsgthYyZLvT/PRoAssADquXKVvxT3VFE/I9kTib0sialOSpLSkvKK0p3UqO3IedPeuWqLtvWGO58iGLyjPbPwceaH1cj+ET85Xhy9D4LkdyO+GL8P1DsR57DLyu2OXud4Y/WQokD8OXE5ezf8YKwZbO3HixF+TPx653O73diAAXBDPfh7WMI121xCBecA86YBz/AwgQZqkN5/+FM3nG89/Ujo+9CkEplV67cjl9Hj8afgMMfQpWib4W/icAn6Dn+mf6+eEgZ/jdQLX0OG3/C1+7vf7w25BM2vN3f7NJZMFmXpn+CIJAB+00HkntfpDGG9THAgBWgccl+5OIP6uRKJtTyDu9niPvD3B6e5IfE/ekfyOuzvppLsn+aR7Z/JJeVfyO3Jv0jtKH6A/8R25P/GkOph4Uh5Melfdk/CuNgx/Dye8K+8NBn4+ddgxphy9PuSTR/nV7Z9R96UeHx9JPGV3DQq8voCpg4mn1NGs53CYOZxpo5ld/iOQTptrcOD/aB6GAHsYdsNvdie/q/QnnVL6k09pfcnvqL3JJ5VexyllV8p7ys7kU1A+OrpTT7m74POu1FNyl+Oku8Pxrns7fNZO8a7U5nhXaoHPWlLfdTc7TkrN8FlT2rvuptSTUkPau1J9+imKOo6MU67ajFNSDaA685SrGv6ugmNl1ilXReZ7UtWCt5Sm1T/27tpQ53l+e1S7C84aO1O87AXcD4gSPyoBwDmQn4rgHAWAj+GNWYnsEb3cNJeuIfC2zyHjHXOJrwvfxXUN8XVfTcZ7riHjO68hE7uuIZO9V5OpPjj2X00mBq4iE7uvJLjJ1eTQlWRq+EoyuRf+tgE5cCVRh+Mk+WebQj691p5dt5wcnQfX+IbtNexAjl5F1IMLwm734Xx1+2XyULyEabC7BscUAvKBeZmEPE0MwueYP8jneB/kEfMN+Z9AQHmM97CywTLqQkB5dUI5QfmNd8whvnYoxzZAKwDKlqIZ/gfOxwdl7mvEdw3Def084q1jgJDVC/XkhfryVMcTDerOUxlPPOUMZQnEs02HtzSBTAHwLaKeqhzi3X7rIdfzPVeybM9uk/fkO7wFWcQNfQFK/ihbgMgCgO9AIc1UAPRRPVQOXz/AV40ZO8HhpC+cMAeVbZokh1Mk2JwgLcx0CDpjc3RBMcu+rakji9rplAmb39uBTp0+NJd4jt4Q9h1e3qevS58enUsX2thdh4OmH+f+APSpD3CkUx8gf3x+FE5/wHKgE+AY6CS4OaYpEMaSSJt5QLgzhO1cIATUF33TD9YfWxpJX4yCdStOh0Bg/QMPcEqEuwBa8rIkolUuVKTBx+9iWZ/d5qy+aQeOCJ3BMCisAPS5QBeyBbiQAsDJcNreeS7/y6Uh3+kLIcxHleGU30+D98frWK9hh/Hhb0CrEq/6X28K26FXRrJKcBqE3TU4TOQ35v7AOQhAZQLQya8LgK8DMPYGFQSAZYivkTWRXxCAuDME3d2Pkx/rCesL6o3WH5sSjcPbVgE4i+DvIsYD4AMC54p5UAhV2cTZt3Ery/7sNfnVQ5+RinLfwpdl0Pnas0YAemVixcrnQQDU+x9cFNb7K0/fke0fgeYeroHz8KMRAa41UPenRtxSUhlOfhG/a3cNDkMAJvLDkU5/hrx263kP8v5sLTAtL1wJhuQHGDtxGOSHz63kFwXAyG8SACU/q1dKfqG+se4LzHsEUUCorOTFE39FNnEN5c2OnaHDmXvX44t8hdnEjav3L3EBWNcBIHD6sbYv6aR0vDPsjnfKvpwdZBTCDH6tKESAE+zUQwvDejrPT4r/VR2K84xbFt2LMHt/gDDz07wZli4A6+xPuspOXANgnQEKCCyEETfGgqPF++sCgLqjSyKR+AxYv6yuncbuEADm/XVuwDkIYAxCZg/wRS3P1cZ/vDfirnrvu4013F5IijOIE0VwzgKA75xzH+D8CIDG6Efguk/fGHYCnP8XrZ/Tdie4cB9OJF80IsC9hCbxJRfHbgs7+uF5as31uGosVN8EPw94f/hM9P4oAOr9ddClooL318MfVlYYMqL3DxH7043LqACCyU/rh5FfovUGAAGYpkILAghsjyKSH4AcAfIjX3AlISkGLtWvjTgFfVaYVH39MG6NyFfxXDItAO6Zg6S1CIDu0nAEvjOSeZhlMaSp+5dsxDe2UOIhAdnOEvyaduTFdcDyUHzEJX3KaHZXuPifXp+JzdgDyJj3z/LKBGDu+Aa8P5aVYo39De8P/7fuB0QFoNcJBRMA3xnOiXWHdci9v9j5NRbFAxdE7w/8sK4Kc2+GVqAYootnmuex4pi99qbf/zdS5Zof4qZYY9ASUPLjHi9nIwBsPs9GAFB5ZyMAJI4oAFx04h+5knj3J57UXswP20Elrx78mNKX9MbkbnY9QwSBlsCuT4AvwVD3pw2yy9gadKz/Utmb/N/TYVaBmcIfw/sHyG8IAMIfumOGSQCsnHDkB8rM3vvD57ysWfgTKvQxvH+YkR9cD2zn/e2WRCJIcQpxNa9vZUUyu83/p998Wq5c+RNS7IDEQ2YuUQHgqM/k6DyiPrM2h2UtpCn7V36T7IPv7oRr8WtGIQJcsKI+uTpsJ2/8pYe+7t07b9qzx34BPLYsJvLbCICTX4/9AVAWeuhztV5GgvfXF8FDmRreHyAsgTRWgAnen4c/tK6wzujID5zzzq8Q+uDID18QbxJAHgLODQHo5Ed44e+xktzXwRlEtTv2+27v/OyHn1WqV/0AReA6SwHQ8eMoBEDfEXyeBYA7tOFKKjmKlV/ktYHLtf6Uk5MY8nTDNTHeRvIZIkDA/4Q+Ad4DF7VrQ3E+74sP/x92KVvTnlx1v92W6Zz8gdhfJP9VdH9TTAtNExeAKfwBGN4fygtDHxRAWO/Pwp8Q4/5YV7TOTLE/gNcvICrvj3xh5MdQWoKQ2lmQPa0+339pPCBD80M4pNReO4RL22Taq780BOAd/AYhT8J1D+SWsKyENWnP8nr6VhkkGL8uEI8S0NQSoAj0eyDICJB0b9JP2WVCmjqaPYrbrIQUALteYNwfwMkfwvtTsNgfhz2VMCM/duP+ove3G/eXcOiTC0Dw/uK+oFj/XACUF4YAgPxC+IP9SSeIYLwok8gDm97/94TN1FwNN22b3JZJfIWQkVksAAXIOQ6Eot728LKo9ueRnn4ozteXOOXtDlyXX5uGQ1QEAJMI9JaAxv+j88PuG+p//cAnQCQnJ/fZhz/hRn6sAhDJbzz4oqGP7vntvT8Ay9dE/oD3d1XBOfX+AKwnqDMMXSON/FjH/akAKPnxhdkogAD5KaA/OV2UAU7lkai32JxVpvQ8sMZTlvMOKUumE+FmmwDw9UH42lN8/6/n0LLNLNlhDeNRpTfjZ6QP7gPXxvDCKgI9HEJCMnLScOgq8NpXQQc7jnifXhd2tznP9+5LnYJ+iN3W6/beH86R/DT2Z+mgAtDzzgVgu/dPlN4/0lNf9P46+RGsXin5+WZYUN8mAcB5SO8feKaEAnB3P3Jxdn+4EOY8VP55tXrpXn95KpkogcxGKQDDw0QrAKjEmQqAjID33xvvUg5eewNLbkST+5c0kN2QBn5tLgKEIQI4AvR3DzCCQogyMQitwJ7E0zjFmF3O1tQjS7ZiR9lKfkTIkR/q/XHkR08Dza+J/Oj9WdlAGRmxPxeAQX4W+1Pyswdf4P2t25+IAtC9P6tDBK9XgESHPoHwJvIDDO8PpEfym7w/E8CmZDJZCALoe2wtK5pL15TO29ZqFTn/S6pSiQIFQwuEF9RFFAASc3IAX4QRB+RPeW7s6Iaonza699y4nvQlEI160oAA6PXFe6AIuuF8JxCUkxOISvbDcW/2fna5kKaNpD2Lsz+t5BdHfsydX7gu9f6B+4sC4KGPLgAgeFjvrwtA9/6szKuDwx9x3N8ZYhc4Jx6hntHhBXV+aaeXC0Anv8n7A/nxBYxqQTbxHK6NuIPGJWHSay9crjRfW6qWZ3hIVTJReFN5PgTQonu0cAIYB6Lg3ji+wcQx34FFD7FkRWXq6L3zfT3J4zhlWKLXh/vR6weEECQCobXBFoC+NPvQ9WF3y/b/punT6vC8sYm9wfF/wPuL5Icj5Euc9kDfibAD0sfSpXt/PfY3Or/hZnxSAeihD8b+tOyZAHi9mMIfI/YHQCtvODbLU18uADH2t478cOCWiAq0BmcKFpwmb//2M6x4PhgmD238ila/tEstT/WS2hTiK9cXxV8IAahAyunea+jOcb7+RHl8JLfJ+dzmL7CkRGWuPeuv9nWnuKZwHg3unAxelG4ka4gAzhEoAA5DBHAEcmKrIw8kvHvmRF/YFWCe525OnBqZaxv/2w99wnVxtzcqAP2eKEJMi0h+7v0p+aGc5OZgAci2Iz8B78/DHzH0MQlA8P44+U3fBxQgkF8XAPf+1tg/IAKcYDmVlwKty8ojrGg+eCb3gRCallcoVZm/n8Jdw+qTyERtAlGq4on7LAWgQiV7oOLJrjmE7J5LJnvnEU+/47hvX+5W7wuP/zu7ddQmj9yX6utMeXe6S78Hxs4KeFEqAlNLoBPOEIClJcCWR927oIVdNqSpB3PX4e5uIcnPvT92rLn3B+Ib4Q/eFwXA0mP2/noZIYK9P3yOZcrJz8IfTn5x5MckAJP3FwSAnV8kPff+nPzG+wC4AKzk13eExin29HVIDbddnPcAvJ+Gr75Uu9bmqg0LmqXqtF+6q5I9kw241Z6w9V5rAiFt8Qzz9CWRnXCO2MG28tsVTybhXOlMkNSelB95+3NKJkavB2WRv2S3mpHJg7es9HWkeKY7oPJZP0N8WR+SyiwCixCYCDxA0PGBeKJ99/4o3jiTXWSd/yOO/OC7DIJjf+b5mQAM74/pMaY8B7y//tQX0m+K/YO9v/3mt/xtkHAecuRHf/AVHPvDufjgK8TID3p/nGEsbc2aUg63fo0VzYfHvEMPXOHdsSrL1bxgndSy6HGpIaNebs0ZdDc6nnI3Jn1faUl9WW5JfcXdFP+c1JLypNyZ2SfvyKyQd+be7RlcnqIefeIf2aXO2tTeVZvH2xPJOBBG4q0M9ZpAdmwJgEy6COxbAlEE9C30A5nfY5cOayq+cukwEFkUgHXc3/D+cH0h9qeCM8gPoORn6aMjP1wALC+GAND7m2N/3fszASD5qQACT32p98eZu6G8v0B+w/sD+V2i97cJfei0ehDAxJYUMla87BVwXqxkYnZRzPVM8RWergWHSFcS8QA5Qr2+lbYCQKhwIsAX9mlASv9gPFGP3BHxTTNo2khWhygAk/cPGvm5KkD+IAHonp+HP5jO0N5fFwCSn4/8iN4/MPIDf6P3Zy2A3ZwfClvvDzDIj61ACAHg4ioMf4rwzfB3X3rhjzpccqX3vw5+kf15SZl317V3etvSTpHtCXQcPKivYSMCKgQqAiAaCkAQAT4oIwNAuL7MF9gtIhoIoFMUQNBTXyoA9P7g+U0jPyL5AZbYPyAAln4jT/CZyfsDsZH84siPpfMbPPIjkB9HfsTYnwkg2pEfJL8K5668HJf60/3n3JJfdHN1fnulWr7S46m5sUbtf+KSmMTk7VuXqbXl/IC0JZHxRiSB7glxC5aACIAoNiIwOsa8JaBeF4UApAQvPNUPlX8o+m3glQPZpsX1oZ764kO2QOije3+7kZ/gGZ8s/TwvpnF/Pe+G9zdCHy4AJD8gVOyPIz/U8wME8psFAMQPEfsj+TH+J4WpZKx8dTMrkkvPnMWLXyDboAe/JWNaLl3yrNZw812eQ/WfZ/+eFYaxpa9vXa7WOv/IeCMUenMCfdrJR5t0EejEiNgSUBGYwyFsDUg/9B/65s/oZW7KoYXlvBNs/9RX9/50zk+3IAC+1BEQmPMDn0GaDAFw0ZrID/+j+WTkx3wzz2878oPkDzPyo3t/OEcB4IgPCsA05wdIb4z8BMjPvT++g8K9NdPnHtx2cV6DeiFMGngiTsnLnFahJ48vNsbhLOjRy3LJkiNy1Q33+Aa2/Af76kU378HNV2gda76tNWb/dKoR0tYI4Q54ORerdAQVAXpBJgJTOBSmTyCGQ17wxp6eZM39XNGX2a2jMu2pVffixDwa+4cY9xc7vsFzfpD8CBSiGPowAZi8v54vUQDhxv0RUqgFL+yhF43/Re8P5I925IfG/rj3bNnqTlYcl645K65to03ZY5BhpuzpPAeIATo3WzJ8roIFP5FLl1ZrdWuXOrs2fuFC9fbhun8+vnvDV5WmZRuU+vlPuqtTVQIef7I2gc5kpB079HJY2WFEQIUQriUAglEBMBHgK17lPdc9zpIRtXm/d3fmNE6EAwEY3h8FYPX+YcMfJD+cowCYMLlQDQGgkNH70/BHzycFyz91CFYBQPhjmvRmjf1Z55d6f0EAgRYASB5izg8KAGN/NzhK12hdxPexzXqTnu78lFSwgG6bgsqme4kyoBjwbTOo9gl819OWdM2Zn/0rV3Hubrls+SZX7drVUvvdc7T95f9y+vUXo9pDEoj+V8ozrZ+T+775FbX9hly1dslGd1XOgLsi4zdSecoUvqbHX4O7DUDFQSXSYTzm1XBsmzf14UQQ6BMA7ESAALKRnRB2dGe9AGma8Y7Wymudf68Mxbsnhr4R0fvrAoBzRn63MfKjCwCFGNr7Y/ij54sLgE57YHkXV3thGelrfcFpcO9vM/JjN+ktMOwJhMcWwMb7Iz+o98cXMVbfsoUVxaVvro5vrZgqzKQ7yIkC4MBtFfGlZzIUgndLCpkGQeD7oCaL0okbX8qXl6Y4C7LechVm/dJVmP1917aFh51li/ZxSOULR1xlOUedJZkvu8qyTjhL051jJY6pSXzvVDVcqyqZjJcnEhmbaqww7rmwEnECl50IIoRD5j4BEEsQgQQkGwfyeXakyO7ntswo9BFN3Z/1AzLCvD+SHyE+9e22hD9BsX8I78/SSod2IQ8m728T+ogCiDjyA8THV1/p3p+RX4j9zU99OfkD7wGeBIfoKlp8/M03/Rfn3b8Xy85U3tBOX62EZLcIAEH3FuX7iwJoLAiF44KWQ4Z4UQOvMZ6fTKYKQSBF4MVLHMRfCihJhiOEVYCJ0iTiK04kGnTCZOqJBGDl8IoSREDnHoVqCezCISQJFQH8HaJjrLXMJf7uRCIN3RR2wlskU5+8dhNOhwh4f5386P3pWgMb708BsT+OQlEBtDHyz3TkhyIwF0snv15Wgc6vUKZQvvZPfeF/hgCg7kPF/iAAjAjUvMwpuWdTEiuCD47hEklX8ZKfkHxHSBEg+P9EEQSgFxwFehEsTCxU7l34aAMWOlYAAr1RBBHQCg0SgV7xVASCEMwiEMKhBgQIAloDfKuitGtFGcv6WZvvJxVf9gwnTPh4CxBquaNIfnHkR1zuaPX+dNyfCRgEYOTJID+AtQBG+IMCCDfywwSge3+9Lszen9Wbhfz6lGcIfYozyJm6W7ay7H/wzHuw6gq5aP479PE26xRbQQUwExFgk8pEQEcZ8hEBEdCKgIrhi7GNCgsSAZyHCYcMUgBChkMgANymXe5Zsodl+ZxN3r/wSVywY3R+WexvhD+i96fkD3R+FSP2Z+Q3ef8A+e2e+nLy6wMErDxCjPzoi12wnO28v143hve3COAMAuqYFDrg+qsOsWx/cM2567FktSBHo53iMCIQWwIK8BK2IkAEiUCoAEEERksQQgT4SB9HN0K2BGFEgEOkpDMBiLn4GLZ2LLvnbN4fPJgxvT+eaDPy/noLoFi9vyEA5v2pePU80HxgngwBwGeC96ehD4I7DMH7c+cSNPKDMLw/1BELf8SRHwx9pvNTiLtk8S+drx67jGX7g21jzXcvgFjPG04ECCoEOKKHCNsSIKzhEBWCVQRwzisrTDgULAKdDFQEghDoWDkSB0A6oe/Rlfvs6ddfP+9vPFH2zj9M9gPBd+KcHyA9j/2R/EwAfJ8fq/cP3uUNECn2596fTnpjoQ+UiWmxOy87JgDq/S3kF73/mE3sj94fyS+XLPqj6+gHYMhzJvZe/R2L1PwsbRwKJppwKKIIrOEQHkOEQ0ZLECQCBFQwC4ei6RgrSP7tiUTtzN37NiFhX510tuZ7ccuXvYNJ2gTuKmEMfeqhD060s3p/Ot8/ROyPoQ/2V3QBMPKjiA3vD38zAYgjPyFjfyhHKgBWvoYAIPYPLHeEerGGPrjTQ0EKUYsX/V4Zrfk6y+qHy063fydTK1pwmr5lJoIIeChEhWAKh+B7XARUCPD3OYmAV7Q5HNJnP+rEoOQAkuDbUEhbMsThyxpYli6YuQ9c/xDBUIi1AEGxPxWA7v2DRn4sAkDy64teOPnhyEVtmvYAeabeXxSAUF5Ydkh+G+8feOjF6oTVj15nSQS3z1RLc//7VG/+JTlh8rzZ2O4tX1VLFv8Knxa72JtmQgoBjlG1BKIIbPoEQaNDvEKtIggTDvkb44mn0TGh9NzwAMvKBTdlOPcQGZ6jkx/H/U3hT8D7G/P9OfmF8Edc7hjs/XXiiwLA8Cf0uL9eftbYH0d+TPP9De+fRFxI/uI0opYt++HY093/yrL24TbphSOXq2Ur+/2FGQRfwG3XGojhEG8JwoogKBzSK4eLgFYWFwAiRDhE57qz0SF8CorLNElLEvG2ZP3SObDhor7UDd/E6NmT80uyBzw8D33wqa/l9UYm728Z+aEPvmjnF0iOArDx/ihyQ/DU++tloXt/KCtWTnrnF8oUj4z8FCbvD2Dk90CdTBdnEnf1dZ24kTLLVsy4uRpuvUMtyD6FUyPcGOYw8ltFIIZDYUeHLOGQMSsxahEwr4dCACL46xOIVpsyrbUvqzp+/PjHWbIvqrlebvs3756sX5NBIDolf8D7mwUAZDeFPvCZMe6ve/4g728d+QHRY76NcjB5/0Dn1yhLSn6Axfu7AbhPrFqc9a679Y5bWVZiZmfOfVVfUMqW71C3ZhB8aIYv47YVAhxnGg5RoHcSRGANh6yjQ/ikeKoqAcifQrSG+c/K/fe8708pT/245x+8g9nfJ3vmEQ1EwKdeB8jPvL9FANGN/Ojkp3N+UABi+MPKhe7zA+FPcOwP54L3d4EA/EUpxFeUTtSKZb24ORrLQswimbzjW8lq6dKDnjwUQipRhBbBNhwK1RLYhkOIgAhoBfJWgIlABvL7q8Bz1aYSrS77p57uc5vWcL6NEPJRz/DyVtKfSPw4MmQ37s/Jj+P+RuzPyE8FwMgvCIB7f+z3hJzxycvJJvbH4Wc3HP0lKWSyNIOo5Yu+r7TelsWSHbOZmqf7wRSlbMUu99ZMCdcT4LoCnDNCQyHWVzBEEKolQIgigEqyC4fc4NWmyoD01SlEKYcmu3bBMU/XTWvOZjbnxTLt0F2rvL0ZvyH9CWSa7lfEBDCTp74I5v310S4AdvxtvD8XgNX7SwUJZLwIyq7MQeQi7OTmPqO1rV/GkhmzczVsPrWaG++XSxY/69qcoU7lp+vTqIHYGhDexVqIkCIQWgIcoZChFfBAhU2WQqWVpxBSAeFWSeq4UpH9stawPF/dde9V7Naz3k6ePPm33uHrHvD2pP8aJ+GRnnlksn0u0UAIODeJjvzQji96fiB5KO/Pw5+wsT86igSiQGfYh2VXlkzLToUYX96W/bpSs6JSG9h4DUtazC6EeaCf4Glav0YqXV4vFSx4wbk146TziTTiy08j04VpBN9TpgOnVQNKGErTiB/gg8+cBY5JV2H621JJ1gvuykXNauOaW3x9j5z11OXZYCf8/r/27btlkdads11tT31dbkmYmN6eQEgHAoSB2A5oB+K2AXERuNdSC6AZAX83AXBpaAMA+j24fgJ37SO4YRm0jNNVDuIFLy+VOFSpJO23cuWCg3Ldyke1zjvicC0GS0rMLqbhMKrS/tDXpdq1Oa6y5etcVdc+6qxYXT1WtLDeVZBZP1a8sM5ZfW2Vu+b6h51lS9cqjTdnyD0P/OeZV54Kuz3hpWxAxr/wHfrOf3p3r1mgdi5a7+5a9rDctXyTtH3x43Ln0sddbYsfcbflbnS35j4sw7mrZemjUvOyx6TWlVuczSu3SM3w3aYVjwOekBpXbHY3r3pYql92D2CN3LE+hQw/9nm8B7tdzGIWs5jFLGYxi1nMYhazmMUsZjGLWcxiFrOYxSxmMYtZzGIWs5jFLGYxi1nMYhazmMUsZjG7+PaRj/x/sjvl25sL1zcAAAAASUVORK5CYII=" />
+      </div>
+      <div class="leading-tight">
+        <div class="text-sm font-bold">舞光戰將點燈計劃</div>
+        <div class="text-[9px] text-gray-500 font-mono-en tracking-widest">ADMIN CONSOLE</div>
+      </div>
+    </a>
+
+    <div class="sidebar-section-label">總覽</div>
+    <nav class="sidebar-nav">
+      <a class="sidebar-link active" data-page="dashboard">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        <span>儀表板</span>
+      </a>
+      <a class="sidebar-link" data-page="trainees">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <span>學員管理</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-section-label">內容</div>
+    <nav class="sidebar-nav">
+      <a class="sidebar-link" data-page="chapters">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        <span>章節管理</span>
+      </a>
+      <a class="sidebar-link" data-page="quiz">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <span>題庫管理</span>
+      </a>
+      <a class="sidebar-link" data-page="resources">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        <span>資源庫</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-section-label">分析</div>
+    <nav class="sidebar-nav">
+      <a class="sidebar-link" data-page="analytics">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>
+        <span>數據分析</span>
+      </a>
+      <a class="sidebar-link" data-page="settings">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        <span>系統設定</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-section-label">前台</div>
+    <nav class="sidebar-nav">
+      <a href="index.html" class="sidebar-link">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6"/><path d="M10 14L21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
+        <span>查看培訓首頁</span>
+      </a>
+    </nav>
+  </aside>
+
+  <!-- ===== Main Area ===== -->
+  <div class="main-area">
+
+    <!-- Topbar -->
+    <header class="topbar">
+      <div class="flex items-center gap-3">
+        <div>
+          <div class="text-xs text-gray-500 font-mono-en tracking-widest" id="topbarBreadcrumb">ADMIN · DASHBOARD</div>
+          <h1 class="text-xl font-bold" id="topbarTitle">儀表板</h1>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <button class="btn btn-ghost">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          通知 <span class="ml-1 text-orange-400">3</span>
+        </button>
+        <div class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-orange-500/10 border border-orange-500/30">
+          <div class="w-7 h-7 rounded-full bg-gradient-to-br from-orange-300 to-orange-600 flex items-center justify-center text-black font-bold text-xs">主</div>
+          <div class="text-xs">
+            <div class="font-medium text-orange-200">業務部主管</div>
+            <div class="text-[10px] text-gray-500">已登入</div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- ===== Content ===== -->
+    <main class="content">
+
+      <!-- ===== DASHBOARD ===== -->
+      <section id="page-dashboard" class="page-section active">
+        <!-- Stats row -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          <div class="stat-card">
+            <div class="stat-label">學員總數</div>
+            <div class="stat-num">12</div>
+            <div class="stat-trend stat-up">↑ 本月新進 3 位</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">平均完成率</div>
+            <div class="stat-num">68<span class="text-lg text-gray-500">%</span></div>
+            <div class="stat-trend stat-up">↑ +12% vs 上月</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">平均光點</div>
+            <div class="stat-num">485</div>
+            <div class="stat-trend stat-up">↑ +85 vs 上月</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">最常卡關</div>
+            <div class="stat-num text-2xl mt-1" style="font-size:1.5rem;">CH 04 · Q11</div>
+            <div class="stat-trend stat-down">62% 答錯率</div>
+          </div>
+        </div>
+
+        <div class="grid lg:grid-cols-[1.5fr_1fr] gap-6 mb-6">
+          <!-- Bar chart: completion by chapter -->
+          <div class="panel">
+            <div class="panel-header">
+              <div>
+                <div class="panel-title">各章節平均完成率</div>
+                <div class="panel-subtitle">所有學員 · 本月</div>
+              </div>
+              <button class="btn btn-ghost text-xs">匯出 CSV</button>
+            </div>
+            <div class="bar-chart">
+              <div class="bar-col"><div class="bar-value">95%</div><div class="bar" style="height: 95%;"></div><div class="bar-label">CH 01</div></div>
+              <div class="bar-col"><div class="bar-value">82%</div><div class="bar" style="height: 82%;"></div><div class="bar-label">CH 02</div></div>
+              <div class="bar-col"><div class="bar-value">68%</div><div class="bar" style="height: 68%;"></div><div class="bar-label">CH 03</div></div>
+              <div class="bar-col"><div class="bar-value">45%</div><div class="bar" style="height: 45%;"></div><div class="bar-label">CH 04</div></div>
+              <div class="bar-col"><div class="bar-value">28%</div><div class="bar" style="height: 28%;"></div><div class="bar-label">CH 05</div></div>
+              <div class="bar-col"><div class="bar-value">12%</div><div class="bar" style="height: 12%;"></div><div class="bar-label">CH 06</div></div>
+              <div class="bar-col"><div class="bar-value">5%</div><div class="bar" style="height: 5%;"></div><div class="bar-label">CH 07</div></div>
+            </div>
+            <div class="text-xs text-gray-500 mt-4 pt-4 border-t border-gray-800">
+              💡 <span class="text-orange-300">主管洞察</span>：CH 04 闖關挑戰是明顯的卡關點，建議補強前置教材或新增中段提示。
+            </div>
+          </div>
+
+          <!-- Donut: tier distribution -->
+          <div class="panel">
+            <div class="panel-header">
+              <div>
+                <div class="panel-title">學員等級分布</div>
+                <div class="panel-subtitle">完成度分級</div>
+              </div>
+            </div>
+            <div class="flex items-center gap-6 mt-4">
+              <div class="donut-wrap">
+                <svg viewBox="0 0 36 36" class="w-full h-full" style="transform: rotate(-90deg);">
+                  <circle cx="18" cy="18" r="15.9155" fill="transparent" stroke="rgba(255,255,255,0.05)" stroke-width="3"></circle>
+                  <circle cx="18" cy="18" r="15.9155" fill="transparent" stroke="#F58220" stroke-width="3" stroke-dasharray="33 67" stroke-dashoffset="0" style="filter: drop-shadow(0 0 4px rgba(245,130,32,0.5));"></circle>
+                  <circle cx="18" cy="18" r="15.9155" fill="transparent" stroke="#FFA050" stroke-width="3" stroke-dasharray="42 58" stroke-dashoffset="-33"></circle>
+                  <circle cx="18" cy="18" r="15.9155" fill="transparent" stroke="#FFD27A" stroke-width="3" stroke-dasharray="17 83" stroke-dashoffset="-75"></circle>
+                  <circle cx="18" cy="18" r="15.9155" fill="transparent" stroke="rgba(255,255,255,0.15)" stroke-width="3" stroke-dasharray="8 92" stroke-dashoffset="-92"></circle>
+                </svg>
+                <div class="donut-text">
+                  <div class="text-2xl font-bold">12</div>
+                  <div class="text-[10px] text-gray-500 tracking-widest">TOTAL</div>
+                </div>
+              </div>
+              <div class="flex-1 space-y-2 text-sm">
+                <div class="flex items-center justify-between">
+                  <span class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full" style="background:#F58220"></span>畢業</span>
+                  <span class="text-gray-400">4 位</span>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full" style="background:#FFA050"></span>進階中</span>
+                  <span class="text-gray-400">5 位</span>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full" style="background:#FFD27A"></span>入門中</span>
+                  <span class="text-gray-400">2 位</span>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full" style="background:rgba(255,255,255,0.15)"></span>未開始</span>
+                  <span class="text-gray-400">1 位</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid lg:grid-cols-2 gap-6">
+          <!-- Stuck questions -->
+          <div class="panel">
+            <div class="panel-header">
+              <div>
+                <div class="panel-title">最常答錯的題目 · TOP 5</div>
+                <div class="panel-subtitle">需要補強教材的訊號</div>
+              </div>
+            </div>
+            <div class="space-y-3">
+              <div class="flex items-center gap-3 p-3 rounded-lg bg-black/30 border border-gray-800">
+                <div class="text-xs text-orange-400 font-mono-en font-bold">CH04 Q11</div>
+                <div class="text-sm flex-1">雜牌應對：「網路上有便宜一半的」</div>
+                <div class="pill pill-red">62% 錯</div>
+              </div>
+              <div class="flex items-center gap-3 p-3 rounded-lg bg-black/30 border border-gray-800">
+                <div class="text-xs text-orange-400 font-mono-en font-bold">CH04 Q07</div>
+                <div class="text-sm flex-1">工程商殺價 8% 怎麼回</div>
+                <div class="pill pill-red">58% 錯</div>
+              </div>
+              <div class="flex items-center gap-3 p-3 rounded-lg bg-black/30 border border-gray-800">
+                <div class="text-xs text-orange-400 font-mono-en font-bold">CH02 Q03</div>
+                <div class="text-sm flex-1">磁吸軌道與傳統軌道差異</div>
+                <div class="pill pill-red">45% 錯</div>
+              </div>
+              <div class="flex items-center gap-3 p-3 rounded-lg bg-black/30 border border-gray-800">
+                <div class="text-xs text-orange-400 font-mono-en font-bold">CH01 Q05</div>
+                <div class="text-sm flex-1">舞光創立年份</div>
+                <div class="pill pill-orange">32% 錯</div>
+              </div>
+              <div class="flex items-center gap-3 p-3 rounded-lg bg-black/30 border border-gray-800">
+                <div class="text-xs text-orange-400 font-mono-en font-bold">CH04 Q12</div>
+                <div class="text-sm flex-1">「LED 都差不多」應對</div>
+                <div class="pill pill-orange">28% 錯</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Recent activity -->
+          <div class="panel">
+            <div class="panel-header">
+              <div>
+                <div class="panel-title">最近活動</div>
+                <div class="panel-subtitle">即時動態</div>
+              </div>
+            </div>
+            <div class="space-y-1">
+              <div class="activity-item">
+                <div class="activity-icon">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                </div>
+                <div class="flex-1 text-sm">
+                  <div><strong>陳柏翰</strong> 通關 CHAPTER 04，獲頒「闖關王」徽章</div>
+                  <div class="text-xs text-gray-500 mt-0.5">10 分鐘前</div>
+                </div>
+              </div>
+              <div class="activity-item">
+                <div class="activity-icon">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                </div>
+                <div class="flex-1 text-sm">
+                  <div><strong>林雅婷</strong> 完成 CH02 產品實驗室，+200 光點</div>
+                  <div class="text-xs text-gray-500 mt-0.5">1 小時前</div>
+                </div>
+              </div>
+              <div class="activity-item">
+                <div class="activity-icon">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                </div>
+                <div class="flex-1 text-sm">
+                  <div><strong>王子豪</strong> 在 CH04 Q11 卡關 3 次</div>
+                  <div class="text-xs text-gray-500 mt-0.5">2 小時前</div>
+                </div>
+              </div>
+              <div class="activity-item">
+                <div class="activity-icon">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                </div>
+                <div class="flex-1 text-sm">
+                  <div>新進學員 <strong>張詠丞</strong> 已加入培訓計畫</div>
+                  <div class="text-xs text-gray-500 mt-0.5">昨天</div>
+                </div>
+              </div>
+              <div class="activity-item">
+                <div class="activity-icon">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                </div>
+                <div class="flex-1 text-sm">
+                  <div>主管新增資源「2026 新品速覽 PPT」</div>
+                  <div class="text-xs text-gray-500 mt-0.5">2 天前</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== TRAINEES ===== -->
+      <section id="page-trainees" class="page-section">
+        <div class="flex items-center justify-between mb-6">
+          <div>
+            <h2 class="text-2xl font-bold mb-1">學員管理</h2>
+            <div class="text-sm text-gray-500">查看每位學員的完成進度與光點</div>
+          </div>
+          <div class="flex gap-2">
+            <button class="btn btn-ghost">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              匯出
+            </button>
+            <button class="btn btn-primary">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              新增學員
+            </button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="flex items-center gap-3 mb-4">
+            <input class="form-input flex-1" placeholder="搜尋學員姓名或編號..." style="max-width:300px;">
+            <select class="form-input" style="width:auto;">
+              <option>全部章節</option>
+              <option>CH 01 品牌之光</option>
+              <option>CH 02 產品實驗室</option>
+              <option>CH 03 業務學院</option>
+              <option>CH 04 闖關挑戰</option>
+            </select>
+            <select class="form-input" style="width:auto;">
+              <option>全部等級</option>
+              <option>畢業</option>
+              <option>進階中</option>
+              <option>入門中</option>
+              <option>未開始</option>
+            </select>
+          </div>
+
+          <div class="table-wrap">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>學員</th>
+                  <th>進度</th>
+                  <th>當前章節</th>
+                  <th>光點</th>
+                  <th>等級</th>
+                  <th>最近活動</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>
+                    <div class="flex items-center gap-3">
+                      <div class="w-8 h-8 rounded-full bg-gradient-to-br from-orange-300 to-orange-600 flex items-center justify-center text-black font-bold text-xs">陳</div>
+                      <div>
+                        <div class="font-medium">陳柏翰</div>
+                        <div class="text-xs text-gray-500">EMP-2026001</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="flex items-center gap-2">
+                      <div class="pbar"><div class="pbar-fill" style="width: 95%"></div></div>
+                      <span class="text-xs">95%</span>
+                    </div>
+                  </td>
+                  <td>CH 04 · 闖關挑戰</td>
+                  <td><span class="text-orange-300 font-bold">980</span></td>
+                  <td><span class="pill pill-orange">畢業</span></td>
+                  <td class="text-gray-500 text-xs">10 分鐘前</td>
+                  <td><button class="btn btn-ghost text-xs">查看</button></td>
+                </tr>
+                <tr>
+                  <td>
+                    <div class="flex items-center gap-3">
+                      <div class="w-8 h-8 rounded-full bg-gradient-to-br from-orange-300 to-orange-600 flex items-center justify-center text-black font-bold text-xs">林</div>
+                      <div>
+                        <div class="font-medium">林雅婷</div>
+                        <div class="text-xs text-gray-500">EMP-2026002</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="flex items-center gap-2">
+                      <div class="pbar"><div class="pbar-fill" style="width: 72%"></div></div>
+                      <span class="text-xs">72%</span>
+                    </div>
+                  </td>
+                  <td>CH 03 · 業務學院</td>
+                  <td><span class="text-orange-300 font-bold">685</span></td>
+                  <td><span class="pill pill-green">進階中</span></td>
+                  <td class="text-gray-500 text-xs">1 小時前</td>
+                  <td><button class="btn btn-ghost text-xs">查看</button></td>
+                </tr>
+                <tr>
+                  <td>
+                    <div class="flex items-center gap-3">
+                      <div class="w-8 h-8 rounded-full bg-gradient-to-br from-orange-300 to-orange-600 flex items-center justify-center text-black font-bold text-xs">王</div>
+                      <div>
+                        <div class="font-medium">王子豪</div>
+                        <div class="text-xs text-gray-500">EMP-2026003</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="flex items-center gap-2">
+                      <div class="pbar"><div class="pbar-fill" style="width: 58%"></div></div>
+                      <span class="text-xs">58%</span>
+                    </div>
+                  </td>
+                  <td>CH 04 · 闖關挑戰</td>
+                  <td><span class="text-orange-300 font-bold">540</span></td>
+                  <td><span class="pill pill-green">進階中</span></td>
+                  <td class="text-gray-500 text-xs">2 小時前 · 卡關中</td>
+                  <td><button class="btn btn-ghost text-xs">查看</button></td>
+                </tr>
+                <tr>
+                  <td>
+                    <div class="flex items-center gap-3">
+                      <div class="w-8 h-8 rounded-full bg-gradient-to-br from-orange-300 to-orange-600 flex items-center justify-center text-black font-bold text-xs">張</div>
+                      <div>
+                        <div class="font-medium">張詠丞</div>
+                        <div class="text-xs text-gray-500">EMP-2026004</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="flex items-center gap-2">
+                      <div class="pbar"><div class="pbar-fill" style="width: 8%"></div></div>
+                      <span class="text-xs">8%</span>
+                    </div>
+                  </td>
+                  <td>CH 01 · 品牌之光</td>
+                  <td><span class="text-orange-300 font-bold">75</span></td>
+                  <td><span class="pill pill-gray">入門中</span></td>
+                  <td class="text-gray-500 text-xs">昨天加入</td>
+                  <td><button class="btn btn-ghost text-xs">查看</button></td>
+                </tr>
+                <tr>
+                  <td>
+                    <div class="flex items-center gap-3">
+                      <div class="w-8 h-8 rounded-full bg-gradient-to-br from-orange-300 to-orange-600 flex items-center justify-center text-black font-bold text-xs">黃</div>
+                      <div>
+                        <div class="font-medium">黃心如</div>
+                        <div class="text-xs text-gray-500">EMP-2026005</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="flex items-center gap-2">
+                      <div class="pbar"><div class="pbar-fill" style="width: 0%"></div></div>
+                      <span class="text-xs">0%</span>
+                    </div>
+                  </td>
+                  <td>—</td>
+                  <td><span class="text-gray-500">0</span></td>
+                  <td><span class="pill pill-gray">未開始</span></td>
+                  <td class="text-gray-500 text-xs">3 天前加入</td>
+                  <td><button class="btn btn-ghost text-xs">提醒</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== CHAPTERS ===== -->
+      <section id="page-chapters" class="page-section">
+        <div class="flex items-center justify-between mb-6">
+          <div>
+            <h2 class="text-2xl font-bold mb-1">章節管理</h2>
+            <div class="text-sm text-gray-500">編輯章節內容、調整順序、新增小節</div>
+          </div>
+          <button class="btn btn-primary">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            新增章節
+          </button>
+        </div>
+
+        <div class="panel">
+          <div class="text-xs text-gray-500 mb-4 flex items-center gap-2">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+            拖曳調整順序
+          </div>
+
+          <!-- Chapter rows -->
+          <div class="chapter-row">
+            <div class="drag-handle">⋮⋮</div>
+            <div class="text-2xl font-bold text-orange-300 font-mono-en">01</div>
+            <div>
+              <div class="font-medium">品牌之光</div>
+              <div class="text-xs text-gray-500">公司沿革 · 舞光誕生 · 三大價值 · 二代團隊 · 三大體驗館</div>
+            </div>
+            <span class="pill pill-green">已上線</span>
+            <div class="flex gap-2">
+              <button class="btn btn-ghost text-xs">編輯</button>
+              <button class="btn btn-ghost text-xs">預覽</button>
+            </div>
+          </div>
+          <div class="chapter-row">
+            <div class="drag-handle">⋮⋮</div>
+            <div class="text-2xl font-bold text-orange-300 font-mono-en">02</div>
+            <div>
+              <div class="font-medium">產品實驗室</div>
+              <div class="text-xs text-gray-500">20+ 大類 · 6 主打產品 · 規格速查 · 場景配對 · 品質骨幹</div>
+            </div>
+            <span class="pill pill-green">已上線</span>
+            <div class="flex gap-2">
+              <button class="btn btn-ghost text-xs">編輯</button>
+              <button class="btn btn-ghost text-xs">預覽</button>
+            </div>
+          </div>
+          <div class="chapter-row">
+            <div class="drag-handle">⋮⋮</div>
+            <div class="text-2xl font-bold text-orange-300 font-mono-en">03</div>
+            <div>
+              <div class="font-medium">業務學院</div>
+              <div class="text-xs text-gray-500">客戶分層 · 客戶分級 · 拜訪 SOP · 報價議價 · 異議處理 · 客訴 SOP</div>
+            </div>
+            <span class="pill pill-green">已上線</span>
+            <div class="flex gap-2">
+              <button class="btn btn-ghost text-xs">編輯</button>
+              <button class="btn btn-ghost text-xs">預覽</button>
+            </div>
+          </div>
+          <div class="chapter-row">
+            <div class="drag-handle">⋮⋮</div>
+            <div class="text-2xl font-bold text-orange-300 font-mono-en">04</div>
+            <div>
+              <div class="font-medium">闖關挑戰</div>
+              <div class="text-xs text-gray-500">12 道情境題 + 3 輪 AI 客戶對話 · 卡關熱點待補強</div>
+            </div>
+            <span class="pill pill-green">已上線</span>
+            <div class="flex gap-2">
+              <button class="btn btn-ghost text-xs">編輯</button>
+              <button class="btn btn-ghost text-xs">預覽</button>
+            </div>
+          </div>
+          <div class="chapter-row">
+            <div class="drag-handle">⋮⋮</div>
+            <div class="text-2xl font-bold text-orange-300 font-mono-en">05</div>
+            <div>
+              <div class="font-medium">數位行銷整合</div>
+              <div class="text-xs text-gray-500">官網 · YT · 社群 · 智慧家庭 · 新世代學院 · ESG 永續</div>
+            </div>
+            <span class="pill pill-orange">草稿</span>
+            <div class="flex gap-2">
+              <button class="btn btn-ghost text-xs">編輯</button>
+              <button class="btn btn-ghost text-xs">發佈</button>
+            </div>
+          </div>
+          <div class="chapter-row">
+            <div class="drag-handle">⋮⋮</div>
+            <div class="text-2xl font-bold text-orange-300 font-mono-en">06</div>
+            <div>
+              <div class="font-medium">職涯地圖</div>
+              <div class="text-xs text-gray-500">三年成長路徑 · 技能樹 · 學長姐錦囊</div>
+            </div>
+            <span class="pill pill-gray">未開始</span>
+            <div class="flex gap-2">
+              <button class="btn btn-ghost text-xs">建立</button>
+              <button class="btn btn-ghost text-xs">參考</button>
+            </div>
+          </div>
+          <div class="chapter-row">
+            <div class="drag-handle">⋮⋮</div>
+            <div class="text-2xl font-bold text-orange-300 font-mono-en">07</div>
+            <div>
+              <div class="font-medium">畢業專題</div>
+              <div class="text-xs text-gray-500">客戶開發實戰提案 · 利他企業 DNA</div>
+            </div>
+            <span class="pill pill-gray">未開始</span>
+            <div class="flex gap-2">
+              <button class="btn btn-ghost text-xs">建立</button>
+              <button class="btn btn-ghost text-xs">參考</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== QUIZ BANK ===== -->
+      <section id="page-quiz" class="page-section">
+        <div class="flex items-center justify-between mb-6">
+          <div>
+            <h2 class="text-2xl font-bold mb-1">題庫管理</h2>
+            <div class="text-sm text-gray-500">所有測驗題目集中管理 · 含答對率分析</div>
+          </div>
+          <button class="btn btn-primary">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            新增題目
+          </button>
+        </div>
+
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          <div class="stat-card">
+            <div class="stat-label">題目總數</div>
+            <div class="stat-num">38</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">情境題</div>
+            <div class="stat-num">14</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">AI 對話腳本</div>
+            <div class="stat-num">6</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">平均答對率</div>
+            <div class="stat-num">71<span class="text-lg text-gray-500">%</span></div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="flex items-center gap-3 mb-4">
+            <input class="form-input flex-1" placeholder="搜尋題目內容、章節或標籤..." style="max-width:400px;">
+            <select class="form-input" style="width:auto;">
+              <option>全部章節</option>
+              <option>CH 02</option>
+              <option>CH 04</option>
+            </select>
+            <select class="form-input" style="width:auto;">
+              <option>全部類型</option>
+              <option>單選</option>
+              <option>情境</option>
+              <option>AI 對話</option>
+            </select>
+          </div>
+
+          <div class="table-wrap">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>編號</th>
+                  <th>章節</th>
+                  <th>題目</th>
+                  <th>類型</th>
+                  <th>光點</th>
+                  <th>答對率</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="font-mono-en text-orange-400">CH04-Q11</td>
+                  <td>闖關挑戰 · 競品 PK</td>
+                  <td>雜牌：「網路上有便宜一半」</td>
+                  <td><span class="pill pill-orange">情境</span></td>
+                  <td>30</td>
+                  <td><span class="text-red-300">38%</span></td>
+                  <td><button class="btn btn-ghost text-xs">編輯</button></td>
+                </tr>
+                <tr>
+                  <td class="font-mono-en text-orange-400">CH04-Q07</td>
+                  <td>闖關挑戰 · 情境</td>
+                  <td>工程商殺價 8%</td>
+                  <td><span class="pill pill-orange">情境</span></td>
+                  <td>20</td>
+                  <td><span class="text-red-300">42%</span></td>
+                  <td><button class="btn btn-ghost text-xs">編輯</button></td>
+                </tr>
+                <tr>
+                  <td class="font-mono-en text-orange-400">CH04-Q10</td>
+                  <td>闖關挑戰 · 競品 PK</td>
+                  <td>飛利浦比舞光便宜 20 元</td>
+                  <td><span class="pill pill-orange">情境</span></td>
+                  <td>30</td>
+                  <td><span class="text-orange-300">68%</span></td>
+                  <td><button class="btn btn-ghost text-xs">編輯</button></td>
+                </tr>
+                <tr>
+                  <td class="font-mono-en text-orange-400">CH04-CHAT</td>
+                  <td>闖關挑戰 · AI 對話</td>
+                  <td>陳老闆：電料行因應對手低價</td>
+                  <td><span class="pill pill-orange">AI 對話</span></td>
+                  <td>50</td>
+                  <td><span class="text-orange-300">72%</span></td>
+                  <td><button class="btn btn-ghost text-xs">編輯</button></td>
+                </tr>
+                <tr>
+                  <td class="font-mono-en text-orange-400">CH02-Q03</td>
+                  <td>產品實驗室</td>
+                  <td>磁吸軌道 vs 傳統軌道差異</td>
+                  <td><span class="pill pill-gray">單選</span></td>
+                  <td>10</td>
+                  <td><span class="text-orange-300">75%</span></td>
+                  <td><button class="btn btn-ghost text-xs">編輯</button></td>
+                </tr>
+                <tr>
+                  <td class="font-mono-en text-orange-400">CH04-Q01</td>
+                  <td>闖關挑戰 · 產品快問</td>
+                  <td>800 流明 = 傳統幾瓦？</td>
+                  <td><span class="pill pill-gray">單選</span></td>
+                  <td>10</td>
+                  <td><span class="text-green-300">88%</span></td>
+                  <td><button class="btn btn-ghost text-xs">編輯</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== RESOURCES ===== -->
+      <section id="page-resources" class="page-section">
+        <div class="flex items-center justify-between mb-6">
+          <div>
+            <h2 class="text-2xl font-bold mb-1">資源庫</h2>
+            <div class="text-sm text-gray-500">產品手冊 · 表單 · 影片 · 簡報</div>
+          </div>
+          <button class="btn btn-primary">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            上傳檔案
+          </button>
+        </div>
+
+        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div class="panel">
+            <div class="flex items-start gap-3">
+              <div class="w-10 h-10 rounded-lg bg-orange-500/15 border border-orange-500/30 flex items-center justify-center text-orange-400 flex-shrink-0">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="font-medium text-sm">2026 新品速覽 PPT</div>
+                <div class="text-xs text-gray-500 mt-1">3.2 MB · 2 天前更新</div>
+              </div>
+            </div>
+            <div class="mt-3 pt-3 border-t border-gray-800/60 flex justify-between items-center text-xs">
+              <span class="text-gray-500">下載 24 次</span>
+              <button class="btn btn-ghost text-xs">查看</button>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="flex items-start gap-3">
+              <div class="w-10 h-10 rounded-lg bg-orange-500/15 border border-orange-500/30 flex items-center justify-center text-orange-400 flex-shrink-0">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="font-medium text-sm">舞光磁吸軌道型錄 PDF</div>
+                <div class="text-xs text-gray-500 mt-1">8.7 MB · 1 週前</div>
+              </div>
+            </div>
+            <div class="mt-3 pt-3 border-t border-gray-800/60 flex justify-between items-center text-xs">
+              <span class="text-gray-500">下載 87 次</span>
+              <button class="btn btn-ghost text-xs">查看</button>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="flex items-start gap-3">
+              <div class="w-10 h-10 rounded-lg bg-orange-500/15 border border-orange-500/30 flex items-center justify-center text-orange-400 flex-shrink-0">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="font-medium text-sm">林口體驗館導覽影片</div>
+                <div class="text-xs text-gray-500 mt-1">128 MB · MP4 · 8 分鐘</div>
+              </div>
+            </div>
+            <div class="mt-3 pt-3 border-t border-gray-800/60 flex justify-between items-center text-xs">
+              <span class="text-gray-500">觀看 156 次</span>
+              <button class="btn btn-ghost text-xs">查看</button>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="flex items-start gap-3">
+              <div class="w-10 h-10 rounded-lg bg-orange-500/15 border border-orange-500/30 flex items-center justify-center text-orange-400 flex-shrink-0">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="font-medium text-sm">客戶拜訪紀錄表 (XLSX)</div>
+                <div class="text-xs text-gray-500 mt-1">42 KB · 標準範本</div>
+              </div>
+            </div>
+            <div class="mt-3 pt-3 border-t border-gray-800/60 flex justify-between items-center text-xs">
+              <span class="text-gray-500">下載 203 次</span>
+              <button class="btn btn-ghost text-xs">查看</button>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="flex items-start gap-3">
+              <div class="w-10 h-10 rounded-lg bg-orange-500/15 border border-orange-500/30 flex items-center justify-center text-orange-400 flex-shrink-0">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="font-medium text-sm">標準報價單範本</div>
+                <div class="text-xs text-gray-500 mt-1">36 KB · 業務必用</div>
+              </div>
+            </div>
+            <div class="mt-3 pt-3 border-t border-gray-800/60 flex justify-between items-center text-xs">
+              <span class="text-gray-500">下載 312 次</span>
+              <button class="btn btn-ghost text-xs">查看</button>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="flex items-start gap-3">
+              <div class="w-10 h-10 rounded-lg bg-orange-500/15 border border-orange-500/30 flex items-center justify-center text-orange-400 flex-shrink-0">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="font-medium text-sm">2026 經銷大會精華</div>
+                <div class="text-xs text-gray-500 mt-1">240 MB · MP4 · 22 分鐘</div>
+              </div>
+            </div>
+            <div class="mt-3 pt-3 border-t border-gray-800/60 flex justify-between items-center text-xs">
+              <span class="text-gray-500">觀看 89 次</span>
+              <button class="btn btn-ghost text-xs">查看</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== ANALYTICS ===== -->
+      <section id="page-analytics" class="page-section">
+        <div class="mb-6">
+          <h2 class="text-2xl font-bold mb-1">數據分析</h2>
+          <div class="text-sm text-gray-500">深度報表 · 趨勢追蹤 · 學員行為分析</div>
+        </div>
+
+        <div class="grid lg:grid-cols-2 gap-6 mb-6">
+          <div class="panel">
+            <div class="panel-header">
+              <div>
+                <div class="panel-title">學員每日活躍人數</div>
+                <div class="panel-subtitle">最近 14 天</div>
+              </div>
+            </div>
+            <div class="bar-chart" style="height:160px;">
+              <div class="bar-col"><div class="bar" style="height: 60%;"></div><div class="bar-label">04/21</div></div>
+              <div class="bar-col"><div class="bar" style="height: 75%;"></div><div class="bar-label">04/22</div></div>
+              <div class="bar-col"><div class="bar" style="height: 50%;"></div><div class="bar-label">04/23</div></div>
+              <div class="bar-col"><div class="bar" style="height: 90%;"></div><div class="bar-label">04/24</div></div>
+              <div class="bar-col"><div class="bar" style="height: 80%;"></div><div class="bar-label">04/25</div></div>
+              <div class="bar-col"><div class="bar" style="height: 30%;"></div><div class="bar-label">04/26</div></div>
+              <div class="bar-col"><div class="bar" style="height: 25%;"></div><div class="bar-label">04/27</div></div>
+              <div class="bar-col"><div class="bar" style="height: 70%;"></div><div class="bar-label">04/28</div></div>
+              <div class="bar-col"><div class="bar" style="height: 88%;"></div><div class="bar-label">04/29</div></div>
+              <div class="bar-col"><div class="bar" style="height: 92%;"></div><div class="bar-label">04/30</div></div>
+              <div class="bar-col"><div class="bar" style="height: 85%;"></div><div class="bar-label">05/01</div></div>
+              <div class="bar-col"><div class="bar" style="height: 95%;"></div><div class="bar-label">05/02</div></div>
+              <div class="bar-col"><div class="bar" style="height: 100%;"></div><div class="bar-label">05/03</div></div>
+              <div class="bar-col"><div class="bar" style="height: 78%;"></div><div class="bar-label">05/04</div></div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-header">
+              <div>
+                <div class="panel-title">章節平均完成時間</div>
+                <div class="panel-subtitle">分鐘</div>
+              </div>
+            </div>
+            <div class="space-y-3 mt-4">
+              <div>
+                <div class="flex justify-between text-sm mb-1">
+                  <span>CH 01 品牌之光</span>
+                  <span class="text-orange-300">38 分</span>
+                </div>
+                <div class="pbar"><div class="pbar-fill" style="width: 38%"></div></div>
+              </div>
+              <div>
+                <div class="flex justify-between text-sm mb-1">
+                  <span>CH 02 產品實驗室</span>
+                  <span class="text-orange-300">52 分</span>
+                </div>
+                <div class="pbar"><div class="pbar-fill" style="width: 52%"></div></div>
+              </div>
+              <div>
+                <div class="flex justify-between text-sm mb-1">
+                  <span>CH 03 業務學院</span>
+                  <span class="text-orange-300">68 分</span>
+                </div>
+                <div class="pbar"><div class="pbar-fill" style="width: 68%"></div></div>
+              </div>
+              <div>
+                <div class="flex justify-between text-sm mb-1">
+                  <span>CH 04 闖關挑戰</span>
+                  <span class="text-orange-300">95 分</span>
+                </div>
+                <div class="pbar"><div class="pbar-fill" style="width: 95%"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <div class="panel-title">主管洞察建議</div>
+              <div class="panel-subtitle">根據本月數據自動產生</div>
+            </div>
+          </div>
+          <div class="space-y-3">
+            <div class="p-4 rounded-lg bg-orange-500/[0.06] border border-orange-500/30">
+              <div class="text-orange-300 font-bold mb-1 text-sm">⚠️ 競品 PK 是普遍弱點</div>
+              <div class="text-sm text-gray-400 leading-relaxed">CH 04 Q10-Q12 答對率連續低於 50%。建議：把競品 PK 從闖關挑戰前置到業務學院，或新增「樣品演示影片」作為前置教材。</div>
+            </div>
+            <div class="p-4 rounded-lg bg-orange-500/[0.06] border border-orange-500/30">
+              <div class="text-orange-300 font-bold mb-1 text-sm">💡 黃心如 3 天未開始</div>
+              <div class="text-sm text-gray-400 leading-relaxed">新進學員加入後尚未開始任何章節。建議主管手動關懷或寄出歡迎信。</div>
+            </div>
+            <div class="p-4 rounded-lg bg-orange-500/[0.06] border border-orange-500/30">
+              <div class="text-orange-300 font-bold mb-1 text-sm">🏆 陳柏翰可以晉升學長角色</div>
+              <div class="text-sm text-gray-400 leading-relaxed">已通關全章節、光點 980。建議邀請成為新進學員的「學長指導員」，回饋並複習自身學習。</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== SETTINGS ===== -->
+      <section id="page-settings" class="page-section">
+        <div class="mb-6">
+          <h2 class="text-2xl font-bold mb-1">系統設定</h2>
+          <div class="text-sm text-gray-500">主管帳號 · 通知 · 整合 · 權限</div>
+        </div>
+
+        <div class="grid lg:grid-cols-2 gap-6">
+          <div class="panel">
+            <div class="panel-header"><div class="panel-title">主管資訊</div></div>
+            <div class="space-y-4">
+              <div>
+                <label class="form-label">姓名</label>
+                <input class="form-input" value="業務部主管">
+              </div>
+              <div>
+                <label class="form-label">職稱</label>
+                <input class="form-input" value="業務部 / 副總">
+              </div>
+              <div>
+                <label class="form-label">Email</label>
+                <input class="form-input" value="manager@dancelight.com.tw">
+              </div>
+              <button class="btn btn-primary">儲存變更</button>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-header"><div class="panel-title">通知設定</div></div>
+            <div class="space-y-3">
+              <label class="flex items-center justify-between p-3 rounded-lg bg-black/30 cursor-pointer">
+                <div>
+                  <div class="font-medium text-sm">學員卡關通知</div>
+                  <div class="text-xs text-gray-500">學員 3 次答錯同題即推播</div>
+                </div>
+                <input type="checkbox" checked class="w-10 h-6 accent-orange-500">
+              </label>
+              <label class="flex items-center justify-between p-3 rounded-lg bg-black/30 cursor-pointer">
+                <div>
+                  <div class="font-medium text-sm">通關里程碑</div>
+                  <div class="text-xs text-gray-500">學員完成章節即通知</div>
+                </div>
+                <input type="checkbox" checked class="w-10 h-6 accent-orange-500">
+              </label>
+              <label class="flex items-center justify-between p-3 rounded-lg bg-black/30 cursor-pointer">
+                <div>
+                  <div class="font-medium text-sm">每週摘要報表</div>
+                  <div class="text-xs text-gray-500">週一上午 9:00 寄送</div>
+                </div>
+                <input type="checkbox" checked class="w-10 h-6 accent-orange-500">
+              </label>
+              <label class="flex items-center justify-between p-3 rounded-lg bg-black/30 cursor-pointer">
+                <div>
+                  <div class="font-medium text-sm">未活躍學員提醒</div>
+                  <div class="text-xs text-gray-500">7 天未登入即推播</div>
+                </div>
+                <input type="checkbox" class="w-10 h-6 accent-orange-500">
+              </label>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-header"><div class="panel-title">系統整合</div></div>
+            <div class="space-y-3">
+              <div class="flex items-center justify-between p-3 rounded-lg bg-black/30">
+                <div>
+                  <div class="font-medium text-sm">SSO · 員工帳號</div>
+                  <div class="text-xs text-gray-500">企業 Office 365</div>
+                </div>
+                <span class="pill pill-green">已連結</span>
+              </div>
+              <div class="flex items-center justify-between p-3 rounded-lg bg-black/30">
+                <div>
+                  <div class="font-medium text-sm">ERP · 客戶資料</div>
+                  <div class="text-xs text-gray-500">同步業務 CRM</div>
+                </div>
+                <span class="pill pill-green">已連結</span>
+              </div>
+              <div class="flex items-center justify-between p-3 rounded-lg bg-black/30">
+                <div>
+                  <div class="font-medium text-sm">LINE Notify</div>
+                  <div class="text-xs text-gray-500">主管即時通知</div>
+                </div>
+                <button class="btn btn-ghost text-xs">設定</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-header"><div class="panel-title">權限管理</div></div>
+            <p class="text-sm text-gray-400 mb-4">後台目前 1 位主管帳號，可邀請其他主管或助理共同管理。</p>
+            <button class="btn btn-primary">邀請新主管</button>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<script>
+  // === Sidebar nav switch ===
+  document.querySelectorAll('.sidebar-link[data-page]').forEach(link => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      const page = link.dataset.page;
+      document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+      link.classList.add('active');
+      document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
+      document.getElementById('page-' + page).classList.add('active');
+      const titles = {
+        dashboard: ['ADMIN · DASHBOARD', '儀表板'],
+        trainees: ['ADMIN · TRAINEES', '學員管理'],
+        chapters: ['ADMIN · CHAPTERS', '章節管理'],
+        quiz: ['ADMIN · QUIZ BANK', '題庫管理'],
+        resources: ['ADMIN · RESOURCES', '資源庫'],
+        analytics: ['ADMIN · ANALYTICS', '數據分析'],
+        settings: ['ADMIN · SETTINGS', '系統設定']
+      };
+      document.getElementById('topbarBreadcrumb').textContent = titles[page][0];
+      document.getElementById('topbarTitle').textContent = titles[page][1];
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  });
+</script>
+
+</body>
+</html>

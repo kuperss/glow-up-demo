@@ -1,0 +1,31 @@
+# === Whitelist mode: ignore everything by default, then re-allow only known demo files ===
+*
+
+# Re-allow this gitignore itself
+!.gitignore
+
+# Re-allow project meta
+!README.md
+
+# Re-allow demo HTML files (explicit list, not wildcard)
+!index.html
+!brand.html
+!products.html
+!academy.html
+!challenge.html
+!digital.html
+!admin.html
+!career.html
+
+# Re-allow assets folder and contents
+!assets/
+!assets/**
+
+# Explicitly never include
+research_notes.md
+content/
+logo_base64.txt
+.DS_Store
+Thumbs.db
+*.tmp
+*.bak
