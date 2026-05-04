@@ -1186,7 +1186,7 @@
       { id: 1, num: '01', name: '品牌之光', desc: '公司沿革 · 舞光誕生 · 五大價值 · 二代團隊 · 三大體驗館', status: 'live' },
       { id: 2, num: '02', name: '產品實驗室', desc: '20+ 大類 · 9 主打產品 · 規格速查 · 場景配對 · 品質骨幹', status: 'live' },
       { id: 3, num: '03', name: '業務學院', desc: '客戶分層 · 客戶分級 · 拜訪 SOP · 報價議價 · 異議處理 · 客訴 SOP', status: 'live' },
-      { id: 4, num: '04', name: '闖關挑戰', desc: '12 道情境題 + 5 輪 AI 客戶對話 + 5 題 HR 規章（共 22 關卡）', status: 'live' },
+      { id: 4, num: '04', name: '闖關挑戰', desc: '12 題情境 + 8 輪 AI 客戶對話 + 5 題 HR 規章 + 5 題進階情境（共 30 關卡）', status: 'live' },
       { id: 5, num: '05', name: '數位行銷整合', desc: '官網 · YT · 社群 · 智慧家庭 · 新世代學院 · ESG 永續', status: 'live' },
       { id: 6, num: '06', name: '職涯地圖', desc: '三年成長路徑 · 5 大技能樹 · 雙軌職涯路徑 v13 · 學長姐錦囊', status: 'live' },
       { id: 7, num: '07', name: '畢業典禮', desc: '點燈者徽章發放典禮 · 新人正式畢業（規劃中）', status: 'draft' }
@@ -1506,7 +1506,7 @@
   document.addEventListener('glow-firebase-ready', async () => {
     const fb = window.glowFirebase;
     if (!fb) return;
-    const TOTAL = 25;
+    const TOTAL = 30;
 
     // 填入 topbar 真實用戶資料
     (function paintTopbar(){
@@ -1580,7 +1580,12 @@
       q14: { stage: 5, label: 'CH04 Q14', desc: '病假證明 N-1~N+4' },
       q15: { stage: 5, label: 'CH04 Q15', desc: '三安福祉 = 安心/安身/安老' },
       q16: { stage: 5, label: 'CH04 Q16', desc: '雙軌升等 1 年/12 月' },
-      q17: { stage: 5, label: 'CH04 Q17', desc: '公務車事故不可私下和解' }
+      q17: { stage: 5, label: 'CH04 Q17', desc: '公務車事故不可私下和解' },
+      q18: { stage: 6, label: 'CH04 Q18', desc: '私下折扣請求婉拒' },
+      q19: { stage: 6, label: 'CH04 Q19', desc: '競品挖角電話應對' },
+      q20: { stage: 6, label: 'CH04 Q20', desc: '拜訪結尾留下伏筆' },
+      q21: { stage: 6, label: 'CH04 Q21', desc: '跨區搶單衝突處理' },
+      q22: { stage: 6, label: 'CH04 Q22', desc: '月底業績衝刺判斷' }
     };
 
     function renderTrainees() {
@@ -1687,8 +1692,9 @@
         1: { label: 'STAGE 1', ids: ['q1','q2','q3','q4','q5'] },
         2: { label: 'STAGE 2', ids: ['q6','q7','q8','q9'] },
         3: { label: 'STAGE 3', ids: ['q10','q11','q12'] },
-        4: { label: 'STAGE 4', ids: null }, // scenarios
-        5: { label: 'STAGE 5', ids: ['q13','q14','q15','q16','q17'] }
+        4: { label: 'STAGE 4', ids: null }, // scenarios (8 個)
+        5: { label: 'STAGE 5', ids: ['q13','q14','q15','q16','q17'] },
+        6: { label: 'STAGE 6', ids: ['q18','q19','q20','q21','q22'] }
       };
       const stagePcts = {};
       Object.entries(stages).forEach(([k, s]) => {
@@ -1701,7 +1707,7 @@
             const done = s.ids.filter(id => ids.has(id)).length;
             total += done / s.ids.length;
           } else {
-            total += (p.scenariosCompleted || 0) / 5;
+            total += (p.scenariosCompleted || 0) / 8;  // STAGE 4 共 8 個場景
           }
         });
         stagePcts[k] = Math.round((total / trainees.length) * 100);
