@@ -1167,7 +1167,7 @@
             </div>
             <div class="flex-1">
               <div class="text-xs text-gray-500 tracking-widest mb-1">你的學習進度</div>
-              <div class="text-xl font-bold mb-1">已完成 <span id="achievementCompleted">0</span> / 17 關卡</div>
+              <div class="text-xl font-bold mb-1">已完成 <span id="achievementCompleted">0</span> / 22 關卡</div>
               <div class="flex items-center gap-2 text-sm text-orange-400">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
                 <span class="font-bold"><span id="achievementPoints">0</span> 光點</span>
@@ -1233,12 +1233,12 @@
           <div class="badge-name text-xs text-gray-400 font-medium mt-1">闖關王</div>
           <div class="badge-hint text-[10px] text-gray-500">完成 3 個 AI 情境</div>
         </div>
-        <div class="badge-item badge-locked reveal" data-badge="dialog5" style="transition-delay:0.35s;">
+        <div class="badge-item badge-locked reveal" data-badge="hr" style="transition-delay:0.35s;">
           <div class="badge-circle">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
           </div>
-          <div class="badge-name text-xs text-gray-400 font-medium mt-1">對話達人</div>
-          <div class="badge-hint text-[10px] text-gray-500">5 個情境全完成</div>
+          <div class="badge-name text-xs text-gray-400 font-medium mt-1">規章達人</div>
+          <div class="badge-hint text-[10px] text-gray-500">完成 STAGE 5（5 題 HR）</div>
         </div>
         <div class="badge-item badge-locked reveal" data-badge="lighter" style="transition-delay:0.4s;">
           <div class="badge-circle">
@@ -1482,7 +1482,7 @@
   // === Achievement section: read live progress from challenge.html localStorage ===
   (function renderAchievement(){
     const STORAGE_KEY = 'glow-quiz-progress-v1';
-    const TOTAL = 17; // 12 quizzes + 5 scenarios
+    const TOTAL = 22; // 12 quizzes + 5 AI scenarios + 5 HR (Stage5)
     let data = null;
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
@@ -1535,6 +1535,7 @@
     const stage1Done = ['q1','q2','q3','q4','q5'].every(id => quizIds.has(id));
     const stage2Done = ['q6','q7','q8','q9'].every(id => quizIds.has(id));
     const stage3Done = ['q10','q11','q12'].every(id => quizIds.has(id));
+    const stage5Done = ['q13','q14','q15','q16','q17'].every(id => quizIds.has(id));
     const allDone = completed >= TOTAL;
 
     const unlocks = {
@@ -1544,7 +1545,7 @@
       warrior:  stage3Done,
       dialog1:  scenarios.size >= 1,
       champion: scenarios.size >= 3,
-      dialog5:  scenarios.size >= 5,
+      hr:       stage5Done,
       lighter:  allDone
     };
 

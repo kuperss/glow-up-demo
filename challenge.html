@@ -473,8 +473,8 @@
       </a>
     </div>
 
-    <!-- 4 stages overview -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 max-w-5xl mx-auto mt-20 reveal" style="transition-delay:0.5s;">
+    <!-- 5 stages overview -->
+    <div class="grid grid-cols-2 lg:grid-cols-5 gap-4 max-w-5xl mx-auto mt-20 reveal" style="transition-delay:0.5s;">
       <div class="stage-hero">
         <div class="stage-num">01</div>
         <div class="text-xs text-orange-400 font-mono-en tracking-widest mt-2 mb-1">STAGE 01</div>
@@ -497,7 +497,13 @@
         <div class="stage-num">04</div>
         <div class="text-xs text-orange-400 font-mono-en tracking-widest mt-2 mb-1">STAGE 04</div>
         <div class="font-bold mb-1">AI 客戶對話</div>
-        <div class="text-xs text-gray-500">3 輪 · 即時對答</div>
+        <div class="text-xs text-gray-500">5 情境 · 即時對答</div>
+      </div>
+      <div class="stage-hero" style="transition-delay:0.2s;">
+        <div class="stage-num">05</div>
+        <div class="text-xs text-orange-400 font-mono-en tracking-widest mt-2 mb-1">STAGE 05</div>
+        <div class="font-bold mb-1">規章 & 福利</div>
+        <div class="text-xs text-gray-500">5 題 · HR 必考</div>
       </div>
     </div>
   </div>
@@ -515,7 +521,7 @@
       <div id="totalProgress" class="progress-bar-fill" style="width: 0%;"></div>
     </div>
     <div class="text-xs text-gray-500 font-mono-en tracking-widest hidden sm:block">
-      <span id="completed">0</span> / 17
+      <span id="completed">0</span> / 22
     </div>
   </div>
 </section>
@@ -877,6 +883,121 @@
   </div>
 </section>
 
+<!-- ===== Stage 5: 規章 & 福利 ===== -->
+<section id="stage5" class="relative py-24">
+  <div class="max-w-4xl mx-auto px-6">
+    <div class="text-center mb-12 reveal">
+      <div class="section-eyebrow justify-center" style="display:inline-flex;">STAGE 05 · 規章 & 福利</div>
+      <h2 class="font-display text-3xl md:text-4xl lg:text-5xl leading-[1.1] mb-4">
+        會跑業績的人，<br>
+        <span class="text-orange-300">也得搞懂規矩跟福利</span>
+      </h2>
+      <p class="text-gray-500 max-w-xl mx-auto leading-relaxed mt-4">
+        你已經學過產品、客戶、競品、對話。但展晟新人還少一塊：規章、勤假、加班、福利的最基本判斷力。
+      </p>
+    </div>
+
+    <div class="space-y-5">
+
+      <!-- Q13 -->
+      <div class="quiz-block reveal" data-quiz="q13" data-points="20">
+        <div class="flex items-center justify-between mb-3">
+          <span class="quiz-tag">Q13 · 出勤規定</span>
+          <span class="text-xs text-gray-500">+20 光點</span>
+        </div>
+        <div class="quiz-question">
+          你是業務人員，今天上班打卡時間是 8:38。下列敘述何者「正確」？
+        </div>
+        <div class="space-y-2.5">
+          <div class="opt" data-correct="false"><span class="flex items-center gap-3"><span class="opt-letter">A</span> 業務人員上班時間 8:00-17:00，打卡 8:38 視為遲到 38 分鐘</span><svg class="opt-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 6L6 18M6 6l12 12"/></svg></div>
+          <div class="opt" data-correct="true"><span class="flex items-center gap-3"><span class="opt-letter">B</span> 業務人員為 8:30-17:30，加上 10 分鐘通勤彈性，8:38 仍在彈性內，未列為遲到</span><svg class="opt-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="opt" data-correct="false"><span class="flex items-center gap-3"><span class="opt-letter">C</span> 通勤彈性 30 分鐘，8:38 完全 OK</span><svg class="opt-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 6L6 18M6 6l12 12"/></svg></div>
+        </div>
+        <div class="feedback">
+          <strong>解析：</strong>業務人員上下班時間為 <strong>08:30 – 17:30</strong>，加上 <strong>10 分鐘通勤彈性</strong>。彈性是兼顧通勤安全用的，但同月累計 3 次未刷卡，第 4 次起依「比例原則」懲戒。詳情見 CH 00 入職須知。
+        </div>
+      </div>
+
+      <!-- Q14 -->
+      <div class="quiz-block reveal" data-quiz="q14" data-points="20">
+        <div class="flex items-center justify-between mb-3">
+          <span class="quiz-tag">Q14 · 病假規則</span>
+          <span class="text-xs text-gray-500">+20 光點</span>
+        </div>
+        <div class="quiz-question">
+          你昨天身體不適請了 1 日病假，今天去就醫。最遲幾日內的醫療證明仍可作為昨天病假的證明文件？
+        </div>
+        <div class="space-y-2.5">
+          <div class="opt" data-correct="false"><span class="flex items-center gap-3"><span class="opt-letter">A</span> 必須是病假當日（昨天）就醫的證明，否則無效</span><svg class="opt-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 6L6 18M6 6l12 12"/></svg></div>
+          <div class="opt" data-correct="true"><span class="flex items-center gap-3"><span class="opt-letter">B</span> 就醫前後 1 日（N-1 ~ N+1）內的證明，可擇 2 日請病假；經主管核可可放寬至 N+4</span><svg class="opt-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="opt" data-correct="false"><span class="flex items-center gap-3"><span class="opt-letter">C</span> 一週內就醫都算數</span><svg class="opt-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 6L6 18M6 6l12 12"/></svg></div>
+        </div>
+        <div class="feedback">
+          <strong>解析：</strong>展晟工作規則補充版（v9）對病假給予彈性：<strong>就醫事實前後 1 日（N-1 ~ N+1）</strong> 的證明可擇 2 日；經部門主管核可，可放寬至 <strong>N-1 ~ N+4</strong> 期間，擇 5 日請病假。連續 3 日以上病假需診斷證明書「正本」。
+        </div>
+      </div>
+
+      <!-- Q15 (三安福祉) -->
+      <div class="quiz-block reveal" data-quiz="q15" data-points="20">
+        <div class="flex items-center justify-between mb-3">
+          <span class="quiz-tag">Q15 · 三安福祉</span>
+          <span class="text-xs text-gray-500">+20 光點</span>
+        </div>
+        <div class="quiz-question">
+          展晟「三安福祉」是公司給予久任員工的長期保障辦法 — 「三安」指的是哪三個面向？
+        </div>
+        <div class="space-y-2.5">
+          <div class="opt" data-correct="false"><span class="flex items-center gap-3"><span class="opt-letter">A</span> 安家、安業、安康</span><svg class="opt-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 6L6 18M6 6l12 12"/></svg></div>
+          <div class="opt" data-correct="true"><span class="flex items-center gap-3"><span class="opt-letter">B</span> 安心、安身、安老</span><svg class="opt-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="opt" data-correct="false"><span class="flex items-center gap-3"><span class="opt-letter">C</span> 安全、安穩、安養</span><svg class="opt-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 6L6 18M6 6l12 12"/></svg></div>
+        </div>
+        <div class="feedback">
+          <strong>解析：</strong>三安 = <strong>安心（在職保障）+ 安身（重大事故支援）+ 安老（退休生活照顧）</strong>。是展晟對「以人為本」的具體承諾 — 久任不只是年資累積，更是公司對你長期投入的具體回饋。詳細權益試算請洽各區人資暨法務部 HR。
+        </div>
+      </div>
+
+      <!-- Q16 (久任年資 + 雙軌升等) -->
+      <div class="quiz-block reveal" data-quiz="q16" data-points="20">
+        <div class="flex items-center justify-between mb-3">
+          <span class="quiz-tag">Q16 · 雙軌職涯升等</span>
+          <span class="text-xs text-gray-500">+20 光點</span>
+        </div>
+        <div class="quiz-question">
+          你目前是 P09 業務專員，剛升上 P08 資深專員。下列關於下一次升等的敘述，何者正確？
+        </div>
+        <div class="space-y-2.5">
+          <div class="opt" data-correct="false"><span class="flex items-center gap-3"><span class="opt-letter">A</span> 表現好的話，三個月後可立即申請升 P07 主任</span><svg class="opt-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 6L6 18M6 6l12 12"/></svg></div>
+          <div class="opt" data-correct="true"><span class="flex items-center gap-3"><span class="opt-letter">B</span> M08 / P08 以上職務，需擔任至少 1 年才得申請晉升；每年 12 月核定下一年度職等</span><svg class="opt-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="opt" data-correct="false"><span class="flex items-center gap-3"><span class="opt-letter">C</span> 升等只看主管推薦，不需經人力資源部審查</span><svg class="opt-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 6L6 18M6 6l12 12"/></svg></div>
+        </div>
+        <div class="feedback">
+          <strong>解析：</strong>展晟雙軌路徑表 v13 規定：<strong>M08 / P08 以上之職務，需擔任至少 1 年</strong> 後方得申請晉升；每年 <strong>12 月</strong> 核定下一年度職等。流程：事業處總經理提案 → 經營決策會討論 → <strong>集團執行長核准</strong> 後生效。新聘入職由面試主管直接核定者不在此限。
+        </div>
+      </div>
+
+      <!-- Q17 (公務車事故 SOP) -->
+      <div class="quiz-block reveal" data-quiz="q17" data-points="20">
+        <div class="flex items-center justify-between mb-3">
+          <span class="quiz-tag">Q17 · 公務車事故 SOP</span>
+          <span class="text-xs text-gray-500">+20 光點</span>
+        </div>
+        <div class="quiz-question">
+          你開公司業務車去客戶端，路上不小心擦撞到一台機車，對方傷勢輕微但車有刮痕。對方提議：「給我 5,000 元現場和解，我不報警」 — 你應該？
+        </div>
+        <div class="space-y-2.5">
+          <div class="opt" data-correct="false"><span class="flex items-center gap-3"><span class="opt-letter">A</span> 對方傷勢輕微，給錢和解最快、不會留紀錄、對公司也好</span><svg class="opt-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 6L6 18M6 6l12 12"/></svg></div>
+          <div class="opt" data-correct="true"><span class="flex items-center gap-3"><span class="opt-letter">B</span> 婉拒和解、立即報警取得三聯單，同步聯繫部門主管，由保險公司接手與對方聯繫</span><svg class="opt-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="opt" data-correct="false"><span class="flex items-center gap-3"><span class="opt-letter">C</span> 自己墊錢和解，回公司請款</span><svg class="opt-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 6L6 18M6 6l12 12"/></svg></div>
+        </div>
+        <div class="feedback">
+          <strong>解析：</strong>展晟公務車車禍通報流程明確規定：<strong>「不論車禍當下什麼狀況，皆不可私下和解，須一律報警（取得報案三聯單）」</strong>。私下和解 = 失去公司及保險公司的法律保障，事後對方反悔追加索賠時你個人就要承擔。正確 SOP：報警 → 通知主管 → 各區人事 → 保險公司 → 30 天後申請初判表。
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
 <!-- ===== End CTA ===== -->
 <section class="relative py-32 overflow-hidden">
   <div class="glow-orb" style="background:#F58220; width:600px; height:600px; bottom:-200px; left:50%; transform:translateX(-50%); opacity:0.2;"></div>
@@ -1019,7 +1140,7 @@
   reveals.forEach(r => io.observe(r));
 
   // === Quiz Logic ===
-  const TOTAL_QUIZ_COUNT = 12 + 5; // 12 mc + 5 AI chat scenarios
+  const TOTAL_QUIZ_COUNT = 12 + 5 + 5; // 12 (Stage1-3) + 5 AI scenarios + 5 HR (Stage5)
   const STORAGE_KEY = 'glow-quiz-progress-v1';
   let totalScore = 0;
   let completedCount = 0;
