@@ -497,13 +497,13 @@
               <button class="btn btn-ghost text-xs">匯出 CSV</button>
             </div>
             <div class="bar-chart">
+              <div class="bar-col"><div class="bar-value">98%</div><div class="bar" style="height: 98%;"></div><div class="bar-label">CH 00</div></div>
               <div class="bar-col"><div class="bar-value">95%</div><div class="bar" style="height: 95%;"></div><div class="bar-label">CH 01</div></div>
               <div class="bar-col"><div class="bar-value">82%</div><div class="bar" style="height: 82%;"></div><div class="bar-label">CH 02</div></div>
               <div class="bar-col"><div class="bar-value">68%</div><div class="bar" style="height: 68%;"></div><div class="bar-label">CH 03</div></div>
               <div class="bar-col"><div class="bar-value">45%</div><div class="bar" style="height: 45%;"></div><div class="bar-label">CH 04</div></div>
               <div class="bar-col"><div class="bar-value">28%</div><div class="bar" style="height: 28%;"></div><div class="bar-label">CH 05</div></div>
               <div class="bar-col"><div class="bar-value">12%</div><div class="bar" style="height: 12%;"></div><div class="bar-label">CH 06</div></div>
-              <div class="bar-col"><div class="bar-value">5%</div><div class="bar" style="height: 5%;"></div><div class="bar-label">CH 07</div></div>
             </div>
             <div class="text-xs text-gray-500 mt-4 pt-4 border-t border-gray-800">
               💡 <span class="text-orange-300">主管洞察</span>：CH 04 闖關挑戰是明顯的卡關點，建議補強前置教材或新增中段提示。
@@ -675,10 +675,13 @@
             <input class="form-input flex-1" placeholder="搜尋學員姓名或編號..." style="max-width:300px;">
             <select class="form-input" style="width:auto;">
               <option>全部章節</option>
+              <option>CH 00 入職須知</option>
               <option>CH 01 品牌之光</option>
               <option>CH 02 產品實驗室</option>
               <option>CH 03 業務學院</option>
               <option>CH 04 闖關挑戰</option>
+              <option>CH 05 數位行銷整合</option>
+              <option>CH 06 職涯地圖</option>
             </select>
             <select class="form-input" style="width:auto;">
               <option>全部等級</option>
@@ -1285,12 +1288,13 @@
 
   const defaultData = {
     chapters: [
+      { id: 0, num: '00', name: '入職須知', desc: '出勤 · 病假 · 加班 · 服儀 · 公務車事故 SOP · 久任年資獎勵 · 三安福祉 · 雙軌路徑 · 法定須知（前置必讀）', status: 'live' },
       { id: 1, num: '01', name: '品牌之光', desc: '公司沿革 · 舞光誕生 · 三大價值 · 二代團隊 · 三大體驗館', status: 'live' },
       { id: 2, num: '02', name: '產品實驗室', desc: '20+ 大類 · 9 主打產品 · 規格速查 · 場景配對 · 品質骨幹', status: 'live' },
       { id: 3, num: '03', name: '業務學院', desc: '客戶分層 · 客戶分級 · 拜訪 SOP · 報價議價 · 異議處理 · 客訴 SOP', status: 'live' },
-      { id: 4, num: '04', name: '闖關挑戰', desc: '12 道情境題 + 5 輪 AI 客戶對話 · 卡關熱點待補強', status: 'live' },
+      { id: 4, num: '04', name: '闖關挑戰', desc: '12 道情境題 + 5 輪 AI 客戶對話 + 5 題 HR 規章（共 22 關卡）', status: 'live' },
       { id: 5, num: '05', name: '數位行銷整合', desc: '官網 · YT · 社群 · 智慧家庭 · 新世代學院 · ESG 永續', status: 'live' },
-      { id: 6, num: '06', name: '職涯地圖', desc: '三年成長路徑 · 5 大技能樹 · 學長姐錦囊 · 畢業專題', status: 'live' },
+      { id: 6, num: '06', name: '職涯地圖', desc: '三年成長路徑 · 5 大技能樹 · 雙軌職涯路徑 v13 · 學長姐錦囊', status: 'live' },
       { id: 7, num: '07', name: '畢業典禮', desc: '點燈者徽章發放典禮 · 新人正式畢業（規劃中）', status: 'draft' }
     ],
     questions: [
