@@ -265,6 +265,49 @@
     letter-spacing: 0.05em;
   }
 
+  /* Product domain filter */
+  .product-filter {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-bottom: 2.5rem;
+  }
+  .product-filter-tab {
+    padding: 0.55rem 1.1rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border-subtle);
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    font-family: inherit;
+  }
+  .product-filter-tab:hover {
+    background: rgba(245, 130, 32, 0.06);
+    border-color: rgba(245, 130, 32, 0.35);
+    color: var(--text-primary);
+    transform: translateY(-1px);
+  }
+  .product-filter-tab.active {
+    background: linear-gradient(135deg, #F58220, #FFA050);
+    border-color: rgba(255, 200, 100, 0.6);
+    color: #08080A;
+    font-weight: 600;
+    box-shadow: 0 4px 14px -4px rgba(245, 130, 32, 0.55);
+  }
+  .flip-card.is-hidden {
+    display: none;
+  }
+  .flip-card.is-fading {
+    animation: card-fade-in 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  @keyframes card-fade-in {
+    from { opacity: 0; transform: scale(0.96) translateY(8px); }
+    to { opacity: 1; transform: none; }
+  }
+
   /* Spec card with hover detail */
   .spec-card {
     position: relative;
@@ -808,17 +851,28 @@
     <div class="text-center mb-16 reveal">
       <div class="section-eyebrow justify-center" style="display:inline-flex;">FLAGSHIP · 主打產品</div>
       <h2 class="font-display text-4xl md:text-5xl lg:text-6xl leading-[1.1] mb-4">
-        五支必背，<br>
-        <span class="text-orange-300">業務的口袋武器</span>
+        依空間挑武器，<br>
+        <span class="text-orange-300">9 支必懂主打</span>
       </h2>
       <p class="text-gray-500 max-w-xl mx-auto leading-relaxed mt-6">
-        滑鼠移到卡片上 · 翻面看規格與業務話術重點。
+        按應用領域切換 · 滑鼠移到卡片上翻面看規格與業務話術。
       </p>
     </div>
 
-    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    <!-- Domain filter -->
+    <div class="product-filter reveal" role="tablist" aria-label="領域篩選">
+      <button type="button" class="product-filter-tab active" data-filter="all">全部</button>
+      <button type="button" class="product-filter-tab" data-filter="居家">居家</button>
+      <button type="button" class="product-filter-tab" data-filter="商空">商空</button>
+      <button type="button" class="product-filter-tab" data-filter="辦公">辦公</button>
+      <button type="button" class="product-filter-tab" data-filter="廠房">廠房</button>
+      <button type="button" class="product-filter-tab" data-filter="戶外">戶外</button>
+      <button type="button" class="product-filter-tab" data-filter="智慧">智慧</button>
+    </div>
+
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6" id="flagshipGrid">
       <!-- 拉斐爾磁吸軌道 -->
-      <div class="flip-card reveal">
+      <div class="flip-card reveal" data-categories="商空">
         <div class="flip-card-inner">
           <div class="flip-face">
             <div class="flex items-center gap-2 mb-4">
@@ -855,7 +909,7 @@
       </div>
 
       <!-- Ai 智慧崁燈 -->
-      <div class="flip-card reveal" style="transition-delay:0.05s;">
+      <div class="flip-card reveal" data-categories="居家,智慧" style="transition-delay:0.05s;">
         <div class="flip-card-inner">
           <div class="flip-face">
             <div class="flex items-center gap-2 mb-4">
@@ -892,7 +946,7 @@
       </div>
 
       <!-- 索爾崁燈 -->
-      <div class="flip-card reveal" style="transition-delay:0.1s;">
+      <div class="flip-card reveal" data-categories="居家" style="transition-delay:0.1s;">
         <div class="flip-card-inner">
           <div class="flip-face">
             <div class="flex items-center gap-2 mb-4">
@@ -929,7 +983,7 @@
       </div>
 
       <!-- 奧丁崁燈 -->
-      <div class="flip-card reveal" style="transition-delay:0.15s;">
+      <div class="flip-card reveal" data-categories="居家,商空" style="transition-delay:0.15s;">
         <div class="flip-card-inner">
           <div class="flip-face">
             <div class="flex items-center gap-2 mb-4">
@@ -966,7 +1020,7 @@
       </div>
 
       <!-- 馬爾防眩崁燈 -->
-      <div class="flip-card reveal" style="transition-delay:0.2s;">
+      <div class="flip-card reveal" data-categories="商空,辦公" style="transition-delay:0.2s;">
         <div class="flip-card-inner">
           <div class="flip-face">
             <div class="flex items-center gap-2 mb-4">
@@ -1003,7 +1057,7 @@
       </div>
 
       <!-- 雲朵吸頂燈 -->
-      <div class="flip-card reveal" style="transition-delay:0.25s;">
+      <div class="flip-card reveal" data-categories="居家" style="transition-delay:0.25s;">
         <div class="flip-card-inner">
           <div class="flip-face">
             <div class="flex items-center gap-2 mb-4">
@@ -1038,6 +1092,116 @@
           </div>
         </div>
       </div>
+
+      <!-- 宙斯泛光燈 -->
+      <div class="flip-card reveal" data-categories="戶外" style="transition-delay:0.3s;">
+        <div class="flip-card-inner">
+          <div class="flip-face">
+            <div class="flex items-center gap-2 mb-4">
+              <span class="flip-tag">戶外．OUTDOOR</span>
+            </div>
+            <div class="text-xs text-orange-400 font-mono-en tracking-widest mb-2">FLOODLIGHT</div>
+            <h3 class="font-display text-2xl mb-3">宙斯<br>泛光燈</h3>
+            <p class="text-sm text-gray-500 leading-relaxed mb-auto">
+              IP66 全防護、高瓦數高流明。
+              招牌、廣場、舞台、建物外牆打燈首選，
+              耐候塗裝抗台灣鹽害氣候。
+            </p>
+            <div class="mt-4 flex items-center justify-between text-xs">
+              <span class="text-orange-400">IP66 防護</span>
+              <span class="text-gray-500 group-hover:text-orange-300 transition">翻面看規格 →</span>
+            </div>
+          </div>
+          <div class="flip-face back">
+            <div class="text-xs text-orange-400 font-mono-en tracking-widest mb-3">SPEC SHEET</div>
+            <h3 class="font-display text-xl mb-4 text-orange-200">宙斯規格重點</h3>
+            <div class="space-y-2.5 text-sm text-gray-300 mb-auto">
+              <div class="flex justify-between"><span class="text-gray-500">瓦數範圍</span><span>30W / 50W / 100W / 200W</span></div>
+              <div class="flex justify-between"><span class="text-gray-500">防護</span><span>IP66 全防塵防噴水</span></div>
+              <div class="flex justify-between"><span class="text-gray-500">色溫</span><span>3000K / 5000K / 5700K</span></div>
+              <div class="flex justify-between"><span class="text-gray-500">塗裝</span><span>耐候抗鹽害</span></div>
+              <div class="flex justify-between"><span class="text-gray-500">適用</span><span>招牌・廣場・舞台・建物</span></div>
+            </div>
+            <div class="mt-3 pt-3 border-t border-orange-500/20">
+              <div class="text-xs text-orange-300 font-medium">業務話術</div>
+              <div class="text-xs text-gray-400 mt-1">「招牌外牆打燈，這支不漏電不掉燈泡」</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 阿波羅高天井燈 -->
+      <div class="flip-card reveal" data-categories="廠房" style="transition-delay:0.35s;">
+        <div class="flip-card-inner">
+          <div class="flip-face">
+            <div class="flex items-center gap-2 mb-4">
+              <span class="flip-tag">廠房．INDUSTRIAL</span>
+            </div>
+            <div class="text-xs text-orange-400 font-mono-en tracking-widest mb-2">HIGH BAY</div>
+            <h3 class="font-display text-2xl mb-3">阿波羅<br>高天井燈</h3>
+            <p class="text-sm text-gray-500 leading-relaxed mb-auto">
+              廠房挑高 6 米以上、倉儲、停車場、體育館的高效能照明。
+              一支抵 4 支傳統金鹵燈，電費直接掉一半。
+            </p>
+            <div class="mt-4 flex items-center justify-between text-xs">
+              <span class="text-orange-400">130 lm/W 高效</span>
+              <span class="text-gray-500 group-hover:text-orange-300 transition">翻面看規格 →</span>
+            </div>
+          </div>
+          <div class="flip-face back">
+            <div class="text-xs text-orange-400 font-mono-en tracking-widest mb-3">SPEC SHEET</div>
+            <h3 class="font-display text-xl mb-4 text-orange-200">阿波羅規格重點</h3>
+            <div class="space-y-2.5 text-sm text-gray-300 mb-auto">
+              <div class="flex justify-between"><span class="text-gray-500">瓦數</span><span>100W / 150W / 200W / 300W</span></div>
+              <div class="flex justify-between"><span class="text-gray-500">發光效率</span><span>130 lm/W 起跳</span></div>
+              <div class="flex justify-between"><span class="text-gray-500">色溫</span><span>5000K 中性白</span></div>
+              <div class="flex justify-between"><span class="text-gray-500">適用高度</span><span>6 - 12 米天花</span></div>
+              <div class="flex justify-between"><span class="text-gray-500">適用</span><span>廠房・倉儲・停車場・體育館</span></div>
+            </div>
+            <div class="mt-3 pt-3 border-t border-orange-500/20">
+              <div class="text-xs text-orange-300 font-medium">業務話術</div>
+              <div class="text-xs text-gray-400 mt-1">「電費掉 60%，半年回本」</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ESG 平板燈 -->
+      <div class="flip-card reveal" data-categories="辦公" style="transition-delay:0.4s;">
+        <div class="flip-card-inner">
+          <div class="flip-face">
+            <div class="flex items-center gap-2 mb-4">
+              <span class="flip-tag">辦公．OFFICE</span>
+            </div>
+            <div class="text-xs text-orange-400 font-mono-en tracking-widest mb-2">ESG PANEL</div>
+            <h3 class="font-display text-2xl mb-3">ESG<br>平板燈系列</h3>
+            <p class="text-sm text-gray-500 leading-relaxed mb-auto">
+              輕鋼架天花板的標配。低眩光、節能標章認證、
+              學校公部門 ESG 採購指定，是標案常勝軍。
+            </p>
+            <div class="mt-4 flex items-center justify-between text-xs">
+              <span class="text-orange-400">UGR &lt; 19 防眩</span>
+              <span class="text-gray-500 group-hover:text-orange-300 transition">翻面看規格 →</span>
+            </div>
+          </div>
+          <div class="flip-face back">
+            <div class="text-xs text-orange-400 font-mono-en tracking-widest mb-3">SPEC SHEET</div>
+            <h3 class="font-display text-xl mb-4 text-orange-200">ESG 平板規格重點</h3>
+            <div class="space-y-2.5 text-sm text-gray-300 mb-auto">
+              <div class="flex justify-between"><span class="text-gray-500">尺寸</span><span>60×60 / 30×120 cm</span></div>
+              <div class="flex justify-between"><span class="text-gray-500">防眩</span><span>UGR &lt; 19</span></div>
+              <div class="flex justify-between"><span class="text-gray-500">色溫</span><span>4000K 自然白</span></div>
+              <div class="flex justify-between"><span class="text-gray-500">認證</span><span>節能標章 · CNS · BSMI</span></div>
+              <div class="flex justify-between"><span class="text-gray-500">適用</span><span>辦公・會議・教室・標案</span></div>
+            </div>
+            <div class="mt-3 pt-3 border-t border-orange-500/20">
+              <div class="text-xs text-orange-300 font-medium">業務話術</div>
+              <div class="text-xs text-gray-400 mt-1">「ESG 採購一張紙說服老師主任」</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 </section>
@@ -1619,6 +1783,35 @@
       }
     });
   });
+
+  // === Flagship product domain filter ===
+  (function() {
+    const filterTabs = document.querySelectorAll('.product-filter-tab');
+    const cards = document.querySelectorAll('#flagshipGrid .flip-card[data-categories]');
+    if (!filterTabs.length || !cards.length) return;
+
+    filterTabs.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const filter = btn.dataset.filter;
+        filterTabs.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        cards.forEach(card => {
+          const cats = (card.dataset.categories || '').split(',').map(s => s.trim());
+          const visible = filter === 'all' || cats.includes(filter);
+          card.classList.remove('is-fading');
+          if (visible) {
+            card.classList.remove('is-hidden');
+            // re-trigger fade animation
+            void card.offsetWidth;
+            card.classList.add('is-fading');
+          } else {
+            card.classList.add('is-hidden');
+          }
+        });
+      });
+    });
+  })();
 </script>
 
 </body>
