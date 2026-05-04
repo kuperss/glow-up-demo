@@ -300,6 +300,69 @@
   ::-webkit-scrollbar { width: 6px; }
   ::-webkit-scrollbar-track { background: var(--bg-base); }
   ::-webkit-scrollbar-thumb { background: rgba(245,130,32,0.25); border-radius: 3px; }
+
+  /* Modal (editable forms) */
+  .modal-backdrop {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.75);
+    backdrop-filter: blur(8px);
+    z-index: 100;
+    display: flex; align-items: center; justify-content: center;
+    padding: 1rem;
+  }
+  .modal-backdrop[hidden] { display: none; }
+  .modal-card {
+    background: var(--bg-card);
+    border: 1px solid rgba(245,130,32,0.3);
+    border-radius: 14px;
+    padding: 1.75rem;
+    max-width: 560px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 30px 60px -15px rgba(0,0,0,0.7), 0 0 0 1px rgba(245,130,32,0.1);
+  }
+  .modal-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .modal-title { font-size: 1.1rem; font-weight: 600; color: var(--text-primary); }
+  .modal-close {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border-subtle);
+    color: var(--text-secondary);
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem; line-height: 1; cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .modal-close:hover { background: rgba(255,255,255,0.1); color: var(--text-primary); }
+  .modal-fields { display: flex; flex-direction: column; gap: 1rem; margin-bottom: 1.5rem; }
+  .modal-actions { display: flex; gap: 0.5rem; justify-content: flex-end; }
+
+  textarea.form-input { min-height: 80px; resize: vertical; font-family: inherit; }
+
+  /* Save indicator (toast) */
+  .save-toast {
+    position: fixed;
+    bottom: 1.5rem; right: 1.5rem;
+    padding: 0.75rem 1.25rem;
+    background: linear-gradient(135deg, #F58220, #FFA050);
+    color: #08080A;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    box-shadow: 0 8px 24px -6px rgba(245,130,32,0.55);
+    transform: translateY(100px);
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    pointer-events: none;
+    z-index: 200;
+  }
+  .save-toast.show { transform: translateY(0); opacity: 1; }
 </style>
 </head>
 <body>
@@ -763,7 +826,7 @@
             <h2 class="text-2xl font-bold mb-1">章節管理</h2>
             <div class="text-sm text-gray-500">編輯章節內容、調整順序、新增小節</div>
           </div>
-          <button class="btn btn-primary">
+          <button class="btn btn-primary" id="addChapterBtn">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             新增章節
           </button>
@@ -772,101 +835,11 @@
         <div class="panel">
           <div class="text-xs text-gray-500 mb-4 flex items-center gap-2">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
-            拖曳調整順序
+            點「編輯」修改章節資料 · 變更會儲存到瀏覽器（localStorage）
           </div>
 
-          <!-- Chapter rows -->
-          <div class="chapter-row">
-            <div class="drag-handle">⋮⋮</div>
-            <div class="text-2xl font-bold text-orange-300 font-mono-en">01</div>
-            <div>
-              <div class="font-medium">品牌之光</div>
-              <div class="text-xs text-gray-500">公司沿革 · 舞光誕生 · 三大價值 · 二代團隊 · 三大體驗館</div>
-            </div>
-            <span class="pill pill-green">已上線</span>
-            <div class="flex gap-2">
-              <button class="btn btn-ghost text-xs">編輯</button>
-              <button class="btn btn-ghost text-xs">預覽</button>
-            </div>
-          </div>
-          <div class="chapter-row">
-            <div class="drag-handle">⋮⋮</div>
-            <div class="text-2xl font-bold text-orange-300 font-mono-en">02</div>
-            <div>
-              <div class="font-medium">產品實驗室</div>
-              <div class="text-xs text-gray-500">20+ 大類 · 6 主打產品 · 規格速查 · 場景配對 · 品質骨幹</div>
-            </div>
-            <span class="pill pill-green">已上線</span>
-            <div class="flex gap-2">
-              <button class="btn btn-ghost text-xs">編輯</button>
-              <button class="btn btn-ghost text-xs">預覽</button>
-            </div>
-          </div>
-          <div class="chapter-row">
-            <div class="drag-handle">⋮⋮</div>
-            <div class="text-2xl font-bold text-orange-300 font-mono-en">03</div>
-            <div>
-              <div class="font-medium">業務學院</div>
-              <div class="text-xs text-gray-500">客戶分層 · 客戶分級 · 拜訪 SOP · 報價議價 · 異議處理 · 客訴 SOP</div>
-            </div>
-            <span class="pill pill-green">已上線</span>
-            <div class="flex gap-2">
-              <button class="btn btn-ghost text-xs">編輯</button>
-              <button class="btn btn-ghost text-xs">預覽</button>
-            </div>
-          </div>
-          <div class="chapter-row">
-            <div class="drag-handle">⋮⋮</div>
-            <div class="text-2xl font-bold text-orange-300 font-mono-en">04</div>
-            <div>
-              <div class="font-medium">闖關挑戰</div>
-              <div class="text-xs text-gray-500">12 道情境題 + 3 輪 AI 客戶對話 · 卡關熱點待補強</div>
-            </div>
-            <span class="pill pill-green">已上線</span>
-            <div class="flex gap-2">
-              <button class="btn btn-ghost text-xs">編輯</button>
-              <button class="btn btn-ghost text-xs">預覽</button>
-            </div>
-          </div>
-          <div class="chapter-row">
-            <div class="drag-handle">⋮⋮</div>
-            <div class="text-2xl font-bold text-orange-300 font-mono-en">05</div>
-            <div>
-              <div class="font-medium">數位行銷整合</div>
-              <div class="text-xs text-gray-500">官網 · YT · 社群 · 智慧家庭 · 新世代學院 · ESG 永續</div>
-            </div>
-            <span class="pill pill-orange">草稿</span>
-            <div class="flex gap-2">
-              <button class="btn btn-ghost text-xs">編輯</button>
-              <button class="btn btn-ghost text-xs">發佈</button>
-            </div>
-          </div>
-          <div class="chapter-row">
-            <div class="drag-handle">⋮⋮</div>
-            <div class="text-2xl font-bold text-orange-300 font-mono-en">06</div>
-            <div>
-              <div class="font-medium">職涯地圖</div>
-              <div class="text-xs text-gray-500">三年成長路徑 · 技能樹 · 學長姐錦囊</div>
-            </div>
-            <span class="pill pill-gray">未開始</span>
-            <div class="flex gap-2">
-              <button class="btn btn-ghost text-xs">建立</button>
-              <button class="btn btn-ghost text-xs">參考</button>
-            </div>
-          </div>
-          <div class="chapter-row">
-            <div class="drag-handle">⋮⋮</div>
-            <div class="text-2xl font-bold text-orange-300 font-mono-en">07</div>
-            <div>
-              <div class="font-medium">畢業專題</div>
-              <div class="text-xs text-gray-500">客戶開發實戰提案 · 利他企業 DNA</div>
-            </div>
-            <span class="pill pill-gray">未開始</span>
-            <div class="flex gap-2">
-              <button class="btn btn-ghost text-xs">建立</button>
-              <button class="btn btn-ghost text-xs">參考</button>
-            </div>
-          </div>
+          <!-- Chapter rows rendered by JS -->
+          <div id="chaptersList"></div>
         </div>
       </section>
 
@@ -877,7 +850,7 @@
             <h2 class="text-2xl font-bold mb-1">題庫管理</h2>
             <div class="text-sm text-gray-500">所有測驗題目集中管理 · 含答對率分析</div>
           </div>
-          <button class="btn btn-primary">
+          <button class="btn btn-primary" id="addQuestionBtn">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             新增題目
           </button>
@@ -931,62 +904,7 @@
                   <th></th>
                 </tr>
               </thead>
-              <tbody>
-                <tr>
-                  <td class="font-mono-en text-orange-400">CH04-Q11</td>
-                  <td>闖關挑戰 · 競品 PK</td>
-                  <td>雜牌：「網路上有便宜一半」</td>
-                  <td><span class="pill pill-orange">情境</span></td>
-                  <td>30</td>
-                  <td><span class="text-red-300">38%</span></td>
-                  <td><button class="btn btn-ghost text-xs">編輯</button></td>
-                </tr>
-                <tr>
-                  <td class="font-mono-en text-orange-400">CH04-Q07</td>
-                  <td>闖關挑戰 · 情境</td>
-                  <td>工程商殺價 8%</td>
-                  <td><span class="pill pill-orange">情境</span></td>
-                  <td>20</td>
-                  <td><span class="text-red-300">42%</span></td>
-                  <td><button class="btn btn-ghost text-xs">編輯</button></td>
-                </tr>
-                <tr>
-                  <td class="font-mono-en text-orange-400">CH04-Q10</td>
-                  <td>闖關挑戰 · 競品 PK</td>
-                  <td>飛利浦比舞光便宜 20 元</td>
-                  <td><span class="pill pill-orange">情境</span></td>
-                  <td>30</td>
-                  <td><span class="text-orange-300">68%</span></td>
-                  <td><button class="btn btn-ghost text-xs">編輯</button></td>
-                </tr>
-                <tr>
-                  <td class="font-mono-en text-orange-400">CH04-CHAT</td>
-                  <td>闖關挑戰 · AI 對話</td>
-                  <td>陳老闆：電料行因應對手低價</td>
-                  <td><span class="pill pill-orange">AI 對話</span></td>
-                  <td>50</td>
-                  <td><span class="text-orange-300">72%</span></td>
-                  <td><button class="btn btn-ghost text-xs">編輯</button></td>
-                </tr>
-                <tr>
-                  <td class="font-mono-en text-orange-400">CH02-Q03</td>
-                  <td>產品實驗室</td>
-                  <td>磁吸軌道 vs 傳統軌道差異</td>
-                  <td><span class="pill pill-gray">單選</span></td>
-                  <td>10</td>
-                  <td><span class="text-orange-300">75%</span></td>
-                  <td><button class="btn btn-ghost text-xs">編輯</button></td>
-                </tr>
-                <tr>
-                  <td class="font-mono-en text-orange-400">CH04-Q01</td>
-                  <td>闖關挑戰 · 產品快問</td>
-                  <td>800 流明 = 傳統幾瓦？</td>
-                  <td><span class="pill pill-gray">單選</span></td>
-                  <td>10</td>
-                  <td><span class="text-green-300">88%</span></td>
-                  <td><button class="btn btn-ghost text-xs">編輯</button></td>
-                </tr>
-              </tbody>
+              <tbody id="quizTableBody"></tbody>
             </table>
           </div>
         </div>
@@ -1294,12 +1212,46 @@
             <p class="text-sm text-gray-400 mb-4">後台目前 1 位主管帳號，可邀請其他主管或助理共同管理。</p>
             <button class="btn btn-primary">邀請新主管</button>
           </div>
+
+          <div class="panel lg:col-span-2" style="border-color: rgba(248,113,113,0.25);">
+            <div class="panel-header">
+              <div>
+                <div class="panel-title" style="color:#fda4a4;">重置 Demo 資料</div>
+                <div class="panel-subtitle">清除 localStorage 中已儲存的編輯，恢復為內建預設值</div>
+              </div>
+              <button class="btn btn-ghost text-xs" id="resetDataBtn" style="border-color:rgba(248,113,113,0.4); color:#fda4a4;">重置全部</button>
+            </div>
+            <p class="text-xs text-gray-500 leading-relaxed">
+              你在「章節管理」與「題庫管理」做的所有編輯都儲存在你瀏覽器的 localStorage。
+              此按鈕只清除本機資料，不會影響其他使用者或線上版本。
+            </p>
+          </div>
         </div>
       </section>
 
     </main>
   </div>
 </div>
+
+<!-- Edit Modal -->
+<div class="modal-backdrop" id="editModal" hidden>
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3 class="modal-title" id="modalTitle">編輯</h3>
+      <button class="modal-close" id="modalClose" aria-label="關閉">×</button>
+    </div>
+    <form id="modalForm">
+      <div class="modal-fields" id="modalFields"></div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" id="modalCancel">取消</button>
+        <button type="submit" class="btn btn-primary">儲存</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Save Toast -->
+<div class="save-toast" id="saveToast">✓ 已儲存</div>
 
 <script>
   // === Sidebar nav switch ===
@@ -1325,6 +1277,322 @@
       window.scrollTo({ top: 0, behavior: 'smooth' });
     });
   });
+
+  // ============================================
+  // === Editable Data Layer (localStorage) ===
+  // ============================================
+  const STORAGE_KEY = 'glow-admin-data-v1';
+
+  const defaultData = {
+    chapters: [
+      { id: 1, num: '01', name: '品牌之光', desc: '公司沿革 · 舞光誕生 · 三大價值 · 二代團隊 · 三大體驗館', status: 'live' },
+      { id: 2, num: '02', name: '產品實驗室', desc: '20+ 大類 · 9 主打產品 · 規格速查 · 場景配對 · 品質骨幹', status: 'live' },
+      { id: 3, num: '03', name: '業務學院', desc: '客戶分層 · 客戶分級 · 拜訪 SOP · 報價議價 · 異議處理 · 客訴 SOP', status: 'live' },
+      { id: 4, num: '04', name: '闖關挑戰', desc: '12 道情境題 + 5 輪 AI 客戶對話 · 卡關熱點待補強', status: 'live' },
+      { id: 5, num: '05', name: '數位行銷整合', desc: '官網 · YT · 社群 · 智慧家庭 · 新世代學院 · ESG 永續', status: 'live' },
+      { id: 6, num: '06', name: '職涯地圖', desc: '三年成長路徑 · 5 大技能樹 · 學長姐錦囊 · 畢業專題', status: 'live' },
+      { id: 7, num: '07', name: '畢業典禮', desc: '點燈者徽章發放典禮 · 新人正式畢業（規劃中）', status: 'draft' }
+    ],
+    questions: [
+      { id: 'CH04-Q11', chapter: '闖關挑戰 · 競品 PK', text: '雜牌：「網路上有便宜一半」', type: '情境', points: 30, correctRate: 38 },
+      { id: 'CH04-Q07', chapter: '闖關挑戰 · 情境', text: '工程商殺價 8%', type: '情境', points: 20, correctRate: 42 },
+      { id: 'CH04-Q10', chapter: '闖關挑戰 · 競品 PK', text: '飛利浦比舞光便宜 20 元', type: '情境', points: 30, correctRate: 68 },
+      { id: 'CH04-CHAT', chapter: '闖關挑戰 · AI 對話', text: '陳老闆：電料行因應對手低價', type: 'AI 對話', points: 50, correctRate: 72 },
+      { id: 'CH02-Q03', chapter: '產品實驗室', text: '磁吸軌道 vs 傳統軌道差異', type: '單選', points: 10, correctRate: 75 },
+      { id: 'CH04-Q01', chapter: '闖關挑戰 · 產品快問', text: '800 流明 = 傳統幾瓦？', type: '單選', points: 10, correctRate: 88 }
+    ]
+  };
+
+  function deepClone(obj) { return JSON.parse(JSON.stringify(obj)); }
+
+  function loadData() {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (parsed && Array.isArray(parsed.chapters) && Array.isArray(parsed.questions)) return parsed;
+      }
+    } catch (e) { console.warn('localStorage load failed', e); }
+    return deepClone(defaultData);
+  }
+
+  function saveData() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(adminData));
+      showToast('✓ 已儲存到本機');
+    } catch (e) {
+      console.error('save failed', e);
+      showToast('× 儲存失敗');
+    }
+  }
+
+  let adminData = loadData();
+
+  // === Toast ===
+  const toastEl = document.getElementById('saveToast');
+  let toastTimeout = null;
+  function showToast(text) {
+    if (!toastEl) return;
+    toastEl.textContent = text;
+    toastEl.classList.add('show');
+    clearTimeout(toastTimeout);
+    toastTimeout = setTimeout(() => toastEl.classList.remove('show'), 2200);
+  }
+
+  function escapeHTML(s) {
+    return String(s).replace(/[&<>"']/g, c => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[c]));
+  }
+  function escapeAttr(s) { return String(s).replace(/"/g, '&quot;'); }
+
+  function statusPill(status) {
+    const map = { live: ['已上線', 'pill-green'], draft: ['草稿', 'pill-orange'], pending: ['未開始', 'pill-gray'] };
+    const [label, cls] = map[status] || map.pending;
+    return '<span class="pill ' + cls + '">' + label + '</span>';
+  }
+
+  function rateColor(rate) {
+    if (rate >= 80) return 'text-green-300';
+    if (rate >= 60) return 'text-orange-300';
+    return 'text-red-300';
+  }
+
+  // === Render Chapters ===
+  const chaptersList = document.getElementById('chaptersList');
+
+  function renderChapters() {
+    if (!chaptersList) return;
+    chaptersList.innerHTML = adminData.chapters.map(c => `
+      <div class="chapter-row" data-chapter-id="${c.id}">
+        <div class="drag-handle">⋮⋮</div>
+        <div class="text-2xl font-bold text-orange-300 font-mono-en">${escapeHTML(c.num)}</div>
+        <div>
+          <div class="font-medium">${escapeHTML(c.name)}</div>
+          <div class="text-xs text-gray-500">${escapeHTML(c.desc)}</div>
+        </div>
+        ${statusPill(c.status)}
+        <div class="flex gap-2">
+          <button class="btn btn-ghost text-xs" data-action="edit-chapter" data-id="${c.id}">編輯</button>
+          <button class="btn btn-ghost text-xs" data-action="delete-chapter" data-id="${c.id}">刪除</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // === Render Quiz ===
+  const quizTableBody = document.getElementById('quizTableBody');
+
+  function renderQuiz() {
+    if (!quizTableBody) return;
+    quizTableBody.innerHTML = adminData.questions.map(q => `
+      <tr data-question-id="${escapeAttr(q.id)}">
+        <td class="font-mono-en text-orange-400">${escapeHTML(q.id)}</td>
+        <td>${escapeHTML(q.chapter)}</td>
+        <td>${escapeHTML(q.text)}</td>
+        <td><span class="pill pill-orange">${escapeHTML(q.type)}</span></td>
+        <td>${q.points}</td>
+        <td><span class="${rateColor(q.correctRate)}">${q.correctRate}%</span></td>
+        <td>
+          <button class="btn btn-ghost text-xs" data-action="edit-question" data-id="${escapeAttr(q.id)}">編輯</button>
+          <button class="btn btn-ghost text-xs" data-action="delete-question" data-id="${escapeAttr(q.id)}">刪除</button>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  // === Modal ===
+  const modalEl = document.getElementById('editModal');
+  const modalTitle = document.getElementById('modalTitle');
+  const modalFields = document.getElementById('modalFields');
+  const modalForm = document.getElementById('modalForm');
+  const modalClose = document.getElementById('modalClose');
+  const modalCancel = document.getElementById('modalCancel');
+
+  let activeEdit = null;
+
+  function nextChapterId() { return adminData.chapters.reduce((m, c) => Math.max(m, c.id), 0) + 1; }
+  function nextChapterNum() {
+    const next = adminData.chapters.length + 1;
+    return next.toString().padStart(2, '0');
+  }
+  function nextQuestionId() { return 'NEW-' + Date.now().toString(36).toUpperCase(); }
+
+  function openModal(kind, id, isNew) {
+    isNew = !!isNew;
+    activeEdit = { kind: kind, id: id, isNew: isNew };
+    if (kind === 'chapter') {
+      const c = isNew
+        ? { id: nextChapterId(), num: nextChapterNum(), name: '', desc: '', status: 'draft' }
+        : adminData.chapters.find(x => x.id === id);
+      if (!c) return;
+      activeEdit.id = c.id;
+      modalTitle.textContent = isNew ? '新增章節' : '編輯章節';
+      modalFields.innerHTML = `
+        <div>
+          <label class="form-label">章節編號</label>
+          <input class="form-input" name="num" value="${escapeAttr(c.num)}" required>
+        </div>
+        <div>
+          <label class="form-label">章節名稱</label>
+          <input class="form-input" name="name" value="${escapeAttr(c.name)}" required>
+        </div>
+        <div>
+          <label class="form-label">描述</label>
+          <textarea class="form-input" name="desc" required>${escapeHTML(c.desc)}</textarea>
+        </div>
+        <div>
+          <label class="form-label">狀態</label>
+          <select class="form-input" name="status">
+            <option value="live" ${c.status==='live'?'selected':''}>已上線</option>
+            <option value="draft" ${c.status==='draft'?'selected':''}>草稿</option>
+            <option value="pending" ${c.status==='pending'?'selected':''}>未開始</option>
+          </select>
+        </div>
+      `;
+    } else if (kind === 'question') {
+      const q = isNew
+        ? { id: nextQuestionId(), chapter: '', text: '', type: '單選', points: 10, correctRate: 0 }
+        : adminData.questions.find(x => x.id === id);
+      if (!q) return;
+      activeEdit.id = q.id;
+      modalTitle.textContent = isNew ? '新增題目' : '編輯題目';
+      modalFields.innerHTML = `
+        <div>
+          <label class="form-label">題目編號</label>
+          <input class="form-input" name="qid" value="${escapeAttr(q.id)}" ${isNew?'':'readonly'} required>
+        </div>
+        <div>
+          <label class="form-label">所屬章節</label>
+          <input class="form-input" name="chapter" value="${escapeAttr(q.chapter)}" required>
+        </div>
+        <div>
+          <label class="form-label">題目內容</label>
+          <textarea class="form-input" name="text" required>${escapeHTML(q.text)}</textarea>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.75rem;">
+          <div>
+            <label class="form-label">類型</label>
+            <select class="form-input" name="type">
+              <option ${q.type==='單選'?'selected':''}>單選</option>
+              <option ${q.type==='情境'?'selected':''}>情境</option>
+              <option ${q.type==='AI 對話'?'selected':''}>AI 對話</option>
+            </select>
+          </div>
+          <div>
+            <label class="form-label">光點</label>
+            <input class="form-input" name="points" type="number" min="0" value="${q.points}" required>
+          </div>
+          <div>
+            <label class="form-label">答對率 %</label>
+            <input class="form-input" name="correctRate" type="number" min="0" max="100" value="${q.correctRate}">
+          </div>
+        </div>
+      `;
+    }
+    modalEl.hidden = false;
+  }
+
+  function closeModal() {
+    modalEl.hidden = true;
+    modalForm.reset();
+    modalFields.innerHTML = '';
+    activeEdit = null;
+  }
+
+  modalClose.addEventListener('click', closeModal);
+  modalCancel.addEventListener('click', closeModal);
+  modalEl.addEventListener('click', (e) => { if (e.target === modalEl) closeModal(); });
+
+  modalForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    if (!activeEdit) return;
+    const fd = new FormData(modalForm);
+    if (activeEdit.kind === 'chapter') {
+      const payload = {
+        id: activeEdit.id,
+        num: (fd.get('num') || '').trim(),
+        name: (fd.get('name') || '').trim(),
+        desc: (fd.get('desc') || '').trim(),
+        status: fd.get('status') || 'draft'
+      };
+      if (activeEdit.isNew) {
+        adminData.chapters.push(payload);
+      } else {
+        const idx = adminData.chapters.findIndex(c => c.id === activeEdit.id);
+        if (idx > -1) adminData.chapters[idx] = payload;
+      }
+      saveData();
+      renderChapters();
+    } else if (activeEdit.kind === 'question') {
+      const payload = {
+        id: (fd.get('qid') || '').trim(),
+        chapter: (fd.get('chapter') || '').trim(),
+        text: (fd.get('text') || '').trim(),
+        type: fd.get('type') || '單選',
+        points: parseInt(fd.get('points'), 10) || 0,
+        correctRate: parseInt(fd.get('correctRate'), 10) || 0
+      };
+      if (activeEdit.isNew) {
+        adminData.questions.push(payload);
+      } else {
+        const idx = adminData.questions.findIndex(q => q.id === activeEdit.id);
+        if (idx > -1) adminData.questions[idx] = payload;
+      }
+      saveData();
+      renderQuiz();
+    }
+    closeModal();
+  });
+
+  // === Click delegation ===
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-action]');
+    if (!btn) return;
+    const action = btn.dataset.action;
+    const id = btn.dataset.id;
+    if (action === 'edit-chapter') {
+      openModal('chapter', parseInt(id, 10), false);
+    } else if (action === 'delete-chapter') {
+      if (confirm('確定刪除這個章節？此操作只在你的瀏覽器生效。')) {
+        adminData.chapters = adminData.chapters.filter(c => c.id !== parseInt(id, 10));
+        saveData();
+        renderChapters();
+      }
+    } else if (action === 'edit-question') {
+      openModal('question', id, false);
+    } else if (action === 'delete-question') {
+      if (confirm('確定刪除這道題目？')) {
+        adminData.questions = adminData.questions.filter(q => q.id !== id);
+        saveData();
+        renderQuiz();
+      }
+    }
+  });
+
+  // === Add buttons ===
+  const addChapterBtn = document.getElementById('addChapterBtn');
+  if (addChapterBtn) addChapterBtn.addEventListener('click', () => openModal('chapter', null, true));
+  const addQuestionBtn = document.getElementById('addQuestionBtn');
+  if (addQuestionBtn) addQuestionBtn.addEventListener('click', () => openModal('question', null, true));
+
+  // === Reset ===
+  const resetBtn = document.getElementById('resetDataBtn');
+  if (resetBtn) {
+    resetBtn.addEventListener('click', () => {
+      if (confirm('確定要重置成預設資料嗎？所有編輯都會清除。')) {
+        localStorage.removeItem(STORAGE_KEY);
+        adminData = deepClone(defaultData);
+        renderChapters();
+        renderQuiz();
+        showToast('✓ 已重置為預設值');
+      }
+    });
+  }
+
+  // === Initial render ===
+  renderChapters();
+  renderQuiz();
 </script>
 
 </body>
