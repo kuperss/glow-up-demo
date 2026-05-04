@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>入職須知 · CHAPTER 00 | 舞光戰將點燈計劃</title>
+<meta name="description" content="出勤、請假、加班、服儀、公務車事故、福利、法定須知 — 30 分鐘看完，全方位裝備你的入職第一天。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Noto+Sans+TC:wght@300;400;500;700;900&family=Noto+Serif+TC:wght@500;700;900&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<style>
+  :root {
+    --glow-orange: #F58220;
+    --glow-orange-bright: #FFA050;
+    --glow-orange-deep: #C66510;
+    --glow-gold: #FFD27A;
+    --bg-base: #08080A;
+    --bg-card: #131316;
+    --bg-elevated: #1A1A1F;
+    --border-subtle: #26262C;
+    --text-primary: #F5F5F7;
+    --text-secondary: #A0A0AB;
+    --text-tertiary: #6B6B75;
+  }
+  * { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Noto Sans TC', 'Inter', system-ui, sans-serif;
+    background: var(--bg-base);
+    color: var(--text-primary);
+    overflow-x: hidden;
+  }
+  .font-display { font-family: 'Noto Serif TC', 'Inter', serif; font-weight: 900; letter-spacing: -0.02em; }
+  .font-mono-en { font-family: 'Inter', sans-serif; letter-spacing: 0.05em; }
+  #particle-canvas { position: fixed; inset: 0; z-index: 1; pointer-events: none; }
+  .glow-text { text-shadow: 0 0 20px rgba(245, 130, 32, 0.6), 0 0 40px rgba(245, 130, 32, 0.3); }
+  .glow-orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.5; pointer-events: none; z-index: 0; }
+  .nav-blur {
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    background: rgba(8, 8, 10, 0.6);
+    border-bottom: 1px solid rgba(245, 130, 32, 0.08);
+  }
+  .nav-link { position: relative; transition: color 0.3s ease; }
+  .nav-link:hover { color: #FFA050; }
+  .nav-link::after {
+    content: ''; position: absolute; left: 0; bottom: -6px; height: 1px; width: 0;
+    background: linear-gradient(90deg, var(--glow-orange), var(--glow-orange-bright));
+    transition: width 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .nav-link:hover::after { width: 100%; }
+  .section-eyebrow {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 6px 14px; border-radius: 999px;
+    background: rgba(245, 130, 32, 0.08); border: 1px solid rgba(245, 130, 32, 0.25);
+    color: var(--glow-orange-bright); font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase;
+    font-family: 'Inter', sans-serif; font-weight: 600;
+    margin-bottom: 24px;
+  }
+  .reveal { opacity: 0; transform: translateY(30px); transition: opacity 0.8s ease, transform 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
+  .reveal.show { opacity: 1; transform: translateY(0); }
+  .info-card {
+    position: relative; background: linear-gradient(180deg, rgba(26,26,31,0.6), rgba(19,19,22,0.4));
+    border: 1px solid rgba(38,38,44,0.7); border-radius: 18px; padding: 28px;
+    overflow: hidden; transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .info-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(245,130,32,0.5), transparent);
+    opacity: 0; transition: opacity 0.4s;
+  }
+  .info-card:hover { border-color: rgba(245,130,32,0.35); transform: translateY(-3px); box-shadow: 0 20px 60px -20px rgba(245,130,32,0.2); }
+  .info-card:hover::before { opacity: 1; }
+  .info-card .corner-num {
+    position: absolute; top: 18px; right: 22px; font-family: 'Inter', sans-serif;
+    font-weight: 800; font-size: 38px; color: rgba(245,130,32,0.12); letter-spacing: -0.04em;
+  }
+  .rule-row {
+    display: grid; grid-template-columns: 88px 1fr; gap: 18px; padding: 16px 0;
+    border-bottom: 1px dashed rgba(38,38,44,0.7);
+  }
+  .rule-row:last-child { border-bottom: none; }
+  .rule-tag {
+    display: inline-flex; align-items: center; justify-content: center;
+    height: 30px; padding: 0 12px; border-radius: 8px;
+    background: rgba(245,130,32,0.1); border: 1px solid rgba(245,130,32,0.3);
+    color: var(--glow-orange-bright); font-size: 12px; font-weight: 700; white-space: nowrap;
+  }
+  .rule-tag.warn { background: rgba(255,82,82,0.08); border-color: rgba(255,82,82,0.3); color: #FF8888; }
+  .rule-tag.ok { background: rgba(94,234,150,0.08); border-color: rgba(94,234,150,0.3); color: #5EEA96; }
+  .benefit-table {
+    width: 100%; border-collapse: collapse; font-size: 14px;
+  }
+  .benefit-table th, .benefit-table td {
+    padding: 14px 16px; text-align: left; border-bottom: 1px solid rgba(38,38,44,0.7);
+  }
+  .benefit-table th {
+    color: var(--glow-orange-bright); font-size: 11px; letter-spacing: 0.15em;
+    text-transform: uppercase; font-weight: 700; background: rgba(245,130,32,0.04);
+  }
+  .benefit-table td.year-cell { color: var(--glow-gold); font-family: 'Inter', sans-serif; font-weight: 800; font-size: 16px; }
+  .benefit-table td.amt-cell { color: var(--glow-orange-bright); font-family: 'Inter', sans-serif; font-weight: 700; }
+  .badge-pill {
+    display: inline-flex; align-items: center; gap: 6px; padding: 4px 11px; border-radius: 999px;
+    background: rgba(245,130,32,0.1); border: 1px solid rgba(245,130,32,0.3);
+    color: var(--glow-orange-bright); font-size: 11px; font-weight: 600;
+  }
+  .divider-glow {
+    height: 1px; background: linear-gradient(90deg, transparent, rgba(245,130,32,0.4), transparent); margin: 60px 0;
+  }
+  .ng-grid, .ok-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px;
+  }
+  .ng-item, .ok-item {
+    display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-radius: 10px;
+    background: rgba(26,26,31,0.5); border: 1px solid rgba(38,38,44,0.7); font-size: 13px;
+  }
+  .ng-item { border-color: rgba(255,82,82,0.2); }
+  .ng-item .dot { width: 8px; height: 8px; border-radius: 50%; background: #FF8888; flex-shrink: 0; }
+  .ok-item { border-color: rgba(94,234,150,0.2); }
+  .ok-item .dot { width: 8px; height: 8px; border-radius: 50%; background: #5EEA96; flex-shrink: 0; }
+  .sop-step {
+    position: relative; padding: 18px 18px 18px 64px; border-radius: 14px;
+    background: rgba(26,26,31,0.5); border: 1px solid rgba(38,38,44,0.7); margin-bottom: 12px;
+  }
+  .sop-step .step-num {
+    position: absolute; left: 18px; top: 18px;
+    width: 32px; height: 32px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(135deg, var(--glow-orange), var(--glow-orange-deep));
+    color: white; font-weight: 800; font-family: 'Inter', sans-serif; font-size: 14px;
+  }
+  .sop-step h4 { font-weight: 700; margin-bottom: 4px; }
+  .sop-step p { font-size: 13px; color: var(--text-secondary); line-height: 1.6; }
+  .triwell-card {
+    background: linear-gradient(160deg, rgba(245,130,32,0.08), rgba(19,19,22,0.4));
+    border: 1px solid rgba(245,130,32,0.25); border-radius: 18px; padding: 24px;
+    text-align: center;
+  }
+  .triwell-card .ico {
+    width: 56px; height: 56px; border-radius: 50%; margin: 0 auto 14px;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(245,130,32,0.15); color: var(--glow-orange-bright);
+  }
+  .triwell-card h4 { font-weight: 800; font-size: 18px; margin-bottom: 6px; color: var(--glow-orange-bright); }
+  .triwell-card p { font-size: 13px; color: var(--text-secondary); line-height: 1.7; }
+  @media (max-width: 640px) {
+    .rule-row { grid-template-columns: 1fr; gap: 8px; }
+    .rule-tag { justify-self: start; }
+    .benefit-table { font-size: 12px; }
+    .benefit-table th, .benefit-table td { padding: 10px 8px; }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="particle-canvas"></canvas>
+
+<!-- ===== Nav ===== -->
+<nav class="fixed top-0 left-0 right-0 z-50 nav-blur">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 h-16 flex items-center justify-between">
+    <a href="index.html" class="flex items-center gap-2 sm:gap-3 group">
+      <div class="relative w-10 h-10 flex items-center justify-center flex-shrink-0">
+        <div class="absolute inset-0 bg-gradient-to-br from-orange-400 to-orange-600 blur-xl opacity-30 group-hover:opacity-60 transition-opacity rounded-full"></div>
+        <img class="relative w-10 h-10 transition-transform group-hover:scale-110" style="filter: drop-shadow(0 0 8px rgba(245,130,32,0.45)); object-fit: contain; display: block;" alt="舞光 Dancelight" src="data:image/png;base64,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">
+      </div>
+      <div>
+        <div class="font-display text-base sm:text-lg leading-none">舞光戰將</div>
+        <div class="text-[10px] text-gray-500 font-mono-en tracking-widest hidden sm:block">TRAINING ACADEMY</div>
+      </div>
+    </a>
+    <div class="hidden md:flex items-center gap-8 text-sm text-gray-300">
+      <a href="onboarding.html" class="nav-link text-orange-300">入職須知</a>
+      <a href="brand.html" class="nav-link">品牌之光</a>
+      <a href="products.html" class="nav-link">產品實驗室</a>
+      <a href="academy.html" class="nav-link">業務學院</a>
+      <a href="challenge.html" class="nav-link">闖關挑戰</a>
+      <a href="admin.html" class="nav-link text-gray-500">主管後台</a>
+    </div>
+    <a href="brand.html" class="text-sm text-orange-400 font-medium hover:text-orange-300 transition-colors">下一章 →</a>
+  </div>
+</nav>
+
+<!-- ===== Hero ===== -->
+<section class="relative pt-32 pb-20 lg:pt-40 lg:pb-28 overflow-hidden">
+  <div class="glow-orb" style="background: radial-gradient(circle, var(--glow-orange) 0%, transparent 70%); width: 500px; height: 500px; top: 10%; right: -100px;"></div>
+  <div class="glow-orb" style="background: radial-gradient(circle, var(--glow-orange-deep) 0%, transparent 70%); width: 400px; height: 400px; bottom: -80px; left: -80px;"></div>
+  <div class="relative max-w-5xl mx-auto px-6 lg:px-10 z-10">
+    <div class="section-eyebrow reveal">CHAPTER 00 · ONBOARDING</div>
+    <h1 class="font-display text-5xl md:text-6xl lg:text-7xl leading-[1.05] mb-8 reveal">
+      先讀這頁，<br>
+      <span class="bg-gradient-to-r from-orange-200 via-orange-300 to-orange-500 bg-clip-text text-transparent glow-text">再開始一切。</span>
+    </h1>
+    <p class="text-lg md:text-xl text-gray-400 leading-relaxed max-w-3xl reveal">
+      30 分鐘 · 把規矩、福利、保護機制一次裝進腦子。<br>
+      <span class="text-gray-500 text-base">展晟照明集團工作規則 v9 · 出勤規定 v2 · 久任年資獎勵辦法 · 三安福祉 · 雙軌職涯路徑表 v13 — 全方位實質指引，不是表面口號。</span>
+    </p>
+    <div class="mt-10 flex flex-wrap gap-3 reveal">
+      <a href="#attendance" class="badge-pill">① 出勤</a>
+      <a href="#leave" class="badge-pill">② 請假</a>
+      <a href="#overtime" class="badge-pill">③ 加班</a>
+      <a href="#dresscode" class="badge-pill">④ 服儀</a>
+      <a href="#carcrash" class="badge-pill">⑤ 公務車事故</a>
+      <a href="#benefits" class="badge-pill">⑥ 福利速覽</a>
+      <a href="#triwell" class="badge-pill">⑦ 三安福祉</a>
+      <a href="#legal" class="badge-pill">⑧ 法定須知</a>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Section 1 · 出勤 ===== -->
+<section id="attendance" class="relative py-20 z-10">
+  <div class="max-w-5xl mx-auto px-6 lg:px-10">
+    <div class="section-eyebrow reveal">SECTION 01 · 出勤節奏</div>
+    <h2 class="font-display text-3xl md:text-4xl lg:text-5xl mb-10 reveal">準時打卡，<span class="text-orange-300">是專業的第一道光</span></h2>
+    <div class="grid md:grid-cols-2 gap-5 mb-8">
+      <div class="info-card reveal">
+        <div class="corner-num">01</div>
+        <h3 class="text-xl font-bold mb-4">上下班時間</h3>
+        <div class="space-y-3 text-sm text-gray-300">
+          <div class="flex justify-between"><span class="text-gray-500">內勤人員</span><span class="text-white font-semibold">08:00 – 17:00</span></div>
+          <div class="flex justify-between"><span class="text-gray-500">業務人員</span><span class="text-orange-300 font-semibold">08:30 – 17:30</span></div>
+          <div class="flex justify-between"><span class="text-gray-500">午休</span><span class="text-white">12:00 – 13:00</span></div>
+          <div class="flex justify-between border-t border-gray-800 pt-3 mt-3"><span class="text-gray-500">通勤彈性</span><span class="text-orange-300">10 分鐘內</span></div>
+        </div>
+        <p class="text-xs text-gray-500 mt-5 leading-relaxed">8:15 打卡 = 視為遲到 5 分鐘。彈性是為了交通安全，不是寬限。</p>
+      </div>
+      <div class="info-card reveal" style="transition-delay:0.05s;">
+        <div class="corner-num">02</div>
+        <h3 class="text-xl font-bold mb-4">未刷卡規則</h3>
+        <div class="space-y-3 text-sm text-gray-300 leading-relaxed">
+          <p>當日上班 + 下班未刷 = <span class="text-orange-300 font-semibold">2 次</span></p>
+          <p>當月累計 <span class="text-red-300 font-semibold">3 次（含）以上</span>，自第 4 次起依「比例原則」適當懲戒。</p>
+          <p class="text-xs text-gray-500 pt-3 border-t border-gray-800">人事系統異常 / 合理情境下未刷，不列入計算。</p>
+        </div>
+      </div>
+      <div class="info-card reveal" style="transition-delay:0.1s;">
+        <div class="corner-num">03</div>
+        <h3 class="text-xl font-bold mb-4">補刷卡 / 補假流程</h3>
+        <div class="space-y-3 text-sm text-gray-300 leading-relaxed">
+          <p>因公務無法打卡：正常出勤後 → Portal 人事系統申請補刷卡 / 教育訓練單 / 國內外出差 / 公出單</p>
+          <p>→ 部門主管線上簽核</p>
+        </div>
+      </div>
+      <div class="info-card reveal" style="transition-delay:0.15s;">
+        <div class="corner-num">04</div>
+        <h3 class="text-xl font-bold mb-4">考勤異常時效（最關鍵）</h3>
+        <div class="space-y-3 text-sm text-gray-300 leading-relaxed">
+          <p>異常單據必須於 <span class="text-orange-300 font-bold">「次月 1 日下午 5 時」</span> 前完成補件。</p>
+          <p class="text-red-300/90">未準時補件 = 視同同意「該時段不支薪」：</p>
+          <ul class="text-xs text-gray-500 space-y-1 pl-4 list-disc">
+            <li>遲到、早退時段 → 不支薪</li>
+            <li>當日曠職（上下班皆無刷）→ 全日不支薪</li>
+            <li>單班未刷 1 次 → 半日不支薪</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="info-card reveal">
+      <h3 class="text-base font-bold mb-3 text-orange-300">遲到 / 早退 / 曠職 計薪公式</h3>
+      <div class="grid md:grid-cols-2 gap-6 text-sm">
+        <div>
+          <div class="text-gray-500 text-xs mb-1">時薪制</div>
+          <div class="font-mono text-gray-200">時薪 ÷ 60 × 實際分鐘 = 不發給金額</div>
+        </div>
+        <div>
+          <div class="text-gray-500 text-xs mb-1">月薪制</div>
+          <div class="font-mono text-gray-200">月薪 ÷ 30 ÷ 8 ÷ 60 × 實際分鐘 = 不發給金額</div>
+        </div>
+      </div>
+      <p class="text-xs text-gray-500 mt-4 pt-4 border-t border-gray-800">遲到、早退、曠職次數均列入 <span class="text-orange-400">KPI 考核 + 年終考核</span> 評估項目。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Section 2 · 請假 ===== -->
+<section id="leave" class="relative py-20 z-10">
+  <div class="max-w-5xl mx-auto px-6 lg:px-10">
+    <div class="section-eyebrow reveal">SECTION 02 · 請假規則</div>
+    <h2 class="font-display text-3xl md:text-4xl lg:text-5xl mb-10 reveal">病假可以請，<span class="text-orange-300">證明文件要備齊</span></h2>
+    <div class="info-card reveal mb-6">
+      <h3 class="text-xl font-bold mb-5">普通傷病假 — 上限與計薪</h3>
+      <div class="space-y-0">
+        <div class="rule-row">
+          <span class="rule-tag">未住院</span>
+          <span class="text-gray-300 text-sm leading-relaxed">一年內合計 <span class="text-orange-300 font-bold">不得超過 30 日</span></span>
+        </div>
+        <div class="rule-row">
+          <span class="rule-tag">住院</span>
+          <span class="text-gray-300 text-sm leading-relaxed">兩年內合計 <span class="text-orange-300 font-bold">不得超過 1 年</span></span>
+        </div>
+        <div class="rule-row">
+          <span class="rule-tag">兩者合計</span>
+          <span class="text-gray-300 text-sm leading-relaxed">兩年內合計 <span class="text-orange-300 font-bold">不得超過 1 年</span>（以 0.5 小時計算）</span>
+        </div>
+        <div class="rule-row">
+          <span class="rule-tag warn">薪資</span>
+          <span class="text-gray-300 text-sm leading-relaxed">一年內合計未超過 30 日部分 <span class="text-orange-300 font-bold">工資折半發給</span>（領有勞保普傷給付未達半數者，由公司補足）</span>
+        </div>
+        <div class="rule-row">
+          <span class="rule-tag">特殊</span>
+          <span class="text-gray-300 text-sm leading-relaxed">癌症（含原位癌）門診治療 / 懷孕安胎休養 → <span class="text-orange-300">併入住院傷病假計算</span></span>
+        </div>
+        <div class="rule-row">
+          <span class="rule-tag">超過上限</span>
+          <span class="text-gray-300 text-sm leading-relaxed">經事假 / 特休抵充後仍未痊癒 → 可申請 <span class="text-orange-300">留職停薪</span>，最長 1 年</span>
+        </div>
+      </div>
+    </div>
+    <div class="info-card reveal">
+      <h3 class="text-xl font-bold mb-5">證明文件規則 — 別漏掉的細節</h3>
+      <div class="grid md:grid-cols-2 gap-5">
+        <div class="p-4 rounded-lg bg-black/20 border border-gray-800/60">
+          <div class="text-orange-300 text-xs font-bold mb-2">2 日（含）以內</div>
+          <p class="text-sm text-gray-300 leading-relaxed">門診收據 / 處方箋 / 載有明細之購藥發票 影本即可</p>
+        </div>
+        <div class="p-4 rounded-lg bg-black/20 border border-gray-800/60">
+          <div class="text-orange-300 text-xs font-bold mb-2">連續 3 日（含）以上</div>
+          <p class="text-sm text-gray-300 leading-relaxed">必須提供 <span class="text-orange-300">診斷證明書「正本」</span></p>
+        </div>
+      </div>
+      <div class="mt-5 p-4 rounded-lg bg-orange-500/5 border border-orange-500/20">
+        <div class="text-orange-300 text-xs font-bold mb-2">★ 就醫實證彈性區間</div>
+        <p class="text-sm text-gray-300 leading-relaxed mb-2">醫療證明以「病假當日」就醫為主，但可彈性：</p>
+        <ul class="text-sm text-gray-400 space-y-1 pl-5 list-disc">
+          <li>就醫前後 1 日（<span class="font-mono text-orange-300">N-1 ~ N+1</span>）區間內證明文件 → 擇 2 日請病假</li>
+          <li>經主管核可：就醫前 1 日至就醫後 4 日（<span class="font-mono text-orange-300">N-1 ~ N+4</span>）→ 擇 5 日請病假</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Section 3 · 加班 ===== -->
+<section id="overtime" class="relative py-20 z-10">
+  <div class="max-w-5xl mx-auto px-6 lg:px-10">
+    <div class="section-eyebrow reveal">SECTION 03 · 加班規範</div>
+    <h2 class="font-display text-3xl md:text-4xl lg:text-5xl mb-10 reveal">加班<span class="text-orange-300">事先申請，事後補登</span></h2>
+    <div class="grid md:grid-cols-2 gap-5 mb-6">
+      <div class="info-card reveal">
+        <div class="corner-num">A</div>
+        <h3 class="text-xl font-bold mb-4">事前提出申請</h3>
+        <p class="text-sm text-gray-300 leading-relaxed">依具體工作事由，<span class="text-orange-300">以書面或通訊軟體</span>向直屬主管提出加班時數申請；經核准後，憑以加班。公司依實際加班時數核付加班費或補休時數。</p>
+      </div>
+      <div class="info-card reveal" style="transition-delay:0.05s;">
+        <div class="corner-num">B</div>
+        <h3 class="text-xl font-bold mb-4">事後補登（次工作日）</h3>
+        <p class="text-sm text-gray-300 leading-relaxed">隔日於 <span class="text-orange-300">Portal 人事系統</span> 自行補填寫加班申請單（敘明加班原因、工作進度、檢附加班日刷卡時間證明）。</p>
+        <p class="text-xs text-red-300/80 mt-3">★ 若最遲未於「次月 1 日下午 5 時」前完成核准 → 視為「無需申請加班時數」，記為「個人因素選擇停留辦公處所」。</p>
+      </div>
+    </div>
+    <div class="info-card reveal mb-6">
+      <h3 class="text-xl font-bold mb-5">申請核准權限對照</h3>
+      <table class="benefit-table">
+        <thead>
+          <tr><th>對象</th><th>平日（週一至週五）</th><th>休息日</th><th>國定假日 / 例假日</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>內勤人員</td><td>部門主管同意</td><td>部門主管同意</td><td>副 / 總經理同意</td></tr>
+          <tr><td>物流 / 外維</td><td>部門主管同意</td><td>部門主管同意</td><td>副 / 總經理同意</td></tr>
+          <tr><td class="text-orange-300 font-bold">業務人員</td><td class="text-gray-500">不適用</td><td class="text-gray-500">不適用</td><td class="text-orange-300 font-bold">所有假日皆需 副 / 總經理同意</td></tr>
+        </tbody>
+      </table>
+      <p class="text-xs text-gray-500 mt-4">業務人員：國定假日、例假日不予出勤；如有出勤必要，須經 副 / 總經理同意。</p>
+    </div>
+    <div class="info-card reveal">
+      <h3 class="text-xl font-bold mb-5">加班類別 — 主旨欄填寫</h3>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 text-sm">
+        <div class="p-3 rounded-lg bg-black/20 border border-gray-800/60"><div class="text-orange-300 text-xs mb-1">① 優化改善</div><div class="text-gray-400 text-xs">內部流程 / 做法改善</div></div>
+        <div class="p-3 rounded-lg bg-black/20 border border-gray-800/60"><div class="text-orange-300 text-xs mb-1">② 例行外專案</div><div class="text-gray-400 text-xs">經銷商餐會 / 專案追蹤</div></div>
+        <div class="p-3 rounded-lg bg-black/20 border border-gray-800/60"><div class="text-orange-300 text-xs mb-1">③ 額外任務</div><div class="text-gray-400 text-xs">主管額外指派</div></div>
+        <div class="p-3 rounded-lg bg-black/20 border border-gray-800/60"><div class="text-orange-300 text-xs mb-1">④ 緊急處理</div><div class="text-gray-400 text-xs">產品 / 客戶 / 員工異常</div></div>
+        <div class="p-3 rounded-lg bg-black/20 border border-gray-800/60"><div class="text-orange-300 text-xs mb-1">⑤ 部門輪班</div><div class="text-gray-400 text-xs">客戶服務 17:00–17:30</div></div>
+        <div class="p-3 rounded-lg bg-black/20 border border-gray-800/60"><div class="text-orange-300 text-xs mb-1">⑥ 其它</div><div class="text-gray-400 text-xs">月結薪 / 報表 / 結帳</div></div>
+        <div class="p-3 rounded-lg bg-black/20 border border-orange-500/30"><div class="text-orange-300 text-xs mb-1">⑦ 會議（特殊）</div><div class="text-gray-400 text-xs">非工時公務會議，差旅費全額由公司支付</div></div>
+        <div class="p-3 rounded-lg bg-black/20 border border-orange-500/30"><div class="text-orange-300 text-xs mb-1">⑧ 教育訓練（特殊）</div><div class="text-gray-400 text-xs">非工時集團指派培訓，自由參加，費用公司支付</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Section 4 · 服儀 ===== -->
+<section id="dresscode" class="relative py-20 z-10">
+  <div class="max-w-5xl mx-auto px-6 lg:px-10">
+    <div class="section-eyebrow reveal">SECTION 04 · 服裝儀容</div>
+    <h2 class="font-display text-3xl md:text-4xl lg:text-5xl mb-10 reveal">維持<span class="text-orange-300">專業工作形象</span></h2>
+    <div class="grid md:grid-cols-2 gap-5">
+      <div class="info-card reveal">
+        <h3 class="text-xl font-bold mb-5 text-green-300">✓ 適宜服裝</h3>
+        <div class="ok-grid">
+          <div class="ok-item"><span class="dot"></span><span>外勤司機 工作服</span></div>
+          <div class="ok-item"><span class="dot"></span><span>退貨維修課 制服</span></div>
+          <div class="ok-item"><span class="dot"></span><span>業務 Smart Casual</span></div>
+          <div class="ok-item"><span class="dot"></span><span>內勤 半正式</span></div>
+          <div class="ok-item"><span class="dot"></span><span>長裙 / 及膝裙</span></div>
+          <div class="ok-item"><span class="dot"></span><span>洋裝</span></div>
+        </div>
+      </div>
+      <div class="info-card reveal" style="transition-delay:0.05s;">
+        <h3 class="text-xl font-bold mb-5 text-red-300">✗ 不適宜（NG）</h3>
+        <div class="ng-grid">
+          <div class="ng-item"><span class="dot"></span><span>細肩帶背心</span></div>
+          <div class="ng-item"><span class="dot"></span><span>低胸服裝</span></div>
+          <div class="ng-item"><span class="dot"></span><span>超短熱褲 / 破褲</span></div>
+          <div class="ng-item"><span class="dot"></span><span>過短裙（迷你裙）</span></div>
+          <div class="ng-item"><span class="dot"></span><span>運動背心 / 挖背</span></div>
+          <div class="ng-item"><span class="dot"></span><span>髮捲</span></div>
+          <div class="ng-item"><span class="dot"></span><span>露趾拖鞋</span></div>
+          <div class="ng-item"><span class="dot"></span><span>球賽球員背心</span></div>
+        </div>
+        <p class="text-xs text-gray-500 mt-4">★ 露趾拖鞋通融情況：雨天</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Section 5 · 公務車事故 ===== -->
+<section id="carcrash" class="relative py-20 z-10">
+  <div class="max-w-5xl mx-auto px-6 lg:px-10">
+    <div class="section-eyebrow reveal">SECTION 05 · 公務車事故 SOP</div>
+    <h2 class="font-display text-3xl md:text-4xl lg:text-5xl mb-10 reveal">出事的當下 —<br><span class="text-orange-300">記住這 7 步，不要慌</span></h2>
+    <div class="info-card reveal mb-6 border-red-500/20" style="border-color: rgba(255,82,82,0.25); background: linear-gradient(180deg, rgba(255,82,82,0.04), rgba(19,19,22,0.4));">
+      <div class="flex items-start gap-4">
+        <div class="w-12 h-12 rounded-full bg-red-500/15 flex items-center justify-center text-red-300 flex-shrink-0 text-2xl">⚠</div>
+        <div>
+          <h3 class="text-lg font-bold text-red-300 mb-2">最重要原則：不論狀況，一律報警，絕不私下和解</h3>
+          <p class="text-sm text-gray-300 leading-relaxed">必須取得 <span class="text-orange-300 font-semibold">「報案三聯單」</span>。集團秉持合法合規原則處理，私下和解 = 失去公司及保險公司的法律保障。</p>
+        </div>
+      </div>
+    </div>
+    <div class="reveal">
+      <div class="sop-step"><div class="step-num">1</div><h4>事故當下</h4><p>立即報警 → 同步聯繫部門主管 → 警局做筆錄。</p></div>
+      <div class="sop-step"><div class="step-num">2</div><h4>部門主管</h4><p>接獲員工通報 → 通知各區人事單位 → 通報事業處總經理。</p></div>
+      <div class="sop-step"><div class="step-num">3</div><h4>各區人事單位</h4><p>聯繫車險保險公司出面協助處理 → 向事業處總經理報告進度。</p></div>
+      <div class="sop-step"><div class="step-num">4</div><h4>保險公司</h4><p>由保險公司直接與對方聯繫處理理賠事宜，員工不直接與對方談賠償。</p></div>
+      <div class="sop-step"><div class="step-num">5</div><h4>30 天後申請警局資料</h4><p>申請：① 初判表　② 車禍事故現場圖　③ 車禍事故紀錄表</p></div>
+      <div class="sop-step"><div class="step-num">6</div><h4>員工提供資料</h4><p>① 行車紀錄器影片　② 個人受傷的診斷證明書、就醫紀錄</p></div>
+      <div class="sop-step"><div class="step-num">7</div><h4>需要法務協助時</h4><p>各區人事單位 → 集團總管理處 人資暨法務部（法務）→ 填寫「法需單」立案。集團法務已建置 <span class="text-orange-300">「車禍和解書範本」</span> + <span class="text-orange-300">「刑事撤回告訴狀範本」</span> 供各區參考。</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Section 6 · 福利速覽 ===== -->
+<section id="benefits" class="relative py-20 z-10">
+  <div class="max-w-5xl mx-auto px-6 lg:px-10">
+    <div class="section-eyebrow reveal">SECTION 06 · 福利速覽</div>
+    <h2 class="font-display text-3xl md:text-4xl lg:text-5xl mb-10 reveal">久任、學習、家庭、生活 —<br><span class="text-orange-300">展晟人的五光十色</span></h2>
+
+    <!-- 久任年資獎勵 -->
+    <div class="info-card reveal mb-6">
+      <h3 class="text-xl font-bold mb-2">久任年資獎勵 — 五光獎</h3>
+      <p class="text-sm text-gray-500 mb-5">每年尾牙頒發，年資以入職日起算至前一年度 12/31 為止。回聘人員自最近入職重新計算。留職停薪期間不計入。</p>
+      <table class="benefit-table">
+        <thead>
+          <tr><th>獎名</th><th>年資</th><th>致贈</th><th>感謝獎金</th><th>特定獎勵</th><th>合計</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="text-orange-200 font-bold">晨光獎</td><td class="year-cell">5 年</td><td>獎狀</td><td class="amt-cell">$5,000</td><td>—</td><td class="amt-cell">$5,000</td></tr>
+          <tr><td class="text-orange-200 font-bold">耀光獎</td><td class="year-cell">10 年</td><td>獎狀＋獎座</td><td class="amt-cell">$10,000</td><td class="amt-cell">$5,000</td><td class="amt-cell">$15,000</td></tr>
+          <tr><td class="text-orange-200 font-bold">鼎光獎</td><td class="year-cell">15 年</td><td>獎狀＋獎座</td><td class="amt-cell">$15,000</td><td class="amt-cell">$10,000</td><td class="amt-cell">$25,000</td></tr>
+          <tr><td class="text-orange-200 font-bold">傳光獎</td><td class="year-cell">20 年</td><td>獎狀＋獎座</td><td class="amt-cell">$20,000</td><td class="amt-cell">$20,000</td><td class="amt-cell">$40,000</td></tr>
+          <tr><td class="text-orange-200 font-bold">恆光獎</td><td class="year-cell">25 年</td><td>獎狀＋獎座</td><td class="amt-cell">$25,000</td><td class="amt-cell">$45,000</td><td class="amt-cell">$70,000</td></tr>
+        </tbody>
+      </table>
+      <div class="mt-5 p-4 rounded-lg bg-orange-500/5 border border-orange-500/20">
+        <div class="text-orange-300 text-xs font-bold mb-2">★ 特定獎勵可申請項目（採實報實銷，須核銷憑證）</div>
+        <p class="text-sm text-gray-300 leading-relaxed">課程 / AI 軟體訂閱 / 國內外學習主題參訪 / 旅遊 / 運動（登山、朝聖之旅、馬拉松等）/ 進階健檢 / 學習津貼。一次性核銷上限為當年度 12/31。</p>
+      </div>
+    </div>
+
+    <!-- 推薦 + 助學 + 員購 -->
+    <div class="grid md:grid-cols-3 gap-5 mb-6">
+      <div class="info-card reveal">
+        <div class="corner-num">人</div>
+        <h3 class="text-base font-bold mb-3">內部推薦獎金</h3>
+        <p class="text-xs text-gray-500 mb-3">推薦人須在職滿 1 年</p>
+        <div class="space-y-2 text-sm">
+          <div class="flex justify-between"><span class="text-gray-400">試用期過：管理職 / 專業職</span><span class="amt-cell">$1,000</span></div>
+          <div class="flex justify-between"><span class="text-gray-400">任職滿 1 年：管理職</span><span class="amt-cell">$2,000</span></div>
+          <div class="flex justify-between"><span class="text-gray-400">任職滿 1 年：專業職</span><span class="amt-cell">$1,000</span></div>
+        </div>
+        <p class="text-xs text-gray-500 mt-3 pt-3 border-t border-gray-800">不適用：二親內親屬 + 上下屬關係 / 試用評核未過 / 獎金發放前離職。</p>
+      </div>
+      <div class="info-card reveal" style="transition-delay:0.05s;">
+        <div class="corner-num">學</div>
+        <h3 class="text-base font-bold mb-3">子女助學金</h3>
+        <p class="text-xs text-gray-500 mb-3">展晟人子女讀台灣大學院校</p>
+        <div class="space-y-2 text-sm">
+          <div class="flex items-start gap-2"><span class="text-orange-300">▸</span><span class="text-gray-400">年資 5 年以上</span></div>
+          <div class="flex items-start gap-2"><span class="text-orange-300">▸</span><span class="text-gray-400">績效 A、B 級同仁</span></div>
+          <div class="flex items-start gap-2"><span class="text-orange-300">▸</span><span class="text-gray-400">限大學部（不含研究所、五專）</span></div>
+        </div>
+        <div class="mt-3 pt-3 border-t border-gray-800 text-center">
+          <div class="amt-cell text-2xl">$5,000</div>
+          <div class="text-xs text-gray-500">每學期 / 每名子女</div>
+        </div>
+      </div>
+      <div class="info-card reveal" style="transition-delay:0.1s;">
+        <div class="corner-num">購</div>
+        <h3 class="text-base font-bold mb-3">員工購物優惠</h3>
+        <p class="text-xs text-gray-500 mb-3">自用 — 本人居所或父母居所使用</p>
+        <div class="space-y-2 text-sm">
+          <div class="flex items-start gap-2"><span class="text-orange-300">▸</span><span class="text-gray-400">員購價：D 級水電優惠價</span></div>
+          <div class="flex items-start gap-2"><span class="text-orange-300">▸</span><span class="text-gray-400">填「員工購物申請單」→ 部門最高主管簽核 → 業管部</span></div>
+          <div class="flex items-start gap-2"><span class="text-orange-300">▸</span><span class="text-gray-400">大量購買（如新成屋）：另行專案核准</span></div>
+        </div>
+        <p class="text-xs text-gray-500 mt-3 pt-3 border-t border-gray-800">不開放為親戚朋友申購（保護市場秩序與客戶權益）。</p>
+      </div>
+    </div>
+
+    <!-- 法律顧問 + 禮金釋明 + 同事選拔 -->
+    <div class="grid md:grid-cols-3 gap-5">
+      <div class="info-card reveal">
+        <div class="corner-num">法</div>
+        <h3 class="text-base font-bold mb-3">集團專屬法律顧問</h3>
+        <p class="text-sm text-gray-400 leading-relaxed">展晟人專屬集團法律顧問優惠，遇法律疑難可洽詢使用。詳細優惠合作期限請洽人資暨法務部。</p>
+      </div>
+      <div class="info-card reveal" style="transition-delay:0.05s;">
+        <div class="corner-num">節</div>
+        <h3 class="text-base font-bold mb-3">端午 / 中秋禮金</h3>
+        <p class="text-sm text-gray-400 leading-relaxed mb-3">「正式員工享有所有福利待遇」 — 須<span class="text-orange-300 font-semibold">通過試用期評核</span>並核發時在職且實際從事工作者為限。</p>
+        <p class="text-xs text-gray-500">★ 例：試用 3 個月，第 2 個月就通過評核 = 已是正式員工，可享中秋禮金。<br>★ 反之，任職 3 個月但未通過評核 = 非正式員工，無法享有。</p>
+      </div>
+      <div class="info-card reveal" style="transition-delay:0.1s;">
+        <div class="corner-num">★</div>
+        <h3 class="text-base font-bold mb-3">感謝同事選拔</h3>
+        <p class="text-sm text-gray-400 leading-relaxed">公司每年舉辦「感謝同事選拔活動」，鼓勵跨部門協作與感謝文化。詳細辦法請見公告版。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Section 7 · 三安福祉 ===== -->
+<section id="triwell" class="relative py-20 z-10">
+  <div class="max-w-5xl mx-auto px-6 lg:px-10">
+    <div class="section-eyebrow reveal">SECTION 07 · 三安福祉</div>
+    <h2 class="font-display text-3xl md:text-4xl lg:text-5xl mb-4 reveal">久任員工的<span class="text-orange-300">三道光</span></h2>
+    <p class="text-gray-400 leading-relaxed mb-10 reveal max-w-3xl">展晟照明集團「三安福祉」是公司給予久任員工的長期保障辦法 — 從「人在職的安心」到「家庭的安身」，再到「退休後的安老」，建構展晟人的全生涯保障網。</p>
+    <div class="grid md:grid-cols-3 gap-5 mb-6">
+      <div class="triwell-card reveal">
+        <div class="ico"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div>
+        <h4>安心</h4>
+        <p>在職期間的健康保障與工作環境支援，照顧每一位用心耕耘的展晟人，讓你能無後顧之憂地專注工作。</p>
+      </div>
+      <div class="triwell-card reveal" style="transition-delay:0.05s;">
+        <div class="ico"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
+        <h4>安身</h4>
+        <p>面對重大事故、傷病、家庭照顧需求時的補助機制，展晟在你需要的時刻成為穩穩的後盾。</p>
+      </div>
+      <div class="triwell-card reveal" style="transition-delay:0.1s;">
+        <div class="ico"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+        <h4>安老</h4>
+        <p>長期任職後的退休生活照顧設計，回饋每一位將青春與展晟共同成長的久任員工。</p>
+      </div>
+    </div>
+    <div class="info-card reveal">
+      <div class="flex items-start gap-3">
+        <div class="w-8 h-8 rounded-full bg-orange-500/15 flex items-center justify-center text-orange-300 flex-shrink-0 text-sm font-bold">i</div>
+        <div>
+          <h4 class="font-bold mb-2">適用對象與啟動條件</h4>
+          <p class="text-sm text-gray-400 leading-relaxed">三安福祉以「久任員工」為核心，依員工年資與在職狀態分階段啟動。具體保障項目、給付條件、申請程序屬集團內部辦法，<span class="text-orange-300">完整版本請洽各區人資暨法務部 HR</span>，將提供你個人化的權益試算與說明。</p>
+          <p class="text-xs text-gray-500 mt-3">這項福利是展晟對「以人為本」的具體承諾 — 久任不只是年資的累積，更是公司對你長期投入的具體回饋。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Section 8 · 法定須知 ===== -->
+<section id="legal" class="relative py-20 z-10">
+  <div class="max-w-5xl mx-auto px-6 lg:px-10">
+    <div class="section-eyebrow reveal">SECTION 08 · 法定須知</div>
+    <h2 class="font-display text-3xl md:text-4xl lg:text-5xl mb-10 reveal">展晟人的<span class="text-orange-300">底線與紀律</span></h2>
+    <div class="grid md:grid-cols-2 gap-5">
+      <div class="info-card reveal">
+        <h3 class="text-lg font-bold mb-3">性騷擾防治</h3>
+        <p class="text-sm text-gray-400 leading-relaxed mb-3">展晟設有完整的性騷擾防治措施、申訴及懲戒規範。任何不當言行皆屬零容忍 — 受害者及目擊者均可透過 HR 申訴管道提出，受理過程嚴守保密。</p>
+        <p class="text-xs text-gray-500">★ 詳細辦法請見「性騷擾防治措施申訴及懲戒規範」公告</p>
+      </div>
+      <div class="info-card reveal" style="transition-delay:0.05s;">
+        <h3 class="text-lg font-bold mb-3">菸害防制</h3>
+        <p class="text-sm text-gray-400 leading-relaxed mb-3">辦公處所、體驗館、倉儲全面禁菸。吸菸請至指定區域，不得於公務車內吸菸（含電子菸）。</p>
+        <p class="text-xs text-gray-500">★ 詳細辦法請見「菸害防制規定」公告</p>
+      </div>
+      <div class="info-card reveal" style="transition-delay:0.1s;">
+        <h3 class="text-lg font-bold mb-3">工作規則 v9（20251031 修訂）</h3>
+        <p class="text-sm text-gray-400 leading-relaxed mb-3">展晟照明集團工作規則為員工權利義務之核心母法，含請假手續、薪資結構、考核獎懲、勞動條件等完整規範。</p>
+        <p class="text-xs text-gray-500">★ 完整版本請洽人資暨法務部，依新進員工到職流程簽署知悉。</p>
+      </div>
+      <div class="info-card reveal" style="transition-delay:0.15s;">
+        <h3 class="text-lg font-bold mb-3">雙軌職涯路徑表 v13</h3>
+        <p class="text-sm text-gray-400 leading-relaxed mb-3">展晟採「管理職（Management）+ 專業職（Professional）」雙軌設計，每年 12 月核定下一年職等。完整對照表詳見：</p>
+        <a href="career.html#dual-track" class="inline-flex items-center gap-2 text-orange-300 hover:text-orange-200 text-sm font-medium">
+          進入 CHAPTER 06 · 職涯地圖 →
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== End CTA ===== -->
+<section class="relative py-24 z-10">
+  <div class="max-w-4xl mx-auto px-6 lg:px-10 text-center">
+    <div class="divider-glow" style="margin: 0 auto 40px; max-width: 200px;"></div>
+    <h2 class="font-display text-3xl md:text-4xl lg:text-5xl mb-6 reveal">入職須知，<span class="text-orange-300">完成。</span></h2>
+    <p class="text-gray-400 leading-relaxed mb-10 reveal max-w-2xl mx-auto">
+      規矩裝進腦子了，福利清單收進口袋了，保護機制也認得了。<br>
+      接下來，認識讓你願意留下來的這個品牌。
+    </p>
+    <div class="flex flex-wrap justify-center gap-4 reveal">
+      <a href="brand.html" class="inline-flex items-center gap-2 px-7 py-4 rounded-full bg-gradient-to-r from-orange-500 to-orange-600 text-white font-semibold hover:shadow-lg hover:shadow-orange-500/30 transition-all">
+        進入 CHAPTER 01 · 品牌之光
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
+      </a>
+      <a href="index.html" class="inline-flex items-center gap-2 px-7 py-4 rounded-full bg-orange-500/10 border border-orange-500/30 text-orange-300 hover:bg-orange-500/20 hover:border-orange-500/50 transition-all">
+        回旅程地圖
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Footer ===== -->
+<footer class="relative border-t border-gray-900 pt-16 pb-10 z-10">
+  <div class="max-w-7xl mx-auto px-6 lg:px-10">
+    <div class="grid md:grid-cols-[1.6fr_1fr_1fr_1.4fr] gap-10 mb-12">
+      <div>
+        <div class="flex items-center gap-3 mb-5">
+          <div class="relative w-10 h-10 flex items-center justify-center flex-shrink-0">
+            <div class="absolute inset-0 bg-gradient-to-br from-orange-400 to-orange-600 blur-lg opacity-25 rounded-full"></div>
+            <img class="relative w-10 h-10" style="filter: drop-shadow(0 0 6px rgba(245,130,32,0.4)); object-fit: contain; display: block;" alt="舞光 Dancelight" src="data:image/png;base64,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">
+          </div>
+          <div>
+            <div class="font-display text-xl">舞光戰將點燈計劃</div>
+            <div class="text-xs text-gray-500 font-mono-en tracking-wider">DANCELIGHT TRAINING ACADEMY</div>
+          </div>
+        </div>
+        <p class="text-sm text-gray-500 leading-relaxed max-w-sm">「先讀這頁，再開始一切」— 展晟照明集團入職須知，全方位實質指引。</p>
+      </div>
+      <div>
+        <div class="text-xs text-gray-500 font-mono-en tracking-wider mb-4">章節</div>
+        <ul class="space-y-2 text-sm text-gray-400">
+          <li><a href="onboarding.html" class="hover:text-orange-300 transition-colors">CH 00 · 入職須知</a></li>
+          <li><a href="brand.html" class="hover:text-orange-300 transition-colors">CH 01 · 品牌之光</a></li>
+          <li><a href="products.html" class="hover:text-orange-300 transition-colors">CH 02 · 產品實驗室</a></li>
+          <li><a href="academy.html" class="hover:text-orange-300 transition-colors">CH 03 · 業務學院</a></li>
+          <li><a href="challenge.html" class="hover:text-orange-300 transition-colors">CH 04 · 闖關挑戰</a></li>
+          <li><a href="digital.html" class="hover:text-orange-300 transition-colors">CH 05 · 數位整合</a></li>
+          <li><a href="career.html" class="hover:text-orange-300 transition-colors">CH 06 · 職涯地圖</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="text-xs text-gray-500 font-mono-en tracking-wider mb-4">資料來源</div>
+        <ul class="space-y-2 text-xs text-gray-500 leading-relaxed">
+          <li>工作規則 v9（20251031 修訂）</li>
+          <li>出勤規定及彈性說明 v2</li>
+          <li>個人考勤單據申請時效 v2</li>
+          <li>延長工時加班申請程序</li>
+          <li>集團成員出勤服儀規範</li>
+          <li>公務車車禍事故通報流程</li>
+          <li>久任年資獎勵辦法</li>
+          <li>三安福祉久任員工辦法</li>
+          <li>子女就讀大學院校助學金</li>
+          <li>內部推薦人才獎金辦法</li>
+        </ul>
+      </div>
+      <div>
+        <div class="text-xs text-gray-500 font-mono-en tracking-wider mb-4">聯絡單位</div>
+        <ul class="space-y-2 text-sm text-gray-400">
+          <li>南區事業處</li>
+          <li class="text-xs text-gray-500">台南市安南區工業一路 86 號</li>
+          <li class="text-xs text-gray-500">06-3840808</li>
+          <li class="pt-3 border-t border-gray-800/60">總管理處 · 人資暨法務部</li>
+          <li class="text-xs text-gray-500">所有規章、福利、申訴、法務協助</li>
+        </ul>
+      </div>
+    </div>
+    <div class="border-t border-gray-900 pt-6 flex flex-col md:flex-row justify-between items-center gap-3 text-xs text-gray-600">
+      <div>© 2026 展晟照明集團 · 內部訓練用途</div>
+      <div class="font-mono-en">JAN CHENG SINCE 1987</div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Particle background
+  (function(){
+    const c = document.getElementById('particle-canvas');
+    if(!c) return;
+    const ctx = c.getContext('2d');
+    let w, h, particles = [];
+    function resize(){ w = c.width = innerWidth; h = c.height = innerHeight; }
+    function init(){
+      particles = [];
+      const n = Math.floor((w*h)/40000);
+      for(let i=0; i<n; i++){
+        particles.push({ x: Math.random()*w, y: Math.random()*h, r: Math.random()*1.5+0.3, vy: -Math.random()*0.3-0.05, a: Math.random()*0.4+0.1 });
+      }
+    }
+    function draw(){
+      ctx.clearRect(0,0,w,h);
+      particles.forEach(p => {
+        ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+        ctx.fillStyle = 'rgba(245,130,32,'+p.a+')';
+        ctx.fill();
+        p.y += p.vy;
+        if(p.y < -10){ p.y = h+10; p.x = Math.random()*w; }
+      });
+      requestAnimationFrame(draw);
+    }
+    resize(); init(); draw();
+    addEventListener('resize', () => { resize(); init(); });
+  })();
+
+  // Reveal on scroll
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(e => { if(e.isIntersecting){ e.target.classList.add('show'); io.unobserve(e.target); } });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+</script>
+
+</body>
+</html>

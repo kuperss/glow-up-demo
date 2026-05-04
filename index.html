@@ -588,6 +588,7 @@
 
     <!-- Center Nav -->
     <div class="hidden md:flex items-center gap-8 text-sm text-gray-300">
+      <a href="onboarding.html" class="nav-link">入職須知</a>
       <a href="brand.html" class="nav-link">品牌之光</a>
       <a href="products.html" class="nav-link">產品實驗室</a>
       <a href="academy.html" class="nav-link">業務學院</a>
@@ -862,6 +863,26 @@
       </p>
     </div>
 
+    <!-- Module 0 — Prerequisite (前置必讀) -->
+    <div class="module-card reveal mb-5" style="background: linear-gradient(160deg, rgba(245,130,32,0.12), rgba(19,19,22,0.6)); border-color: rgba(245,130,32,0.35); min-height: 180px;">
+      <a href="onboarding.html" class="absolute inset-0 z-10" aria-label="進入：入職須知"></a>
+      <div class="glow-line"></div>
+      <span class="module-num" style="color: rgba(245,130,32,0.25);">00</span>
+      <div class="grid lg:grid-cols-[auto_1fr_auto] gap-6 items-center h-full">
+        <div class="module-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        </div>
+        <div>
+          <h3 class="text-xl font-bold mb-2">入職須知 · 先讀這頁</h3>
+          <p class="text-sm text-gray-400 leading-relaxed">出勤節奏 · 病假規則 · 加班申請 · 服儀規範 · 公務車事故 SOP · 久任年資獎勵 · 三安福祉 · 雙軌職涯路徑 — 30 分鐘把規矩、福利、保護機制一次裝進腦子。</p>
+        </div>
+        <div class="text-right">
+          <div class="text-xs text-orange-400 font-medium mb-1">Day 0 · 必讀</div>
+          <div class="inline-flex items-center gap-1 text-xs text-orange-300 px-3 py-1 rounded-full bg-orange-500/10 border border-orange-500/30">前置課程</div>
+        </div>
+      </div>
+    </div>
+
     <!-- Modules Grid -->
     <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
       <!-- Module 1 -->
@@ -1124,14 +1145,14 @@
           每月最高光點，登上「點燈者排行榜」，主管會親自頒獎。
         </p>
 
-        <!-- Progress Sample -->
-        <div class="card max-w-md">
+        <!-- Live Progress (reads localStorage from challenge.html) -->
+        <div class="card max-w-md" id="achievementCard">
           <div class="flex items-center gap-5">
             <!-- Progress Ring -->
             <div class="relative w-24 h-24 flex-shrink-0">
               <svg class="progress-ring w-24 h-24" viewBox="0 0 100 100">
                 <circle cx="50" cy="50" r="44" stroke="rgba(245,130,32,0.1)" stroke-width="6" fill="none"/>
-                <circle class="progress-ring-circle" cx="50" cy="50" r="44" stroke="url(#ringGrad)" stroke-width="6" fill="none" stroke-linecap="round" stroke-dasharray="276.46" stroke-dashoffset="83"/>
+                <circle id="achievementRing" class="progress-ring-circle" cx="50" cy="50" r="44" stroke="url(#ringGrad)" stroke-width="6" fill="none" stroke-linecap="round" stroke-dasharray="276.46" stroke-dashoffset="276.46"/>
                 <defs>
                   <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
                     <stop offset="0%" stop-color="#FFA050"/>
@@ -1140,79 +1161,91 @@
                 </defs>
               </svg>
               <div class="absolute inset-0 flex flex-col items-center justify-center">
-                <div class="text-2xl font-bold text-orange-300">70%</div>
+                <div id="achievementPct" class="text-2xl font-bold text-orange-300">0%</div>
                 <div class="text-[10px] text-gray-500">PROGRESS</div>
               </div>
             </div>
-            <div>
-              <div class="text-xs text-gray-500 tracking-widest mb-1">ALEX · 業務新人</div>
-              <div class="text-xl font-bold mb-1">已點亮 5 / 7 關卡</div>
+            <div class="flex-1">
+              <div class="text-xs text-gray-500 tracking-widest mb-1">你的學習進度</div>
+              <div class="text-xl font-bold mb-1">已完成 <span id="achievementCompleted">0</span> / 17 關卡</div>
               <div class="flex items-center gap-2 text-sm text-orange-400">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-                <span class="font-bold">880 光點</span>
+                <span class="font-bold"><span id="achievementPoints">0</span> 光點</span>
               </div>
             </div>
+          </div>
+          <!-- Empty state -->
+          <div id="achievementEmpty" class="hidden mt-5 pt-5 border-t border-gray-800/60 text-center">
+            <p class="text-sm text-gray-400 mb-3">你還沒開始挑戰 — 答對題目就能解鎖徽章！</p>
+            <a href="challenge.html" class="inline-flex items-center gap-2 text-orange-300 hover:text-orange-200 text-sm font-medium">
+              前往 CHAPTER 04 · 闖關挑戰 →
+            </a>
+          </div>
+          <!-- Action row when there's progress -->
+          <div id="achievementActions" class="hidden mt-5 pt-5 border-t border-gray-800/60 flex flex-wrap items-center justify-between gap-3">
+            <a href="challenge.html" class="text-sm text-orange-300 hover:text-orange-200 font-medium">繼續挑戰 →</a>
+            <button id="achievementReset" class="text-xs text-gray-500 hover:text-red-300 transition-colors">重新開始</button>
           </div>
         </div>
       </div>
 
-      <!-- Right: Badges Grid -->
-      <div class="grid grid-cols-3 sm:grid-cols-4 gap-y-8 gap-x-4">
-        <div class="badge-item reveal" style="transition-delay:0.05s;">
+      <!-- Right: Badges Grid (unlock state driven by localStorage) -->
+      <div class="grid grid-cols-3 sm:grid-cols-4 gap-y-8 gap-x-4" id="badgesGrid">
+        <div class="badge-item badge-locked reveal" data-badge="starter" style="transition-delay:0.05s;">
           <div class="badge-circle">
             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>
           </div>
-          <div class="text-xs text-orange-300 font-medium mt-1">入門之光</div>
-          <div class="text-[10px] text-gray-500">Day 1 完訓</div>
+          <div class="badge-name text-xs text-gray-400 font-medium mt-1">入門之光</div>
+          <div class="badge-hint text-[10px] text-gray-500">答 1 題即解鎖</div>
         </div>
-        <div class="badge-item reveal" style="transition-delay:0.1s;">
+        <div class="badge-item badge-locked reveal" data-badge="product" style="transition-delay:0.1s;">
           <div class="badge-circle">
             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><polyline points="2 17 12 22 22 17"/></svg>
           </div>
-          <div class="text-xs text-orange-300 font-medium mt-1">產品達人</div>
-          <div class="text-[10px] text-gray-500">90% 通關</div>
+          <div class="badge-name text-xs text-gray-400 font-medium mt-1">產品達人</div>
+          <div class="badge-hint text-[10px] text-gray-500">完成 STAGE 1（5 題）</div>
         </div>
-        <div class="badge-item reveal" style="transition-delay:0.15s;">
+        <div class="badge-item badge-locked reveal" data-badge="customer" style="transition-delay:0.15s;">
           <div class="badge-circle">
             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
           </div>
-          <div class="text-xs text-orange-300 font-medium mt-1">通路通</div>
-          <div class="text-[10px] text-gray-500">客戶模組</div>
+          <div class="badge-name text-xs text-gray-400 font-medium mt-1">通路通</div>
+          <div class="badge-hint text-[10px] text-gray-500">完成 STAGE 2（4 題）</div>
         </div>
-        <div class="badge-item reveal" style="transition-delay:0.2s;">
+        <div class="badge-item badge-locked reveal" data-badge="warrior" style="transition-delay:0.2s;">
           <div class="badge-circle">
             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
           </div>
-          <div class="text-xs text-orange-300 font-medium mt-1">業務戰將</div>
-          <div class="text-[10px] text-gray-500">實戰滿分</div>
+          <div class="badge-name text-xs text-gray-400 font-medium mt-1">業務戰將</div>
+          <div class="badge-hint text-[10px] text-gray-500">完成 STAGE 3（3 題）</div>
         </div>
-        <div class="badge-item badge-locked reveal" style="transition-delay:0.25s;">
+        <div class="badge-item badge-locked reveal" data-badge="dialog1" style="transition-delay:0.25s;">
           <div class="badge-circle">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
           </div>
-          <div class="text-xs text-gray-400 font-medium mt-1">行銷整合</div>
-          <div class="text-[10px] text-gray-500">未解鎖</div>
+          <div class="badge-name text-xs text-gray-400 font-medium mt-1">對話新手</div>
+          <div class="badge-hint text-[10px] text-gray-500">完成 1 個 AI 情境</div>
         </div>
-        <div class="badge-item badge-locked reveal" style="transition-delay:0.3s;">
+        <div class="badge-item badge-locked reveal" data-badge="champion" style="transition-delay:0.3s;">
           <div class="badge-circle">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
           </div>
-          <div class="text-xs text-gray-400 font-medium mt-1">闖關王</div>
-          <div class="text-[10px] text-gray-500">未解鎖</div>
+          <div class="badge-name text-xs text-gray-400 font-medium mt-1">闖關王</div>
+          <div class="badge-hint text-[10px] text-gray-500">完成 3 個 AI 情境</div>
         </div>
-        <div class="badge-item badge-locked reveal" style="transition-delay:0.35s;">
+        <div class="badge-item badge-locked reveal" data-badge="dialog5" style="transition-delay:0.35s;">
           <div class="badge-circle">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
           </div>
-          <div class="text-xs text-gray-400 font-medium mt-1">畢業生</div>
-          <div class="text-[10px] text-gray-500">未解鎖</div>
+          <div class="badge-name text-xs text-gray-400 font-medium mt-1">對話達人</div>
+          <div class="badge-hint text-[10px] text-gray-500">5 個情境全完成</div>
         </div>
-        <div class="badge-item badge-locked reveal" style="transition-delay:0.4s;">
+        <div class="badge-item badge-locked reveal" data-badge="lighter" style="transition-delay:0.4s;">
           <div class="badge-circle">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.84V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.16A7 7 0 0 0 12 2z"/></svg>
           </div>
-          <div class="text-xs text-gray-400 font-medium mt-1">點燈者</div>
-          <div class="text-[10px] text-gray-500">最高榮譽</div>
+          <div class="badge-name text-xs text-gray-400 font-medium mt-1">點燈者</div>
+          <div class="badge-hint text-[10px] text-gray-500">17/17 全通關 · 最高榮譽</div>
         </div>
       </div>
     </div>
@@ -1310,7 +1343,7 @@
             <svg class="text-orange-400 mt-0.5 flex-shrink-0" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
             <div>
               <div class="text-xs text-gray-500">台南燈光體驗館</div>
-              <div class="text-xs leading-relaxed">台南市安南區（預約制）</div>
+              <div class="text-xs leading-relaxed">台南市安南區工業一路 86 號（預約制）</div>
             </div>
           </li>
         </ul>
@@ -1445,6 +1478,90 @@
       orb.style.transform = `translate(${x * factor}px, ${y * factor}px)`;
     });
   });
+
+  // === Achievement section: read live progress from challenge.html localStorage ===
+  (function renderAchievement(){
+    const STORAGE_KEY = 'glow-quiz-progress-v1';
+    const TOTAL = 17; // 12 quizzes + 5 scenarios
+    let data = null;
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) data = JSON.parse(raw);
+    } catch(e) {}
+
+    const score = (data && data.score) || 0;
+    const completed = (data && data.completed) || 0;
+    const quizIds = new Set((data && data.quizIds) || []);
+    const scenarios = new Set((data && data.scenarios) || []);
+
+    // Update numbers
+    const pctEl = document.getElementById('achievementPct');
+    const completedEl = document.getElementById('achievementCompleted');
+    const pointsEl = document.getElementById('achievementPoints');
+    const ringEl = document.getElementById('achievementRing');
+    const emptyEl = document.getElementById('achievementEmpty');
+    const actionsEl = document.getElementById('achievementActions');
+
+    const pct = Math.min(100, Math.round((completed / TOTAL) * 100));
+    if (pctEl) pctEl.textContent = pct + '%';
+    if (completedEl) completedEl.textContent = completed;
+    if (pointsEl) pointsEl.textContent = score;
+    if (ringEl) {
+      const circ = 276.46;
+      ringEl.setAttribute('stroke-dashoffset', String(circ * (1 - pct/100)));
+    }
+
+    if (completed === 0) {
+      if (emptyEl) emptyEl.classList.remove('hidden');
+    } else {
+      if (actionsEl) {
+        actionsEl.classList.remove('hidden');
+        actionsEl.classList.add('flex');
+      }
+    }
+
+    // Reset button
+    const resetBtn = document.getElementById('achievementReset');
+    if (resetBtn) {
+      resetBtn.addEventListener('click', () => {
+        if (confirm('確定要重新開始挑戰嗎？\n\n所有累積的光點與徽章將會清除，下次進入闖關挑戰時可以重新作答。')) {
+          try { localStorage.removeItem(STORAGE_KEY); } catch(e) {}
+          location.reload();
+        }
+      });
+    }
+
+    // Badge unlock logic
+    const stage1Done = ['q1','q2','q3','q4','q5'].every(id => quizIds.has(id));
+    const stage2Done = ['q6','q7','q8','q9'].every(id => quizIds.has(id));
+    const stage3Done = ['q10','q11','q12'].every(id => quizIds.has(id));
+    const allDone = completed >= TOTAL;
+
+    const unlocks = {
+      starter:  completed >= 1,
+      product:  stage1Done,
+      customer: stage2Done,
+      warrior:  stage3Done,
+      dialog1:  scenarios.size >= 1,
+      champion: scenarios.size >= 3,
+      dialog5:  scenarios.size >= 5,
+      lighter:  allDone
+    };
+
+    document.querySelectorAll('#badgesGrid .badge-item').forEach(badge => {
+      const key = badge.dataset.badge;
+      if (unlocks[key]) {
+        badge.classList.remove('badge-locked');
+        const name = badge.querySelector('.badge-name');
+        const hint = badge.querySelector('.badge-hint');
+        if (name) name.classList.replace('text-gray-400', 'text-orange-300');
+        if (hint) {
+          hint.textContent = '✓ 已解鎖';
+          hint.classList.replace('text-gray-500', 'text-orange-400');
+        }
+      }
+    });
+  })();
 </script>
 
 </body>

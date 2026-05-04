@@ -426,6 +426,7 @@
       </div>
     </a>
     <div class="hidden md:flex items-center gap-7 text-sm text-gray-300">
+      <a href="onboarding.html" class="nav-link">入職須知</a>
       <a href="brand.html" class="nav-link">品牌之光</a>
       <a href="products.html" class="nav-link">產品實驗室</a>
       <a href="academy.html" class="nav-link">業務學院</a>
@@ -899,6 +900,11 @@
           <span>看徽章</span>
         </a>
       </div>
+      <div class="mt-8">
+        <button onclick="if(confirm('確定要重新開始所有題目嗎？\n\n累積的光點與場景進度將會清除。')){window.glowProgress&&window.glowProgress.reset();}" class="text-xs text-gray-500 hover:text-red-300 transition-colors underline-offset-4 hover:underline">
+          重新開始挑戰（清除進度）
+        </button>
+      </div>
     </div>
   </div>
 </section>
@@ -1014,22 +1020,76 @@
 
   // === Quiz Logic ===
   const TOTAL_QUIZ_COUNT = 12 + 5; // 12 mc + 5 AI chat scenarios
+  const STORAGE_KEY = 'glow-quiz-progress-v1';
   let totalScore = 0;
   let completedCount = 0;
+  let completedQuizIds = new Set();   // q1, q2, ...
 
-  function updateScore(points) {
+  // ---- localStorage persistence ----
+  function loadProgress() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return null;
+      const data = JSON.parse(raw);
+      totalScore = data.score || 0;
+      completedCount = data.completed || 0;
+      completedQuizIds = new Set(data.quizIds || []);
+      return data;
+    } catch (e) { return null; }
+  }
+  function saveProgress() {
+    const data = {
+      score: totalScore,
+      completed: completedCount,
+      quizIds: Array.from(completedQuizIds),
+      scenarios: (typeof completedScenarios !== 'undefined') ? Array.from(completedScenarios) : [],
+      total: TOTAL_QUIZ_COUNT,
+      ts: Date.now()
+    };
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch(e) {}
+  }
+  function refreshUI() {
+    const ts = document.getElementById('totalScore'); if (ts) ts.textContent = totalScore;
+    const cp = document.getElementById('completed'); if (cp) cp.textContent = completedCount;
+    const tp = document.getElementById('totalProgress'); if (tp) tp.style.width = ((completedCount / TOTAL_QUIZ_COUNT) * 100) + '%';
+  }
+  // Expose for the reset button + completedScenarios restoration after Stage4 init
+  window.glowProgress = {
+    reset() {
+      try { localStorage.removeItem(STORAGE_KEY); } catch(e) {}
+      location.reload();
+    },
+    save: saveProgress
+  };
+
+  function updateScore(points, quizId) {
+    if (quizId && completedQuizIds.has(quizId)) return;
     totalScore += points;
     completedCount++;
-    document.getElementById('totalScore').textContent = totalScore;
-    document.getElementById('completed').textContent = completedCount;
-    document.getElementById('totalProgress').style.width = ((completedCount / TOTAL_QUIZ_COUNT) * 100) + '%';
+    if (quizId) completedQuizIds.add(quizId);
+    refreshUI();
+    saveProgress();
   }
+
+  // Restore on load
+  const _savedProgress = loadProgress();
+  refreshUI();
 
   document.querySelectorAll('.quiz-block').forEach(block => {
     const opts = block.querySelectorAll('.opt');
     const feedback = block.querySelector('.feedback');
     const points = parseInt(block.dataset.points || '10');
+    const quizId = block.dataset.quiz;
     let answered = false;
+
+    // Restore previously-answered state
+    if (quizId && completedQuizIds.has(quizId)) {
+      opts.forEach(o => { if (o.dataset.correct === 'true') o.classList.add('correct'); });
+      if (feedback) feedback.classList.add('show');
+      block.classList.add('completed');
+      answered = true;
+    }
+
     opts.forEach(opt => {
       opt.addEventListener('click', () => {
         if (answered) return;
@@ -1040,10 +1100,16 @@
         if (!isCorrect) opt.classList.add('wrong');
         if (feedback) feedback.classList.add('show');
         if (isCorrect) {
-          updateScore(points);
+          updateScore(points, quizId);
           block.classList.add('completed');
         } else {
-          updateScore(0);
+          // Wrong attempt still locks the question (no retry, no points)
+          if (quizId && !completedQuizIds.has(quizId)) {
+            completedCount++;
+            completedQuizIds.add(quizId);
+            refreshUI();
+            saveProgress();
+          }
         }
         answered = true;
       });
@@ -1196,7 +1262,7 @@
   let activeScenarioKey = 'dealer';
   let currentRound = 0;
   let scenarioToken = 0;
-  const completedScenarios = new Set();
+  const completedScenarios = new Set((_savedProgress && _savedProgress.scenarios) || []);
 
   const chatWindow = document.getElementById('chatWindow');
   const replyArea = document.getElementById('replyArea');
@@ -1205,6 +1271,13 @@
   const chatActiveSubtitle = document.getElementById('chatActiveSubtitle');
   const chatActiveTag = document.getElementById('chatActiveTag');
   const scenariosCompletedEl = document.getElementById('scenariosCompleted');
+
+  // Restore completed scenario tab marks on load
+  if (scenariosCompletedEl) scenariosCompletedEl.textContent = completedScenarios.size;
+  completedScenarios.forEach(k => {
+    const t = document.querySelector('.scenario-tab[data-scenario="' + k + '"]');
+    if (t) t.classList.add('completed');
+  });
 
   function appendBubble({ type, text, actorLabel }) {
     if (actorLabel) {
@@ -1234,7 +1307,9 @@
         scenariosCompletedEl.textContent = completedScenarios.size;
         const tab = document.querySelector('.scenario-tab[data-scenario="' + activeScenarioKey + '"]');
         if (tab) tab.classList.add('completed');
-        updateScore(50);
+        updateScore(50, 'scenario:' + activeScenarioKey);
+      } else {
+        saveProgress();
       }
       return;
     }
