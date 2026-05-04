@@ -443,15 +443,14 @@
         </div>
       </div>
       <div class="flex items-center gap-3">
-        <button class="btn btn-ghost">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-          通知 <span class="ml-1 text-orange-400">3</span>
-        </button>
-        <div class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-orange-500/10 border border-orange-500/30">
-          <div class="w-7 h-7 rounded-full bg-gradient-to-br from-orange-300 to-orange-600 flex items-center justify-center text-black font-bold text-xs">主</div>
+        <a href="index.html" class="btn btn-ghost">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          回培訓首頁
+        </a>
+        <div id="topbarUserSlot" class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-orange-500/10 border border-orange-500/30">
+          <div class="w-7 h-7 rounded-full bg-orange-500/30 flex items-center justify-center text-xs">…</div>
           <div class="text-xs">
-            <div class="font-medium text-orange-200">業務部主管</div>
-            <div class="text-[10px] text-gray-500">已登入</div>
+            <div class="font-medium text-orange-200">載入中</div>
           </div>
         </div>
       </div>
@@ -760,9 +759,11 @@
         </div>
 
         <div class="panel">
-          <div class="text-xs text-gray-500 mb-4 flex items-center gap-2">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
-            點「編輯」修改章節資料 · 變更會儲存到瀏覽器（localStorage）
+          <div class="text-xs text-gray-500 mb-4 p-3 rounded-lg bg-orange-500/5 border border-orange-500/15 flex items-start gap-2">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mt-0.5 flex-shrink-0 text-orange-400"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            <div>
+              <span class="text-orange-300">章節清單與題庫編輯</span> 目前僅儲存於你目前瀏覽器（localStorage），用於主管側內容規劃預覽 — 不影響上線訓練頁的實際內容（實際內容寫死在 HTML）。學員資料、進度、白名單則為 <span class="text-orange-300">Firestore 雲端同步</span>。
+            </div>
           </div>
 
           <!-- Chapter rows rendered by JS -->
@@ -816,6 +817,13 @@
               <option>情境</option>
               <option>AI 對話</option>
             </select>
+          </div>
+
+          <div class="text-xs text-gray-500 mb-4 p-3 rounded-lg bg-orange-500/5 border border-orange-500/15 flex items-start gap-2">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mt-0.5 flex-shrink-0 text-orange-400"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            <div>
+              <span class="text-orange-300">題庫編輯</span> 同樣僅儲存於目前瀏覽器（localStorage），用於規劃／審題預覽。學員實際作答到的題目、即時答對率，由學員雲端進度反算（待擴充：「答對率」需聚合 Firestore <code class="text-xs text-orange-300">progress</code> 集合）。
+            </div>
           </div>
 
           <div class="table-wrap">
@@ -1537,6 +1545,28 @@
     const fb = window.glowFirebase;
     if (!fb) return;
     const TOTAL = 22;
+
+    // 填入 topbar 真實用戶資料
+    (function paintTopbar(){
+      const slot = document.getElementById('topbarUserSlot');
+      if (!slot) return;
+      const me = fb.getCurrentUser();
+      if (!me || !me.doc) return;
+      const initial = (me.doc.name || me.doc.email || '?').charAt(0).toUpperCase();
+      slot.innerHTML = `
+        ${me.doc.photoURL
+          ? `<img src="${me.doc.photoURL}" referrerpolicy="no-referrer" class="w-7 h-7 rounded-full" alt="">`
+          : `<div class="w-7 h-7 rounded-full bg-gradient-to-br from-orange-300 to-orange-600 flex items-center justify-center text-black font-bold text-xs">${initial}</div>`}
+        <div class="text-xs">
+          <div class="font-medium text-orange-200">${(me.doc.name || me.doc.email).replace(/[<>]/g,'')}</div>
+          <div class="text-[10px] text-gray-500">${me.doc.role === 'manager' ? '主管 · 已登入' : '學員 · 已登入'}</div>
+        </div>
+        <button id="topbarSignOutBtn" class="ml-2 text-xs text-gray-500 hover:text-red-300 transition-colors" title="登出">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        </button>`;
+      const out = document.getElementById('topbarSignOutBtn');
+      if (out) out.addEventListener('click', () => fb.signOutUser());
+    })();
 
     function fmtTime(ts) {
       if (!ts) return '—';
