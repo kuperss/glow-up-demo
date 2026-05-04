@@ -185,7 +185,8 @@ export function requireAuth(opts = {}) {
         },
         onUsersUpdate(cb) { cb([guestDoc]); return () => {}; },
         onAllowlistUpdate(cb) { cb([]); return () => {}; },
-        async getStuckPointAnalysis() { return []; }
+        async getStuckPointAnalysis() { return []; },
+        async markWizardSeen() { guestDoc.wizardSeen = true; }
       };
       document.dispatchEvent(new CustomEvent('glow-firebase-ready', { detail: { user: currentUser, doc: guestDoc } }));
       resolve({ user: currentUser, doc: guestDoc });
@@ -214,7 +215,7 @@ export function requireAuth(opts = {}) {
       // Expose Firestore helpers globally so non-module inline scripts can use them
       window.glowFirebase = {
         recordQuizAttempt, recordScenarioCompletion, loadProgress, resetMyProgress,
-        getCurrentUser, signOutUser,
+        getCurrentUser, signOutUser, markWizardSeen,
         listAllowlist, addToAllowlist, removeFromAllowlist,
         listAllUsers, getUserProgressDetail,
         onUsersUpdate, onAllowlistUpdate, getStuckPointAnalysis
@@ -249,6 +250,14 @@ export async function recordScenarioCompletion(scenarioKey, points = 50) {
     points,
     completedAt: serverTimestamp()
   }, { merge: false });
+}
+
+export async function markWizardSeen() {
+  if (!currentUser) return;
+  try {
+    await updateDoc(doc(db, 'users', currentUser.uid), { wizardSeen: true });
+    if (currentUserDoc) currentUserDoc.wizardSeen = true;
+  } catch(e) { console.warn('markWizardSeen failed', e); }
 }
 
 export async function resetMyProgress() {
@@ -456,4 +465,67 @@ export async function getUserProgressDetail(uid) {
 export {
   doc, setDoc, getDoc, getDocs, collection, query, where,
   onSnapshot, serverTimestamp, deleteDoc, updateDoc
+};
+
+// ========== 全域 Toast 工具（用於徽章解鎖、答對提示）==========
+function injectToastCSS() {
+  if (document.getElementById('glow-toast-css')) return;
+  const s = document.createElement('style');
+  s.id = 'glow-toast-css';
+  s.textContent = `
+    .glow-toast-container { position: fixed; top: 80px; right: 20px; z-index: 10000; pointer-events: none; display: flex; flex-direction: column; gap: 12px; max-width: calc(100vw - 40px); }
+    .glow-toast {
+      pointer-events: auto;
+      min-width: 240px; max-width: 360px;
+      padding: 14px 18px; border-radius: 12px;
+      background: linear-gradient(180deg, rgba(26,26,31,0.96), rgba(19,19,22,0.96));
+      border: 1px solid rgba(245,130,32,0.3); color: #F5F5F7;
+      box-shadow: 0 20px 60px -10px rgba(245,130,32,0.4);
+      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      transform: translateX(400px); opacity: 0;
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s;
+      font-family: 'Noto Sans TC', 'Inter', sans-serif;
+    }
+    .glow-toast.show { transform: translateX(0); opacity: 1; }
+    .glow-toast.exit { transform: translateX(400px); opacity: 0; }
+    .glow-toast.toast-correct { border-color: rgba(94,234,150,0.4); }
+    .glow-toast.toast-badge {
+      border-color: rgba(245,130,32,0.7);
+      background: linear-gradient(180deg, rgba(245,130,32,0.18), rgba(19,19,22,0.96));
+      box-shadow: 0 30px 80px -10px rgba(245,130,32,0.6), 0 0 0 1px rgba(245,130,32,0.5) inset;
+    }
+    .glow-toast-title { font-weight: 700; margin-bottom: 4px; font-size: 15px; }
+    .glow-toast-desc { font-size: 12px; color: #A0A0AB; line-height: 1.5; }
+    .glow-toast.toast-badge .glow-toast-title { color: #FFD27A; font-size: 16px; }
+    @keyframes glow-toast-pulse { 0%,100% { box-shadow: 0 30px 80px -10px rgba(245,130,32,0.6), 0 0 0 1px rgba(245,130,32,0.5) inset; } 50% { box-shadow: 0 30px 100px -10px rgba(245,130,32,0.9), 0 0 0 2px rgba(245,130,32,0.7) inset; } }
+    .glow-toast.toast-badge { animation: glow-toast-pulse 1.6s ease-in-out infinite; }
+  `;
+  document.head.appendChild(s);
+}
+
+window.showToast = function(opts) {
+  injectToastCSS();
+  let container = document.getElementById('glow-toast-container');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'glow-toast-container';
+    container.className = 'glow-toast-container';
+    document.body.appendChild(container);
+  }
+  const t = document.createElement('div');
+  const typeClass = opts.type === 'correct' ? ' toast-correct' : opts.type === 'badge' ? ' toast-badge' : '';
+  t.className = 'glow-toast' + typeClass;
+  const safeTitle = String(opts.title || '').replace(/[<>]/g, '');
+  const safeDesc = String(opts.desc || '').replace(/[<>]/g, '');
+  t.innerHTML = `
+    <div class="glow-toast-title">${safeTitle}</div>
+    ${safeDesc ? `<div class="glow-toast-desc">${safeDesc}</div>` : ''}
+  `;
+  container.appendChild(t);
+  requestAnimationFrame(() => t.classList.add('show'));
+  const dur = opts.duration || (opts.type === 'badge' ? 4500 : 2500);
+  setTimeout(() => {
+    t.classList.add('exit');
+    setTimeout(() => t.remove(), 400);
+  }, dur);
 };

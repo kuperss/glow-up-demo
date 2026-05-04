@@ -1166,21 +1166,77 @@
     }
   };
 
+  // 徽章定義（與 index.html 同步，用於 toast 偵測）
+  const BADGE_DEFS = [
+    { key: 'starter',  name: '入門之光', test: (qIds, sc) => qIds.size + sc.size >= 1, desc: '你已經點亮第一道光' },
+    { key: 'product',  name: '產品達人', test: (qIds) => ['q1','q2','q3','q4','q5'].every(id => qIds.has(id)), desc: '完成 STAGE 1 五題' },
+    { key: 'customer', name: '通路通',   test: (qIds) => ['q6','q7','q8','q9'].every(id => qIds.has(id)), desc: '完成 STAGE 2 四題' },
+    { key: 'warrior',  name: '業務戰將', test: (qIds) => ['q10','q11','q12'].every(id => qIds.has(id)), desc: '完成 STAGE 3 三題' },
+    { key: 'dialog1',  name: '對話新手', test: (qIds, sc) => sc.size >= 1, desc: '完成第一個 AI 客戶對話' },
+    { key: 'champion', name: '闖關王',   test: (qIds, sc) => sc.size >= 3, desc: '完成 3 個 AI 情境' },
+    { key: 'hr',       name: '規章達人', test: (qIds) => ['q13','q14','q15','q16','q17'].every(id => qIds.has(id)), desc: '完成 STAGE 5 五題 HR 規章' },
+    { key: 'lighter',  name: '點燈者',   test: (qIds, sc) => qIds.size + sc.size >= 22, desc: '★ 22 / 22 全通關 · 最高榮譽' }
+  ];
+  const SHOWN_BADGES_KEY = 'glow-shown-badges-v1';
+  function shownBadges() {
+    try { return new Set(JSON.parse(sessionStorage.getItem(SHOWN_BADGES_KEY) || '[]')); }
+    catch(e) { return new Set(); }
+  }
+  function markBadgeShown(key) {
+    const s = shownBadges(); s.add(key);
+    try { sessionStorage.setItem(SHOWN_BADGES_KEY, JSON.stringify(Array.from(s))); } catch(e) {}
+  }
+  // 把進來時就已解鎖的徽章先標記為「已顯示」，避免一進頁就跳一堆 toast
+  function silenceAlreadyUnlocked() {
+    BADGE_DEFS.forEach(b => {
+      if (b.test(completedQuizIds, completedScenarios)) markBadgeShown(b.key);
+    });
+  }
+  function checkAndAnnounceBadges() {
+    if (!window.showToast) return;
+    const already = shownBadges();
+    let i = 0;
+    BADGE_DEFS.forEach(b => {
+      if (already.has(b.key)) return;
+      if (b.test(completedQuizIds, completedScenarios)) {
+        markBadgeShown(b.key);
+        const delay = (i++) * 350;
+        setTimeout(() => {
+          window.showToast({
+            type: 'badge',
+            title: '🏆 解鎖徽章：' + b.name,
+            desc: b.desc,
+            duration: 4500
+          });
+        }, delay);
+      }
+    });
+  }
+
   async function updateScore(points, quizId, isCorrect = true) {
     if (quizId && completedQuizIds.has(quizId)) return;
     if (isCorrect) totalScore += points;
     completedCount++;
     if (quizId) completedQuizIds.add(quizId);
     refreshUI();
+    // 答對 toast（不對單一場景的子題目）
+    if (window.showToast && quizId && !quizId.startsWith('scenario:')) {
+      if (isCorrect) {
+        window.showToast({ type: 'correct', title: `✓ +${points} 光點`, desc: '答對了！繼續保持。' });
+      } else {
+        window.showToast({ type: 'default', title: '×　答錯了', desc: '看一下解析，這題不算光點但仍鎖定。' });
+      }
+    }
     if (window.glowFirebase) {
       try {
         if (quizId && quizId.startsWith('scenario:')) {
-          // 由 scenario 完成路徑呼叫，已在外部處理
+          // scenario 完成路徑由 renderReplies 直接呼叫 recordScenarioCompletion，這裡不重複
         } else if (quizId) {
           await window.glowFirebase.recordQuizAttempt(quizId, isCorrect, points);
         }
       } catch(e) { console.warn('記錄進度失敗', e); }
     }
+    checkAndAnnounceBadges();
   }
 
   function attachQuizHandlers() {
@@ -1229,6 +1285,8 @@
     }
     refreshUI();
     attachQuizHandlers();
+    // 進來時已解鎖的徽章先標記為「已顯示」，避免一進頁就跳一堆 toast
+    silenceAlreadyUnlocked();
     // 通知 Stage 4 場景初始化（在下方）
     document.dispatchEvent(new Event('glow-quiz-state-ready'));
   });
@@ -1426,6 +1484,15 @@
           try { await window.glowFirebase.recordScenarioCompletion(finishedKey, 50); }
           catch(e) { console.warn('場景進度寫入失敗', e); }
         }
+        if (window.showToast) {
+          window.showToast({
+            type: 'correct',
+            title: '✓ 對話完成 +50 光點',
+            desc: scenario.name + '：' + scenario.finishMessage,
+            duration: 3500
+          });
+        }
+        checkAndAnnounceBadges();
       }
       return;
     }
