@@ -2877,7 +2877,7 @@
             setTimeout(() => { elFlagSaveMsg.textContent = ''; }, 4000);
           } catch (err) {
             console.error(err);
-            alert('AI 生成失敗：' + (err.message || err) + '\n（請確認 AI 設定已填入有效 API Key 並啟用）');
+            alert('AI 生成失敗：' + (err.message || err) + '\n（請確認 AI 設定已啟用且填入有效憑證；若用 NotebookLM 知識庫但 SKU 不在主打 9 必懂列表，建議改用 Gemini/Claude/OpenAI 生成）');
           } finally {
             btn.disabled = false;
             btn.innerHTML = orig;

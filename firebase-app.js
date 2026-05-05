@@ -871,12 +871,33 @@ export async function generateFlagshipCard(productData) {
   "categories": ["從這 7 個選 1-2 個：居家、商業、辦公、學校、工廠、互聯、戶外"]
 }`;
 
-  const reply = await callAI({ messages: [{ role: 'user', content: prompt }] });
-  // 嘗試解析 JSON（防 markdown 包裹）
+  // 用獨立 system prompt 覆蓋掉學員端「舞妞」人格，避免它去用學長姐口吻寫 JSON
+  const cardGenSystem = '你是內容編輯助手。嚴格按照使用者指定的 JSON 結構回應；只回 JSON 物件本體，不要加任何前後說明文字、不要 markdown code block、不要引用標號。';
+  const reply = await callAI({
+    messages: [{ role: 'user', content: prompt }],
+    system: cardGenSystem
+  });
+
+  // 強壯版 JSON 抽取：適用所有 provider（含 NotebookLM 會多塞引用標號 + 自然語句）
   let cleaned = String(reply || '').trim();
-  // 去除 ```json ... ``` 包裹
+  // 1. 去引用標號 [1] [1, 2] [2-3]（NotebookLM 常加）
+  cleaned = cleaned.replace(/\s*\[\s*\d+(?:\s*[-,，、\s]\s*\d+)*\s*\]/g, '');
+  // 2. 去 markdown fence
   cleaned = cleaned.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/i, '');
-  const parsed = JSON.parse(cleaned);
+  // 3. 抽出第一個 { 到最後 } 之間的內容（去掉前後多餘自然語句）
+  const firstBrace = cleaned.indexOf('{');
+  const lastBrace = cleaned.lastIndexOf('}');
+  if (firstBrace >= 0 && lastBrace > firstBrace) {
+    cleaned = cleaned.slice(firstBrace, lastBrace + 1);
+  }
+
+  let parsed;
+  try {
+    parsed = JSON.parse(cleaned);
+  } catch (e) {
+    console.error('[generateFlagshipCard] JSON 解析失敗。原始回應：', reply);
+    throw new Error('AI 回傳格式不對，無法解析 JSON。請改試其他 provider（Gemini / Claude / OpenAI 對 JSON 比較穩），或稍後再試。');
+  }
   // 防呆：確保 categories 是陣列
   if (typeof parsed.categories === 'string') parsed.categories = [parsed.categories];
   if (!Array.isArray(parsed.categories)) parsed.categories = [];
