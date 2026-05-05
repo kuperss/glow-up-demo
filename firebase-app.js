@@ -916,9 +916,14 @@ function injectAIHelperCSS() {
       background: linear-gradient(180deg, rgba(245,130,32,0.08), transparent);
     }
     .ai-panel-icon {
-      width: 36px; height: 36px; border-radius: 50%;
+      width: 40px; height: 40px; border-radius: 50%;
       background: linear-gradient(135deg, #FFA050, #F58220);
       display: flex; align-items: center; justify-content: center;
+      overflow: hidden; flex-shrink: 0;
+    }
+    .ai-panel-icon img,
+    .ai-helper-fab img {
+      width: 100%; height: 100%; object-fit: cover; display: block;
     }
     .ai-panel-title { font-weight: 700; font-size: 15px; color: #F5F5F7; }
     .ai-panel-subtitle { font-size: 11px; color: #6B6B75; }
@@ -977,15 +982,8 @@ export async function injectAIHelper() {
   const fab = document.createElement('button');
   fab.id = 'aiHelperFab';
   fab.className = 'ai-helper-fab';
-  fab.title = '舞光 AI 助教';
-  fab.innerHTML = `
-    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M12 2a4 4 0 0 1 4 4v3h3a4 4 0 0 1 4 4v3"/>
-      <path d="M21 16v3a4 4 0 0 1-4 4h-3"/>
-      <path d="M14 23H6a4 4 0 0 1-4-4v-3"/>
-      <path d="M2 13v-3a4 4 0 0 1 4-4h3"/>
-      <circle cx="12" cy="13" r="2.5" fill="white"/>
-    </svg>`;
+  fab.title = '舞光戰將的 AI 助教';
+  fab.innerHTML = `<img src="assets/ai-helper-mascot.png" alt="舞光戰將 AI 助教" onerror="this.style.display='none';this.parentElement.innerHTML='<svg width=\\'26\\' height=\\'26\\' viewBox=\\'0 0 24 24\\' fill=\\'none\\' stroke=\\'white\\' stroke-width=\\'2\\'><circle cx=\\'12\\' cy=\\'12\\' r=\\'10\\'/><circle cx=\\'12\\' cy=\\'12\\' r=\\'3\\' fill=\\'white\\'/></svg>'">`;
   document.body.appendChild(fab);
 
   const panel = document.createElement('div');
@@ -994,10 +992,10 @@ export async function injectAIHelper() {
   panel.innerHTML = `
     <div class="ai-panel-header">
       <div class="ai-panel-icon">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3" fill="white"/></svg>
+        <img src="assets/ai-helper-mascot.png" alt="舞光戰將 AI 助教" onerror="this.style.display='none';this.parentElement.innerHTML='<svg width=\\'20\\' height=\\'20\\' viewBox=\\'0 0 24 24\\' fill=\\'none\\' stroke=\\'white\\' stroke-width=\\'2\\'><circle cx=\\'12\\' cy=\\'12\\' r=\\'10\\'/><circle cx=\\'12\\' cy=\\'12\\' r=\\'3\\' fill=\\'white\\'/></svg>'">
       </div>
       <div>
-        <div class="ai-panel-title">舞光 AI 助教</div>
+        <div class="ai-panel-title">舞光戰將的 AI 助教</div>
         <div class="ai-panel-subtitle">隨時問訓練內容相關的問題</div>
       </div>
       <button class="ai-panel-close" id="aiPanelCloseBtn" title="關閉">
@@ -1005,7 +1003,7 @@ export async function injectAIHelper() {
       </button>
     </div>
     <div class="ai-chat-list" id="aiChatList">
-      <div class="ai-chat-bubble ai">嗨！我是舞光 AI 助教。<br>有任何訓練內容（產品、客戶、規章、福利）的疑問都可以問我。<br><br>提示：點下方建議快速開始。</div>
+      <div class="ai-chat-bubble ai">嗨！我是舞光戰將的 AI 助教。<br>有任何訓練內容（產品、客戶、規章、福利）的疑問都可以問我。<br><br>提示：點下方建議快速開始。</div>
     </div>
     <div class="ai-helper-suggestions" id="aiSuggestions">
       <button class="ai-helper-suggestion" data-q="Ra90 跟 Ra80 差在哪？">Ra90 跟 Ra80 差在哪？</button>
@@ -1106,17 +1104,21 @@ export async function injectAIHelper() {
 //   3) 升級為 Cloudflare Worker 代理（下階段）
 
 const DEFAULT_AI_CONFIG = {
-  provider: 'gemini',        // 'gemini' | 'claude' | 'openai'
+  provider: 'gemini',        // 'gemini' | 'claude' | 'openai' | 'notebooklm'
   apiKey: '',
   model: '',                 // 空字串時使用 provider 預設
   systemPrompt: '你是舞光 LED 業務新人訓練系統的 AI 助教。請用繁體中文，以友善、專業的口吻回答業務新人關於展晟照明集團、舞光 LED 產品、客戶經營、業務技巧的問題。回答簡潔明確，避免冗長，每次最多 200 字。',
-  enabled: false
+  enabled: false,
+  // notebooklm provider 專用欄位
+  endpointUrl: '',           // 例：https://meeting-minutes-bot.fly.dev
+  secretToken: ''            // 後端與前端共享的 bearer token
 };
 
 const PROVIDER_DEFAULTS = {
   gemini: { model: 'gemini-1.5-flash', label: 'Google Gemini', testEndpoint: 'https://generativelanguage.googleapis.com/' },
   claude: { model: 'claude-haiku-4-5-20251001', label: 'Anthropic Claude', testEndpoint: 'https://api.anthropic.com/' },
-  openai: { model: 'gpt-4o-mini', label: 'OpenAI GPT', testEndpoint: 'https://api.openai.com/' }
+  openai: { model: 'gpt-4o-mini', label: 'OpenAI GPT', testEndpoint: 'https://api.openai.com/' },
+  notebooklm: { model: '(自有後端 RAG)', label: 'NotebookLM（RAG 知識庫）', testEndpoint: '' }
 };
 
 export function getProviderDefaults() {
@@ -1149,14 +1151,49 @@ export function onAIConfigUpdate(cb) {
 // system: 可選，會覆蓋 config 的 systemPrompt
 export async function callAI({ messages, system, configOverride } = {}) {
   const cfg = configOverride || await getAIConfig();
+  const sysPrompt = system || cfg.systemPrompt || '';
+
+  // notebooklm 走自有後端，不需 apiKey（用 secretToken 即可）
+  if (cfg.provider === 'notebooklm') {
+    if (!cfg.endpointUrl) throw new Error('NotebookLM 模式：尚未設定後端 endpoint URL');
+    return _callNotebookLM(cfg.endpointUrl, cfg.secretToken, messages, sysPrompt);
+  }
+
   if (!cfg.apiKey) throw new Error('尚未設定 API Key（請主管至 admin.html → AI 設定）');
   const model = (cfg.model && cfg.model.trim()) || PROVIDER_DEFAULTS[cfg.provider].model;
-  const sysPrompt = system || cfg.systemPrompt || '';
 
   if (cfg.provider === 'gemini') return _callGemini(cfg.apiKey, model, messages, sysPrompt);
   if (cfg.provider === 'claude') return _callClaude(cfg.apiKey, model, messages, sysPrompt);
   if (cfg.provider === 'openai') return _callOpenAI(cfg.apiKey, model, messages, sysPrompt);
   throw new Error('未知的 AI provider: ' + cfg.provider);
+}
+
+// NotebookLM 走自有 backend（meeting-minutes-bot 上的 /api/dancelight/ask）
+async function _callNotebookLM(endpointUrl, secretToken, messages, system) {
+  const url = endpointUrl.replace(/\/$/, '') + '/api/dancelight/ask';
+  const headers = { 'Content-Type': 'application/json' };
+  if (secretToken) headers['Authorization'] = 'Bearer ' + secretToken;
+
+  // 取最後一則 user 訊息為主題；保留前面 history 給後端參考
+  const lastUser = [...(messages || [])].reverse().find(m => m.role === 'user');
+  const question = lastUser ? lastUser.content : '';
+
+  const r = await fetch(url, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({
+      question,
+      messages: messages || [],
+      system: system || ''
+    })
+  });
+  if (!r.ok) {
+    let errText = '';
+    try { errText = await r.text(); } catch(e) {}
+    throw new Error('NotebookLM endpoint ' + r.status + ': ' + (errText || r.statusText));
+  }
+  const data = await r.json();
+  return data.answer || data.response || '';
 }
 
 async function _callGemini(apiKey, model, messages, system) {

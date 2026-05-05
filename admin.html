@@ -807,6 +807,7 @@
                 <option value="gemini">Google Gemini</option>
                 <option value="claude">Anthropic Claude</option>
                 <option value="openai">OpenAI GPT</option>
+                <option value="notebooklm">NotebookLM（RAG · 知識庫）</option>
               </select>
               <div class="text-[11px] text-gray-500 mt-2" id="aiProviderHint"></div>
             </div>
@@ -818,13 +819,36 @@
             </div>
           </div>
 
-          <div class="mt-5">
+          <div class="mt-5" id="aiKeyBlock">
             <label class="text-xs text-gray-500 tracking-wider mb-2 block">API Key</label>
             <div class="flex gap-2">
               <input type="password" id="aiKeyInput" class="form-input flex-1" placeholder="貼上 API Key（儲存後會用密碼遮罩顯示）">
               <button id="aiKeyToggleBtn" class="btn btn-ghost text-xs whitespace-nowrap">顯示</button>
             </div>
             <div class="text-[11px] text-gray-500 mt-2" id="aiKeyHint"></div>
+          </div>
+
+          <!-- NotebookLM 專用：後端 endpoint 與共享密鑰 -->
+          <div class="mt-5 hidden" id="aiNbBlock">
+            <div class="p-3 rounded-lg bg-orange-500/5 border border-orange-500/15 text-xs text-gray-400 leading-relaxed mb-4">
+              <strong class="text-orange-300">NotebookLM 模式：</strong>由你的 fly.io 後端代理呼叫 NotebookLM。請填寫後端 endpoint URL 與 shared secret。
+              <br>後端會用固定的 NotebookLM 筆記本（事先上傳產品手冊／規章／訓練教材）來回答。
+            </div>
+            <div class="grid md:grid-cols-2 gap-5">
+              <div>
+                <label class="text-xs text-gray-500 tracking-wider mb-2 block">後端 Endpoint URL</label>
+                <input type="text" id="aiNbEndpointInput" class="form-input" placeholder="https://meeting-minutes-bot.fly.dev">
+                <div class="text-[11px] text-gray-500 mt-2">不要加結尾的 <code class="text-orange-300 text-[11px]">/</code>，也不要加 <code class="text-orange-300 text-[11px]">/api/dancelight/ask</code> — 系統會自動補上。</div>
+              </div>
+              <div>
+                <label class="text-xs text-gray-500 tracking-wider mb-2 block">Shared Secret Token</label>
+                <div class="flex gap-2">
+                  <input type="password" id="aiNbSecretInput" class="form-input flex-1" placeholder="與後端 DANCELIGHT_SHARED_SECRET 相同">
+                  <button id="aiNbSecretToggleBtn" class="btn btn-ghost text-xs whitespace-nowrap">顯示</button>
+                </div>
+                <div class="text-[11px] text-gray-500 mt-2">隨機字串即可（建議 32+ 字元）。前端會用 Bearer header 帶給後端驗證。</div>
+              </div>
+            </div>
           </div>
 
           <div class="mt-5">
@@ -2164,13 +2188,19 @@
     const keyHints = {
       gemini: '取得位置：<a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-orange-300 hover:underline">aistudio.google.com/app/apikey</a>（免費額度生成式 AI Studio）',
       claude: '取得位置：<a href="https://console.anthropic.com/" target="_blank" class="text-orange-300 hover:underline">console.anthropic.com</a> → Settings → API Keys',
-      openai: '取得位置：<a href="https://platform.openai.com/api-keys" target="_blank" class="text-orange-300 hover:underline">platform.openai.com/api-keys</a>'
+      openai: '取得位置：<a href="https://platform.openai.com/api-keys" target="_blank" class="text-orange-300 hover:underline">platform.openai.com/api-keys</a>',
+      notebooklm: '走自有 fly.io 後端（meeting-minutes-bot）→ 後端用 cookie 呼叫 NotebookLM，回答基於你上傳的 source 文件。'
     };
 
     const elProvider = document.getElementById('aiProviderSelect');
     const elModel = document.getElementById('aiModelInput');
     const elKey = document.getElementById('aiKeyInput');
     const elKeyToggle = document.getElementById('aiKeyToggleBtn');
+    const elKeyBlock = document.getElementById('aiKeyBlock');
+    const elNbBlock = document.getElementById('aiNbBlock');
+    const elNbEndpoint = document.getElementById('aiNbEndpointInput');
+    const elNbSecret = document.getElementById('aiNbSecretInput');
+    const elNbSecretToggle = document.getElementById('aiNbSecretToggleBtn');
     const elSystem = document.getElementById('aiSystemPrompt');
     const elEnabled = document.getElementById('aiEnabledChk');
     const elSaveBtn = document.getElementById('aiSaveBtn');
@@ -2188,6 +2218,13 @@
       elModel.placeholder = def ? def.model : '';
       elModelHint.textContent = providerHints[provider] || '';
       elKeyHint.innerHTML = keyHints[provider] || '';
+      // notebooklm：隱藏 API Key + Model 區，顯示後端 endpoint/secret
+      const isNb = provider === 'notebooklm';
+      if (elKeyBlock) elKeyBlock.classList.toggle('hidden', isNb);
+      if (elNbBlock) elNbBlock.classList.toggle('hidden', !isNb);
+      // model 欄位 NotebookLM 沒意義，停用顯示提示
+      elModel.disabled = isNb;
+      if (isNb) elModel.placeholder = '（NotebookLM 模式不需指定 model）';
     }
 
     elProvider.addEventListener('change', () => updateProviderHints(elProvider.value));
@@ -2199,11 +2236,22 @@
       elKeyToggle.textContent = keyVisible ? '隱藏' : '顯示';
     });
 
+    let nbSecretVisible = false;
+    if (elNbSecretToggle) {
+      elNbSecretToggle.addEventListener('click', () => {
+        nbSecretVisible = !nbSecretVisible;
+        elNbSecret.type = nbSecretVisible ? 'text' : 'password';
+        elNbSecretToggle.textContent = nbSecretVisible ? '隱藏' : '顯示';
+      });
+    }
+
     // 訂閱 aiConfig（即時同步）
     fb.onAIConfigUpdate((cfg) => {
       elProvider.value = cfg.provider || 'gemini';
       elModel.value = cfg.model || '';
       elKey.value = cfg.apiKey || '';
+      if (elNbEndpoint) elNbEndpoint.value = cfg.endpointUrl || '';
+      if (elNbSecret) elNbSecret.value = cfg.secretToken || '';
       elSystem.value = cfg.systemPrompt || '';
       elEnabled.checked = !!cfg.enabled;
       updateProviderHints(elProvider.value);
@@ -2220,6 +2268,8 @@
           provider: elProvider.value,
           model: elModel.value.trim(),
           apiKey: elKey.value.trim(),
+          endpointUrl: (elNbEndpoint && elNbEndpoint.value || '').trim().replace(/\/$/, ''),
+          secretToken: (elNbSecret && elNbSecret.value || '').trim(),
           systemPrompt: elSystem.value,
           enabled: elEnabled.checked
         });
@@ -2251,21 +2301,30 @@
             provider: elProvider.value,
             model: elModel.value.trim(),
             apiKey: elKey.value.trim(),
+            endpointUrl: (elNbEndpoint && elNbEndpoint.value || '').trim().replace(/\/$/, ''),
+            secretToken: (elNbSecret && elNbSecret.value || '').trim(),
             systemPrompt: elSystem.value
           }
         });
+        const modelLabel = elProvider.value === 'notebooklm'
+          ? 'NotebookLM RAG · ' + ((elNbEndpoint && elNbEndpoint.value) || '(no endpoint)')
+          : (elModel.value || providerDefaults[elProvider.value].model);
         elTestChat.innerHTML = `
           <div class="flex justify-end"><div class="max-w-[80%] px-4 py-2.5 rounded-2xl rounded-br-sm bg-orange-500/15 border border-orange-500/30 text-sm">${escapeHtml(userPrompt)}</div></div>
           <div class="flex justify-start"><div class="max-w-[80%] px-4 py-2.5 rounded-2xl rounded-bl-sm bg-gray-800/50 border border-gray-700 text-sm whitespace-pre-wrap">${escapeHtml(reply)}</div></div>
-          <div class="text-[11px] text-green-300 text-center pt-2">✓ 連線正常 · ${escapeHtml(elProvider.value)} · ${escapeHtml(elModel.value || providerDefaults[elProvider.value].model)}</div>
+          <div class="text-[11px] text-green-300 text-center pt-2">✓ 連線正常 · ${escapeHtml(elProvider.value)} · ${escapeHtml(modelLabel)}</div>
         `;
       } catch (e) {
+        const isNb = elProvider.value === 'notebooklm';
+        const hint = isNb
+          ? '常見原因：(1) Endpoint URL 錯誤或後端未部署 (2) Shared Secret Token 不對 (3) 後端 NotebookLM cookie 過期 (4) DANCELIGHT_NOTEBOOK_ID 未設'
+          : '常見原因：(1) API Key 錯誤 (2) 模型名稱錯誤 (3) 帳戶額度用完 (4) Anthropic Claude 需要在請求時帶 dangerous-direct-browser-access header（已自動處理）';
         elTestChat.innerHTML = `
           <div class="flex justify-end"><div class="max-w-[80%] px-4 py-2.5 rounded-2xl rounded-br-sm bg-orange-500/15 border border-orange-500/30 text-sm">${escapeHtml(userPrompt)}</div></div>
           <div class="p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-sm text-red-300">
             <div class="font-bold mb-1">✗ 呼叫失敗</div>
             <div class="text-xs whitespace-pre-wrap">${escapeHtml(e.message || e)}</div>
-            <div class="text-[11px] text-gray-400 mt-2">常見原因：(1) API Key 錯誤 (2) 模型名稱錯誤 (3) 帳戶額度用完 (4) Anthropic Claude 需要在請求時帶 dangerous-direct-browser-access header（已自動處理）</div>
+            <div class="text-[11px] text-gray-400 mt-2">${hint}</div>
           </div>
         `;
       } finally {
