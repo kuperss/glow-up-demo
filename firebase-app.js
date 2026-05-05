@@ -1002,11 +1002,12 @@ export function renderChatMarkdown(text) {
 }
 
 export async function injectAIHelper() {
-  // 訪客模式不顯示
-  if (currentUserDoc && currentUserDoc.isGuest) return;
+  // 訪客模式也允許使用（A 方案）
   // 讀取設定
   const cfg = await getAIConfig();
-  if (!cfg.enabled || !cfg.apiKey) return;
+  // notebooklm 走自有後端，沒有 apiKey，改檢查 secretToken
+  const hasCredential = cfg.provider === 'notebooklm' ? !!cfg.secretToken : !!cfg.apiKey;
+  if (!cfg.enabled || !hasCredential) return;
   // 已注入過就不重複
   if (document.getElementById('aiHelperFab')) return;
   injectAIHelperCSS();
