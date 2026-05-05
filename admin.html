@@ -414,6 +414,11 @@
         <span>產品分類牆</span>
         <span class="ml-auto text-[10px] px-1.5 py-0.5 rounded bg-orange-500/30 text-orange-200">NEW</span>
       </a>
+      <a class="sidebar-link" data-page="flagship">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        <span>主打產品</span>
+        <span class="ml-auto text-[10px] px-1.5 py-0.5 rounded bg-orange-500/30 text-orange-200">AI</span>
+      </a>
       <a class="sidebar-link" data-page="ai">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12a4 4 0 0 1 8 0"/><circle cx="12" cy="10" r="1"/><path d="M12 14v4"/></svg>
         <span>AI 設定</span>
@@ -932,6 +937,37 @@
         </div>
       </section>
 
+      <!-- ===== FLAGSHIP PRODUCTS EDITOR ===== -->
+      <section id="page-flagship" class="page-section">
+        <div class="flex items-center justify-between mb-6">
+          <div>
+            <h2 class="text-2xl font-bold mb-1">主打產品</h2>
+            <div class="text-sm text-gray-500">編輯 products.html「9 必懂主打」翻面卡片 · 換 SKU + AI 自動生成卡片內容</div>
+          </div>
+          <div class="flex gap-2">
+            <button class="btn btn-ghost" id="flagshipResetBtn">重置為預設</button>
+            <button class="btn btn-primary" id="flagshipSaveBtn">儲存全部</button>
+          </div>
+        </div>
+
+        <div class="panel mb-6">
+          <div class="text-xs text-gray-400 p-3 rounded-lg bg-orange-500/5 border border-orange-500/15 flex items-start gap-2">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mt-0.5 flex-shrink-0 text-orange-400"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            <div class="leading-relaxed">
+              <strong class="text-orange-300">使用方式</strong>：每張卡可從 <strong>1,359 SKU</strong> 中搜尋換成另一支產品。換完後按 <strong>「✨ AI 生成內容」</strong> 讓 LLM 根據該產品規格自動生成 tag / 標題 / 描述 / 業務話術（需先到「AI 設定」啟用任一家 LLM）。所有欄位 AI 生成後仍可手動調整。
+              <span id="flagshipUpdatedAt" class="block mt-1 text-[10px] text-gray-500"></span>
+            </div>
+          </div>
+        </div>
+
+        <div id="flagshipCards" class="space-y-4"></div>
+        <div class="mt-6 flex items-center justify-end gap-3">
+          <span id="flagshipDirty" class="text-xs text-orange-300 hidden">● 有未儲存變更</span>
+          <span id="flagshipSaveMsg" class="text-xs"></span>
+          <button class="btn btn-primary" id="flagshipSaveBtn2">儲存全部</button>
+        </div>
+      </section>
+
       <!-- ===== RESOURCES ===== -->
       <section id="page-resources" class="page-section">
         <div class="flex items-center justify-between mb-6">
@@ -1292,6 +1328,7 @@
         quiz: ['ADMIN · QUIZ BANK', '題庫管理'],
         content: ['ADMIN · CONTENT CMS', '內容編輯'],
         categorymap: ['ADMIN · CATEGORY MAP', '產品分類牆'],
+        flagship: ['ADMIN · FLAGSHIP', '主打產品'],
         ai: ['ADMIN · AI CONFIG', 'AI 設定'],
         resources: ['ADMIN · RESOURCES', '資源庫'],
         analytics: ['ADMIN · ANALYTICS', '數據分析'],
@@ -2456,8 +2493,415 @@
       }
       renderCatEditor();
     });
+
+    // ===========================================================
+    // ===== 主打產品編輯器（9 必懂主打 + AI 生成）=====
+    // ===========================================================
+    const FLAGSHIP_TAGS = fb.FLAGSHIP_TAG_PRESETS || [];
+    const DEFAULT_FLAGSHIP = fb.DEFAULT_FLAGSHIP_PRODUCTS || { cards: [] };
+    const CATEGORY_OPTIONS = ['居家', '商業', '辦公', '學校', '工廠', '互聯', '戶外'];
+    const elFlagCards = document.getElementById('flagshipCards');
+    const elFlagSave = document.getElementById('flagshipSaveBtn');
+    const elFlagSave2 = document.getElementById('flagshipSaveBtn2');
+    const elFlagReset = document.getElementById('flagshipResetBtn');
+    const elFlagDirty = document.getElementById('flagshipDirty');
+    const elFlagSaveMsg = document.getElementById('flagshipSaveMsg');
+    const elFlagUpdated = document.getElementById('flagshipUpdatedAt');
+
+    let flagState = null;
+    let flagBaseline = null;
+    let allProducts = []; // products.json
+    let productsLoadPromise = null;
+
+    function loadAllProducts() {
+      if (productsLoadPromise) return productsLoadPromise;
+      productsLoadPromise = fetch('./products.json', { cache: 'force-cache' })
+        .then(r => r.ok ? r.json() : [])
+        .then(d => { allProducts = Array.isArray(d) ? d : []; return allProducts; })
+        .catch(e => { console.warn('products.json load failed', e); return []; });
+      return productsLoadPromise;
+    }
+
+    function findProductBySku(sku) {
+      if (!sku) return null;
+      return allProducts.find(p => (p['產品型號'] || '').toString().trim() === sku.toString().trim()) || null;
+    }
+
+    function flagDeepClone(o) { return JSON.parse(JSON.stringify(o)); }
+    function flagCheckDirty() {
+      const dirty = JSON.stringify(flagState) !== JSON.stringify(flagBaseline);
+      elFlagDirty.classList.toggle('hidden', !dirty);
+      return dirty;
+    }
+
+    function buildSkuSearch(idx, currentSku) {
+      const linked = findProductBySku(currentSku);
+      return `
+        <div class="flag-sku-row" data-idx="${idx}">
+          <label class="text-[11px] text-gray-500 block mb-1">產品 SKU（型號）</label>
+          <div class="relative">
+            <input type="text" class="form-input flag-sku-input" data-idx="${idx}" placeholder="搜尋型號／商品名稱…" value="${escapeHtml(currentSku || '')}" autocomplete="off">
+            <div class="flag-sku-results" data-idx="${idx}" style="display:none;"></div>
+          </div>
+          <div class="text-[11px] text-gray-400 mt-1" data-flag-product-name="${idx}">
+            ${linked ? `<span class="text-orange-300">✓ ${escapeHtml(linked['商品名稱'] || '')}</span> · ${escapeHtml(linked['類型'] || '')}` : '<span class="text-yellow-400">⚠ 未對應到產品庫的 SKU</span>'}
+          </div>
+        </div>`;
+    }
+
+    function buildCategoriesCheckboxes(idx, current) {
+      const cur = Array.isArray(current) ? current : [];
+      return CATEGORY_OPTIONS.map(c => `
+        <label class="inline-flex items-center gap-1 mr-3 text-xs cursor-pointer">
+          <input type="checkbox" class="flag-cat-chk" data-idx="${idx}" data-cat="${escapeHtml(c)}" ${cur.includes(c) ? 'checked' : ''}>
+          <span>${escapeHtml(c)}</span>
+        </label>`).join('');
+    }
+
+    function buildTagDatalist() {
+      return `<datalist id="flagshipTagList">${FLAGSHIP_TAGS.map(t => `<option value="${escapeHtml(t)}">`).join('')}</datalist>`;
+    }
+
+    function buildSpecsEditor(idx, specs) {
+      const arr = Array.isArray(specs) ? specs : [];
+      const rows = arr.map((s, si) => `
+        <div class="flex items-center gap-2 mb-1.5" data-idx="${idx}" data-si="${si}">
+          <input type="text" class="form-input flag-spec-label" data-idx="${idx}" data-si="${si}" value="${escapeHtml(s.label || '')}" placeholder="瓦數" style="flex:1; max-width:160px;">
+          <input type="text" class="form-input flag-spec-value" data-idx="${idx}" data-si="${si}" value="${escapeHtml(s.value || '')}" placeholder="8W" style="flex:1;">
+          <button class="btn btn-ghost text-xs flag-spec-del" data-idx="${idx}" data-si="${si}" style="color:#fca5a5;">✕</button>
+        </div>`).join('');
+      return rows + `
+        <button class="btn btn-ghost text-xs mt-1 flag-spec-add" data-idx="${idx}">+ 新增規格列</button>`;
+    }
+
+    function renderFlagEditor() {
+      if (!flagState) return;
+      const list = flagState.cards || [];
+      elFlagCards.innerHTML = buildTagDatalist() + list.map((c, idx) => `
+        <div class="panel" data-flag-idx="${idx}">
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-lg bg-orange-500/15 border border-orange-500/30 flex items-center justify-center text-orange-300 font-bold text-sm">${idx + 1}</div>
+              <div>
+                <div class="font-bold text-sm">${escapeHtml(c.shortName || c.title?.replace(/<br>/g,' ') || '（未命名）')}</div>
+                <div class="text-[11px] text-gray-500 font-mono-en">${escapeHtml(c.sku || '—')}</div>
+              </div>
+            </div>
+            <div class="flex gap-2">
+              <button class="btn btn-ghost text-xs flag-ai-btn" data-idx="${idx}" title="呼叫 LLM 自動生成卡片內容">✨ AI 生成內容</button>
+              <button class="btn btn-ghost text-xs flag-up-btn" data-idx="${idx}" ${idx === 0 ? 'disabled' : ''}>↑</button>
+              <button class="btn btn-ghost text-xs flag-dn-btn" data-idx="${idx}" ${idx === list.length - 1 ? 'disabled' : ''}>↓</button>
+            </div>
+          </div>
+
+          <div class="grid md:grid-cols-2 gap-3 mb-3">
+            ${buildSkuSearch(idx, c.sku)}
+            <div>
+              <label class="text-[11px] text-gray-500 block mb-1">情境標籤 tag（前面卡左上）</label>
+              <input type="text" class="form-input flag-tag-input" list="flagshipTagList" data-idx="${idx}" value="${escapeHtml(c.tag || '')}" placeholder="例：旗艦．FLAGSHIP">
+            </div>
+          </div>
+
+          <div class="grid md:grid-cols-2 gap-3 mb-3">
+            <div>
+              <label class="text-[11px] text-gray-500 block mb-1">英文 eyebrow（小標）</label>
+              <input type="text" class="form-input flag-eyebrow-input" data-idx="${idx}" value="${escapeHtml(c.eyebrow || '')}" placeholder="MAGNETIC TRACK">
+            </div>
+            <div>
+              <label class="text-[11px] text-gray-500 block mb-1">前面卡角落 pill（賣點關鍵字）</label>
+              <input type="text" class="form-input flag-pill-input" data-idx="${idx}" value="${escapeHtml(c.pillText || '')}" placeholder="商業空間神器">
+            </div>
+          </div>
+
+          <div class="grid md:grid-cols-2 gap-3 mb-3">
+            <div>
+              <label class="text-[11px] text-gray-500 block mb-1">標題（中文，可用 &lt;br&gt; 換行）</label>
+              <input type="text" class="form-input flag-title-input" data-idx="${idx}" value="${escapeHtml(c.title || '')}" placeholder="拉斐爾&lt;br&gt;超薄磁吸軌道">
+            </div>
+            <div>
+              <label class="text-[11px] text-gray-500 block mb-1">後面卡的短標題（不換行）</label>
+              <input type="text" class="form-input flag-shortname-input" data-idx="${idx}" value="${escapeHtml(c.shortName || '')}" placeholder="拉斐爾 超薄磁吸軌道">
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="text-[11px] text-gray-500 block mb-1">描述 blurb（前面卡 2-3 句）</label>
+            <textarea class="form-input flag-blurb-input" data-idx="${idx}" rows="2" placeholder="6 公釐超薄...">${escapeHtml(c.blurb || '')}</textarea>
+          </div>
+
+          <div class="mb-3">
+            <label class="text-[11px] text-gray-500 block mb-1">業務話術 pitch（後面卡底部）</label>
+            <input type="text" class="form-input flag-pitch-input" data-idx="${idx}" value="${escapeHtml(c.pitch || '')}" placeholder="「設計師不用拆天花，6 釐米直接貼」">
+          </div>
+
+          <div class="mb-3">
+            <label class="text-[11px] text-gray-500 block mb-1">應用場域分類（前端篩選用，可多選）</label>
+            <div>${buildCategoriesCheckboxes(idx, c.categories)}</div>
+          </div>
+
+          <div class="mb-1">
+            <label class="text-[11px] text-gray-500 block mb-1">規格表（後面卡 SPEC SHEET）</label>
+            <div data-flag-specs="${idx}">${buildSpecsEditor(idx, c.specs)}</div>
+          </div>
+        </div>`).join('');
+
+      bindFlagEvents();
+      flagCheckDirty();
+    }
+
+    function bindFlagEvents() {
+      // SKU input + autocomplete
+      elFlagCards.querySelectorAll('.flag-sku-input').forEach(inp => {
+        let timer = null;
+        inp.addEventListener('input', (e) => {
+          const idx = +e.target.dataset.idx;
+          const q = e.target.value.trim();
+          flagState.cards[idx].sku = q;
+          flagCheckDirty();
+          clearTimeout(timer);
+          timer = setTimeout(() => showSkuSuggestions(idx, q), 200);
+        });
+        inp.addEventListener('blur', () => {
+          setTimeout(() => {
+            elFlagCards.querySelectorAll('.flag-sku-results').forEach(r => r.style.display = 'none');
+          }, 200);
+        });
+      });
+      // Tag / eyebrow / pill / title / shortName / blurb / pitch
+      const fields = [
+        ['.flag-tag-input', 'tag'], ['.flag-eyebrow-input', 'eyebrow'],
+        ['.flag-pill-input', 'pillText'], ['.flag-title-input', 'title'],
+        ['.flag-shortname-input', 'shortName'], ['.flag-blurb-input', 'blurb'],
+        ['.flag-pitch-input', 'pitch']
+      ];
+      fields.forEach(([sel, key]) => {
+        elFlagCards.querySelectorAll(sel).forEach(el => {
+          el.addEventListener('input', (e) => {
+            flagState.cards[+e.target.dataset.idx][key] = e.target.value;
+            flagCheckDirty();
+          });
+        });
+      });
+      // Category checkboxes
+      elFlagCards.querySelectorAll('.flag-cat-chk').forEach(chk => {
+        chk.addEventListener('change', (e) => {
+          const idx = +e.target.dataset.idx;
+          const cat = e.target.dataset.cat;
+          const arr = flagState.cards[idx].categories || [];
+          if (e.target.checked) { if (!arr.includes(cat)) arr.push(cat); }
+          else { const i = arr.indexOf(cat); if (i > -1) arr.splice(i, 1); }
+          flagState.cards[idx].categories = arr;
+          flagCheckDirty();
+        });
+      });
+      // Spec rows
+      elFlagCards.querySelectorAll('.flag-spec-label').forEach(inp => {
+        inp.addEventListener('input', (e) => {
+          flagState.cards[+e.target.dataset.idx].specs[+e.target.dataset.si].label = e.target.value;
+          flagCheckDirty();
+        });
+      });
+      elFlagCards.querySelectorAll('.flag-spec-value').forEach(inp => {
+        inp.addEventListener('input', (e) => {
+          flagState.cards[+e.target.dataset.idx].specs[+e.target.dataset.si].value = e.target.value;
+          flagCheckDirty();
+        });
+      });
+      elFlagCards.querySelectorAll('.flag-spec-del').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const idx = +e.currentTarget.dataset.idx;
+          const si = +e.currentTarget.dataset.si;
+          flagState.cards[idx].specs.splice(si, 1);
+          renderFlagEditor();
+        });
+      });
+      elFlagCards.querySelectorAll('.flag-spec-add').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const idx = +e.currentTarget.dataset.idx;
+          if (!flagState.cards[idx].specs) flagState.cards[idx].specs = [];
+          flagState.cards[idx].specs.push({ label: '', value: '' });
+          renderFlagEditor();
+        });
+      });
+      // ↑↓ reorder
+      elFlagCards.querySelectorAll('.flag-up-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const idx = +e.currentTarget.dataset.idx;
+          if (idx === 0) return;
+          const arr = flagState.cards;
+          [arr[idx-1], arr[idx]] = [arr[idx], arr[idx-1]];
+          renderFlagEditor();
+        });
+      });
+      elFlagCards.querySelectorAll('.flag-dn-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const idx = +e.currentTarget.dataset.idx;
+          const arr = flagState.cards;
+          if (idx >= arr.length - 1) return;
+          [arr[idx+1], arr[idx]] = [arr[idx], arr[idx+1]];
+          renderFlagEditor();
+        });
+      });
+      // AI generate
+      elFlagCards.querySelectorAll('.flag-ai-btn').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          const idx = +e.currentTarget.dataset.idx;
+          const sku = flagState.cards[idx].sku;
+          const prod = findProductBySku(sku);
+          if (!prod) {
+            alert('請先選好對應到產品庫的 SKU 再生成 AI 內容');
+            return;
+          }
+          const orig = btn.innerHTML;
+          btn.disabled = true;
+          btn.innerHTML = '<span class="animate-pulse">生成中…</span>';
+          try {
+            const generated = await fb.generateFlagshipCard(prod);
+            // Merge — 保留 sku，覆蓋其他欄位
+            const card = flagState.cards[idx];
+            if (generated.tag) card.tag = generated.tag;
+            if (generated.eyebrow) card.eyebrow = generated.eyebrow;
+            if (generated.title) card.title = generated.title;
+            if (generated.shortName) card.shortName = generated.shortName;
+            if (generated.blurb) card.blurb = generated.blurb;
+            if (generated.pillText) card.pillText = generated.pillText;
+            if (generated.pitch) card.pitch = generated.pitch;
+            if (Array.isArray(generated.categories) && generated.categories.length) card.categories = generated.categories;
+            // 規格自動從產品資料填
+            const specs = [];
+            const addSpec = (label, val) => { if (val) specs.push({ label, value: String(val) }); };
+            addSpec('瓦數', prod['消耗電力']);
+            addSpec('色溫', prod['色溫']);
+            addSpec('光通量', prod['光通量']);
+            addSpec('演色性 Ra', prod['演色性']);
+            addSpec('光束角', prod['光束角'] || prod['發光角度']);
+            if (prod['IP等級']) addSpec('防護等級', 'IP' + prod['IP等級']);
+            addSpec('尺寸', prod['尺寸']);
+            addSpec('壽命', prod['平均壽命']);
+            if (specs.length) card.specs = specs;
+            renderFlagEditor();
+            elFlagSaveMsg.innerHTML = `<span class="text-green-300">✓ 第 ${idx+1} 張卡 AI 生成完成（記得按「儲存全部」）</span>`;
+            setTimeout(() => { elFlagSaveMsg.textContent = ''; }, 4000);
+          } catch (err) {
+            console.error(err);
+            alert('AI 生成失敗：' + (err.message || err) + '\n（請確認 AI 設定已填入有效 API Key 並啟用）');
+          } finally {
+            btn.disabled = false;
+            btn.innerHTML = orig;
+          }
+        });
+      });
+    }
+
+    function showSkuSuggestions(idx, q) {
+      const wrap = elFlagCards.querySelector(`.flag-sku-results[data-idx="${idx}"]`);
+      const nameEl = elFlagCards.querySelector(`[data-flag-product-name="${idx}"]`);
+      if (!wrap) return;
+      if (!q || q.length < 2) {
+        wrap.style.display = 'none';
+        const linked = findProductBySku(flagState.cards[idx].sku);
+        if (nameEl) nameEl.innerHTML = linked
+          ? `<span class="text-orange-300">✓ ${escapeHtml(linked['商品名稱'] || '')}</span> · ${escapeHtml(linked['類型'] || '')}`
+          : '<span class="text-yellow-400">⚠ 未對應到產品庫的 SKU</span>';
+        return;
+      }
+      const ql = q.toLowerCase();
+      const matches = allProducts.filter(p => {
+        const m = (p['產品型號'] || '').toString().toLowerCase();
+        const n = (p['商品名稱'] || '').toString().toLowerCase();
+        return m.includes(ql) || n.includes(ql);
+      }).slice(0, 8);
+      if (matches.length === 0) {
+        wrap.innerHTML = '<div class="flag-sku-empty">沒有符合的產品</div>';
+        wrap.style.display = 'block';
+        return;
+      }
+      wrap.innerHTML = matches.map(p => `
+        <div class="flag-sku-suggest" data-idx="${idx}" data-sku="${escapeHtml(p['產品型號'] || '')}">
+          <div class="text-xs font-mono-en text-orange-300">${escapeHtml(p['產品型號'] || '')}</div>
+          <div class="text-sm">${escapeHtml(p['商品名稱'] || '')}</div>
+          <div class="text-[10px] text-gray-500">${escapeHtml(p['類型'] || '')} · ${escapeHtml(p['消耗電力'] || '')} · ${escapeHtml(p['色溫'] || '')}</div>
+        </div>`).join('');
+      wrap.style.display = 'block';
+      wrap.querySelectorAll('.flag-sku-suggest').forEach(el => {
+        el.addEventListener('mousedown', (e) => {
+          e.preventDefault();
+          const i = +el.dataset.idx;
+          const sku = el.dataset.sku;
+          flagState.cards[i].sku = sku;
+          renderFlagEditor();
+        });
+      });
+    }
+
+    async function saveFlagship() {
+      // 簡單驗證
+      for (let i = 0; i < flagState.cards.length; i++) {
+        const c = flagState.cards[i];
+        if (!c.sku || !c.sku.trim()) {
+          elFlagSaveMsg.innerHTML = `<span class="text-red-300">✗ 第 ${i+1} 張卡片 SKU 為空</span>`;
+          return;
+        }
+        if (!c.title || !c.title.trim()) {
+          elFlagSaveMsg.innerHTML = `<span class="text-red-300">✗ 第 ${i+1} 張卡片標題為空</span>`;
+          return;
+        }
+      }
+      elFlagSaveMsg.innerHTML = '<span class="text-gray-400">儲存中…</span>';
+      [elFlagSave, elFlagSave2].forEach(b => b.disabled = true);
+      try {
+        await fb.saveFlagshipProducts({ cards: flagState.cards });
+        flagBaseline = flagDeepClone(flagState);
+        elFlagSaveMsg.innerHTML = '<span class="text-green-300">✓ 已儲存，products.html 已即時更新</span>';
+        setTimeout(() => { elFlagSaveMsg.textContent = ''; }, 3000);
+        flagCheckDirty();
+      } catch (e) {
+        elFlagSaveMsg.innerHTML = `<span class="text-red-300">✗ ${escapeHtml(e.message || e)}</span>`;
+      } finally {
+        [elFlagSave, elFlagSave2].forEach(b => b.disabled = false);
+      }
+    }
+    elFlagSave.addEventListener('click', saveFlagship);
+    elFlagSave2.addEventListener('click', saveFlagship);
+
+    elFlagReset.addEventListener('click', () => {
+      if (!confirm('將 9 主打卡片重置為系統預設值？（仍需按「儲存全部」才會寫回 Firestore）')) return;
+      flagState = flagDeepClone(DEFAULT_FLAGSHIP);
+      renderFlagEditor();
+    });
+
+    // 載入 products.json + 訂閱 Firestore
+    loadAllProducts();
+    fb.onFlagshipProductsUpdate((data) => {
+      const fresh = (data && Array.isArray(data.cards) && data.cards.length) ? { cards: data.cards } : flagDeepClone(DEFAULT_FLAGSHIP);
+      flagState = flagDeepClone(fresh);
+      flagBaseline = flagDeepClone(fresh);
+      if (data && data.updatedAt) {
+        elFlagUpdated.textContent = '上次更新：' + fmtTime(data.updatedAt) + (data.updatedBy ? ' · ' + data.updatedBy : '');
+      } else {
+        elFlagUpdated.textContent = '尚未自訂過 · 目前顯示系統預設 9 張卡片';
+      }
+      renderFlagEditor();
+    });
   });
 </script>
+
+<style>
+  /* 主打產品 SKU 搜尋下拉 */
+  .flag-sku-results {
+    position: absolute; top: 100%; left: 0; right: 0; z-index: 50;
+    margin-top: 4px; max-height: 280px; overflow-y: auto;
+    background: rgba(15,15,18,0.98); backdrop-filter: blur(12px);
+    border: 1px solid rgba(245,130,32,0.3); border-radius: 8px;
+    box-shadow: 0 12px 40px -8px rgba(0,0,0,0.6);
+  }
+  .flag-sku-suggest {
+    padding: 8px 12px; cursor: pointer; border-bottom: 1px solid rgba(38,38,44,0.5);
+  }
+  .flag-sku-suggest:last-child { border-bottom: none; }
+  .flag-sku-suggest:hover { background: rgba(245,130,32,0.1); }
+  .flag-sku-empty { padding: 16px; text-align: center; color: #6B6B75; font-size: 12px; }
+</style>
 
 </body>
 </html>

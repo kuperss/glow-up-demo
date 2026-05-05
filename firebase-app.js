@@ -195,6 +195,11 @@ export function requireAuth(opts = {}) {
         async saveCategoryMap() { alert('訪客模式：無法儲存分類牆變更'); },
         onCategoryMapUpdate(cb) { cb(null); return () => {}; },
         renderCatIcon, CAT_ICONS, CAT_ICON_LABELS, CATEGORY_GROUPS, DEFAULT_CATEGORY_MAP,
+        async getFlagshipProducts() { return null; },
+        async saveFlagshipProducts() { alert('訪客模式：無法儲存主打產品變更'); },
+        onFlagshipProductsUpdate(cb) { cb(null); return () => {}; },
+        async generateFlagshipCard() { throw new Error('訪客模式：AI 功能不可用，請登入正式帳號'); },
+        DEFAULT_FLAGSHIP_PRODUCTS, FLAGSHIP_TAG_PRESETS,
         async getAIConfig() { return { provider: 'gemini', apiKey: '', model: '', systemPrompt: '', enabled: false }; },
         async saveAIConfig() { alert('訪客模式：無法儲存 AI 設定'); },
         onAIConfigUpdate(cb) { cb({ provider: 'gemini', apiKey: '', model: '', systemPrompt: '', enabled: false }); return () => {}; },
@@ -235,6 +240,8 @@ export function requireAuth(opts = {}) {
         listSiteContent, saveContentValue, onSiteContentUpdate, applySiteContent,
         getCategoryMap, saveCategoryMap, onCategoryMapUpdate,
         renderCatIcon, CAT_ICONS, CAT_ICON_LABELS, CATEGORY_GROUPS, DEFAULT_CATEGORY_MAP,
+        getFlagshipProducts, saveFlagshipProducts, onFlagshipProductsUpdate, generateFlagshipCard,
+        DEFAULT_FLAGSHIP_PRODUCTS, FLAGSHIP_TAG_PRESETS,
         getAIConfig, saveAIConfig, onAIConfigUpdate, callAI, getProviderDefaults,
         injectAIHelper
       };
@@ -674,6 +681,202 @@ export function onCategoryMapUpdate(cb) {
   return onSnapshot(doc(db, 'siteContent', 'categoryMap'), snap => {
     cb(snap.exists() ? snap.data() : null);
   }, err => console.warn('categoryMap onSnapshot err', err));
+}
+
+// ========== 9 必懂主打 CMS（flagshipProducts）==========
+// 每張卡片儲存 sku（對應 products.json）+ 全部展示文案 + 規格表
+// AI 生成功能：給定 SKU，呼叫 LLM 自動生成卡片內容（tag/eyebrow/title/blurb/pillText/pitch）
+// admin 可以從 1,359 SKU 搜尋換掉任一張，前端 products.html 即時同步
+
+export const FLAGSHIP_TAG_PRESETS = [
+  '旗艦．FLAGSHIP', '走量．VOLUME', '商業．COMMERCIAL', '舒眩．COMFORT',
+  '戶外．OUTDOOR', '重型．INDUSTRIAL', '氛圍．AMBIENCE', '辦公．OFFICE',
+  '支架．BRACKET', '互聯．DIGITAL', '學校．SCHOOL', '工廠．FACTORY'
+];
+
+export const DEFAULT_FLAGSHIP_PRODUCTS = {
+  cards: [
+    {
+      sku: 'D-UTMTTR8N', categories: ['商業'],
+      tag: '旗艦．FLAGSHIP', eyebrow: 'MAGNETIC TRACK',
+      title: '拉斐爾<br>超薄磁吸軌道', shortName: '拉斐爾 超薄磁吸軌道',
+      blurb: '6 公釐超薄、不開槽即可安裝。磁吸結構讓燈具角度雙手就能調，是設計師最愛的「商業空間神器」。',
+      pillText: 'DC 24V 系統', pitch: '「設計師不用拆天花，6 釐米直接貼」',
+      specs: [
+        { label: '瓦數', value: '8W' }, { label: '色溫', value: '4000K' },
+        { label: '光通量', value: '600 lm' }, { label: '演色性 Ra', value: '90；R9 >50' },
+        { label: '光束角', value: '36°' }, { label: '尺寸', value: '直徑44*寬120*長161mm' },
+        { label: '壽命', value: '15000小時' }
+      ]
+    },
+    {
+      sku: 'D-21DOP25NR2', categories: ['居家'],
+      tag: '走量．VOLUME', eyebrow: 'SOL DOWNLIGHT',
+      title: '索爾<br>崁燈', shortName: '索爾 崁燈',
+      blurb: '從 9 到 21 公分多種尺寸，一體式設計、護眼、好施工。電料行最常推薦的吸光主力。',
+      pillText: '電料行最愛', pitch: '「九成案場都用得上的安全牌」',
+      specs: [
+        { label: '瓦數', value: '25W' }, { label: '色溫', value: '4000K' },
+        { label: '光通量', value: '2500 lm' }, { label: '演色性 Ra', value: '≧ 80' },
+        { label: '光束角', value: '120 °' }, { label: '尺寸', value: '直徑245*高100 mm' },
+        { label: '壽命', value: '15000小時' }
+      ]
+    },
+    {
+      sku: 'D-15DOO12NR3', categories: ['居家', '商業'],
+      tag: '商業．COMMERCIAL', eyebrow: 'ODIN DOWNLIGHT',
+      title: '奧丁<br>極簡崁燈', shortName: '奧丁 極簡崁燈',
+      blurb: '7.5 / 9 / 11 / 15 公分極簡無框。隱形等級設計，連接縫都看不到，商空、精品店、設計師最愛。',
+      pillText: '極簡無邊框', pitch: '「天花板上看不到燈，只看到光」',
+      specs: [
+        { label: '瓦數', value: '12W' }, { label: '色溫', value: '4000K' },
+        { label: '光通量', value: '1200 lm' }, { label: '演色性 Ra', value: '80' },
+        { label: '光束角', value: '140°' }, { label: '尺寸', value: '直徑170*高28 mm' },
+        { label: '壽命', value: '15000小時' }
+      ]
+    },
+    {
+      sku: 'D-7DOR12N', categories: ['居家'],
+      tag: '舒眩．COMFORT', eyebrow: 'MARS ANTI-GLARE',
+      title: '馬爾<br>防眩崁燈', shortName: '馬爾 防眩崁燈',
+      blurb: '深防眩設計、UGR 低、光源完全藏進燈杯。父母長輩、書房、小孩房閱讀的最佳選擇。',
+      pillText: 'UGR 防眩', pitch: '「給最在意眼睛的長輩用」',
+      specs: [
+        { label: '瓦數', value: '12W' }, { label: '色溫', value: '4000K' },
+        { label: '光通量', value: '890 lm' }, { label: '演色性 Ra', value: '90' },
+        { label: '光束角', value: '30°' }, { label: '尺寸', value: '直徑81*高82 mm' },
+        { label: '壽命', value: '15000小時' }
+      ]
+    },
+    {
+      sku: 'OD-FLZ20DR1', categories: ['戶外'],
+      tag: '戶外．OUTDOOR', eyebrow: 'ZEUS FLOOD',
+      title: '宙斯<br>戶外泛光燈', shortName: '宙斯 戶外泛光燈',
+      blurb: '10 / 20 / 50W 多瓦數選擇，IP66 戶外等級，招牌、廣告燈箱、庭院投射首選。',
+      pillText: 'IP66 戶外', pitch: '「IP66 規格直接報，工程商秒懂」',
+      specs: [
+        { label: '瓦數', value: '20W' }, { label: '色溫', value: '6500K' },
+        { label: '光通量', value: '2000 lm' }, { label: '演色性 Ra', value: '80' },
+        { label: '光束角', value: '140°' }, { label: '防護等級', value: 'IP66' },
+        { label: '尺寸', value: '長190*寬48*高225 mm' }
+      ]
+    },
+    {
+      sku: 'E-FLDB100D/2R2', categories: ['戶外', '工廠'],
+      tag: '重型．INDUSTRIAL', eyebrow: 'APOLLO INDUSTRIAL',
+      title: '阿波羅<br>大瓦數泛光燈', shortName: '阿波羅 大瓦數泛光燈',
+      blurb: '100 / 150 / 200W 大瓦數泛光，廠房、停車場、球場、大型外牆投射的主力。',
+      pillText: '工業重型', pitch: '「廠房 6 公尺挑高，一支阿波羅打到底」',
+      specs: [
+        { label: '瓦數', value: '100W' }, { label: '色溫', value: '5700K' },
+        { label: '光通量', value: '11500 lm' }, { label: '演色性 Ra', value: '70' },
+        { label: '光束角', value: '150°' }, { label: '防護等級', value: 'IP66' },
+        { label: '尺寸', value: '長262*寬47*高262 mm' }
+      ]
+    },
+    {
+      sku: 'D-35NA24V-RGBDW', categories: ['互聯', '商業'],
+      tag: '氛圍．AMBIENCE', eyebrow: 'DANCE COLOR',
+      title: '舞色<br>幻彩軟條燈', shortName: '舞色 幻彩軟條燈',
+      blurb: '5 米 RGB+DW 全彩，2700~6500K 調色，遙控+APP 雙控。網美店、餐酒館、咖啡廳氛圍救星。',
+      pillText: 'RGB+DW 全彩', pitch: '「老闆，氛圍不到位是因為沒有 RGB」',
+      specs: [
+        { label: '瓦數', value: '8W（每米）' }, { label: '色溫', value: '2700~6500K、RGB' },
+        { label: '光通量', value: '800 lm/米' }, { label: '演色性 Ra', value: '80' },
+        { label: '尺寸', value: '長5000*寬10*高1.3 mm' }, { label: '壽命', value: '15000小時' }
+      ]
+    },
+    {
+      sku: 'D-PD40NR7', categories: ['辦公', '學校'],
+      tag: '辦公．OFFICE', eyebrow: 'PANEL LIGHT',
+      title: '柔光平板燈<br>2×2 尺', shortName: '柔光平板燈 2×2 尺',
+      blurb: '辦公室、會議室、學校、診所主力光源。一片光均勻，不刺眼。多瓦數可選。',
+      pillText: '辦公主力', pitch: '「辦公室一場下來，平板燈最划算」',
+      specs: [
+        { label: '瓦數', value: '40W' }, { label: '色溫', value: '4000K' },
+        { label: '光通量', value: '4000 lm' }, { label: '演色性 Ra', value: '80' },
+        { label: '光束角', value: '160°' }, { label: '尺寸', value: '長600*寬600*高32 mm' },
+        { label: '壽命', value: '15000小時' }
+      ]
+    },
+    {
+      sku: 'D-T5BA1-NR10', categories: ['辦公', '居家'],
+      tag: '支架．BRACKET', eyebrow: 'T5 STRIP',
+      title: 'T5 一體式<br>支架燈', shortName: 'T5 一體式 支架燈',
+      blurb: '1 / 2 / 3 / 4 尺四種長度，廚房、工作檯、層板、櫥櫃下最好施工的補光神器。',
+      pillText: '走量神器', pitch: '「廚房層板補光，T5 一體式裝完就完事」',
+      specs: [
+        { label: '瓦數', value: '5W' }, { label: '色溫', value: '4000K' },
+        { label: '光通量', value: '575 lm' }, { label: '演色性 Ra', value: '80' },
+        { label: '光束角', value: '210°' }, { label: '尺寸', value: '長312*寬26*高37 mm' },
+        { label: '壽命', value: '15000小時' }
+      ]
+    }
+  ]
+};
+
+export async function getFlagshipProducts() {
+  try {
+    const snap = await getDoc(doc(db, 'siteContent', 'flagshipProducts'));
+    if (snap.exists()) return snap.data();
+  } catch(e) { console.warn('getFlagshipProducts failed', e); }
+  return null;
+}
+
+export async function saveFlagshipProducts(data) {
+  await setDoc(doc(db, 'siteContent', 'flagshipProducts'), {
+    type: 'flagshipProducts',
+    cards: data.cards || [],
+    updatedAt: serverTimestamp(),
+    updatedBy: (auth.currentUser && auth.currentUser.email) || 'unknown'
+  });
+}
+
+export function onFlagshipProductsUpdate(cb) {
+  return onSnapshot(doc(db, 'siteContent', 'flagshipProducts'), snap => {
+    cb(snap.exists() ? snap.data() : null);
+  }, err => console.warn('flagshipProducts onSnapshot err', err));
+}
+
+// AI 生成主打卡內容：給定 products.json 的單筆產品資料，回傳 {tag,eyebrow,title,blurb,pillText,pitch,categories}
+export async function generateFlagshipCard(productData) {
+  const prompt = `你是舞光業務新人訓練系統的內容編輯助手。給定下面這支產品的完整規格資料，生成一張「9 必懂主打」翻面卡片的文案內容。
+
+產品資料：
+商品名稱：${productData['商品名稱'] || ''}
+產品型號：${productData['產品型號'] || ''}
+類型：${productData['類型'] || ''}
+瓦數：${productData['消耗電力'] || ''}
+色溫：${productData['色溫'] || ''}
+光通量：${productData['光通量'] || ''}
+演色性：${productData['演色性'] || ''}
+適用場景：${Array.isArray(productData['適用場景']) ? productData['適用場景'].join('、') : ''}
+使用用途：${Array.isArray(productData['使用用途']) ? productData['使用用途'].join('、') : ''}
+銷售切入點：${Array.isArray(productData['銷售切入點']) ? productData['銷售切入點'].join('、') : ''}
+建議客群：${Array.isArray(productData['建議客群']) ? productData['建議客群'].join('、') : ''}
+
+請依下列規範產出結果，**只回 JSON、不要 markdown code block、不要任何前後說明**：
+{
+  "tag": "情境標籤（XX．ENGLISH 格式，例：旗艦．FLAGSHIP / 商業．COMMERCIAL / 走量．VOLUME / 戶外．OUTDOOR / 辦公．OFFICE / 重型．INDUSTRIAL / 氛圍．AMBIENCE / 舒眩．COMFORT / 支架．BRACKET）",
+  "eyebrow": "英文短名 / 全大寫 / 1-3 字（例：MAGNETIC TRACK、SOL DOWNLIGHT、PANEL LIGHT）",
+  "title": "中文短名稱 / 中間用 <br> 換行 / 不超過 12 字（例：拉斐爾<br>超薄磁吸軌道）",
+  "shortName": "中文短名稱 不換行版（例：拉斐爾 超薄磁吸軌道）",
+  "blurb": "2-3 句口語業務介紹，強調賣點與情境，60~80 字",
+  "pillText": "前面卡角落賣點關鍵字 / 6 字內（例：商業空間神器 / 電料行最愛 / IP66 戶外）",
+  "pitch": "業務記憶話術 / 引號包起來 / 不超過 30 字（例：「設計師不用拆天花，6 釐米直接貼」）",
+  "categories": ["從這 7 個選 1-2 個：居家、商業、辦公、學校、工廠、互聯、戶外"]
+}`;
+
+  const reply = await callAI({ messages: [{ role: 'user', content: prompt }] });
+  // 嘗試解析 JSON（防 markdown 包裹）
+  let cleaned = String(reply || '').trim();
+  // 去除 ```json ... ``` 包裹
+  cleaned = cleaned.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/i, '');
+  const parsed = JSON.parse(cleaned);
+  // 防呆：確保 categories 是陣列
+  if (typeof parsed.categories === 'string') parsed.categories = [parsed.categories];
+  if (!Array.isArray(parsed.categories)) parsed.categories = [];
+  return parsed;
 }
 
 // ========== AI 浮動助教（學員端）==========
