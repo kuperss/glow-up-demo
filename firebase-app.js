@@ -243,7 +243,7 @@ export function requireAuth(opts = {}) {
         getFlagshipProducts, saveFlagshipProducts, onFlagshipProductsUpdate, generateFlagshipCard,
         DEFAULT_FLAGSHIP_PRODUCTS, FLAGSHIP_TAG_PRESETS,
         getAIConfig, saveAIConfig, onAIConfigUpdate, callAI, getProviderDefaults,
-        injectAIHelper
+        injectAIHelper, renderChatMarkdown
       };
       // 自動套用 siteContent 覆蓋
       applySiteContent();
@@ -962,11 +962,39 @@ function injectAIHelperCSS() {
       color: #FFA050; cursor: pointer; transition: all 0.2s;
     }
     .ai-helper-suggestion:hover { background: rgba(245,130,32,0.15); border-color: rgba(245,130,32,0.4); }
+    /* Markdown rendering inside chat bubbles */
+    .ai-chat-bubble strong { color: #FFD27A; font-weight: 600; }
+    .ai-chat-bubble .md-h { font-weight: 700; color: #FFD27A; margin: 6px 0 2px; font-size: 13.5px; }
+    .ai-chat-bubble .md-li { padding-left: 14px; position: relative; margin: 2px 0; }
+    .ai-chat-bubble .md-li::before { content: '·'; position: absolute; left: 4px; color: #F58220; font-weight: 700; }
+    .ai-chat-bubble .md-num { padding-left: 14px; margin: 2px 0; }
+    .ai-chat-bubble .md-cite { color: #6B6B75; font-size: 10px; margin: 0 1px; vertical-align: super; }
     @media (max-width: 480px) {
       .ai-helper-panel { width: calc(100vw - 16px); right: 8px; bottom: 80px; height: 70vh; }
     }
   `;
   document.head.appendChild(s);
+}
+
+// 把 NotebookLM / LLM 回覆的 markdown 轉成 chat-friendly HTML
+// 不引入完整 markdown parser；只處理常見 4 種：粗體、標題、列表、引用標號
+export function renderChatMarkdown(text) {
+  if (!text) return '';
+  // 1. HTML escape
+  let h = String(text).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  // 2. 引用標號 [1] [2-3] → 縮小灰字上標（讓答覆看起來更專業不刺眼）
+  h = h.replace(/\[(\d+(?:[-,\s]\d+)*)\]/g, '<sup class="md-cite">[$1]</sup>');
+  // 3. 標題 ### / ## / # → 同 .md-h
+  h = h.replace(/^#{1,4}\s+(.+)$/gm, '<div class="md-h">$1</div>');
+  // 4. **bold** → <strong>
+  h = h.replace(/\*\*([^*\n]+)\*\*/g, '<strong>$1</strong>');
+  // 5. 列表項：行首 * 或 - 加空格
+  h = h.replace(/^[\*\-]\s+(.+)$/gm, '<div class="md-li">$1</div>');
+  // 6. 編號列表 1. 2. → 保留數字
+  h = h.replace(/^(\d+)\.\s+(.+)$/gm, '<div class="md-num"><strong>$1.</strong> $2</div>');
+  // 7. 換行：兩個換行 → 段落間距，單一換行 → <br>
+  h = h.replace(/\n{2,}/g, '<div style="height:6px"></div>').replace(/\n/g, '<br>');
+  return h;
 }
 
 export async function injectAIHelper() {
@@ -983,7 +1011,7 @@ export async function injectAIHelper() {
   fab.id = 'aiHelperFab';
   fab.className = 'ai-helper-fab';
   fab.title = '舞光戰將的 AI 助教';
-  fab.innerHTML = `<img src="assets/ai-helper-mascot.png" alt="舞光戰將 AI 助教" onerror="this.style.display='none';this.parentElement.innerHTML='<svg width=\\'26\\' height=\\'26\\' viewBox=\\'0 0 24 24\\' fill=\\'none\\' stroke=\\'white\\' stroke-width=\\'2\\'><circle cx=\\'12\\' cy=\\'12\\' r=\\'10\\'/><circle cx=\\'12\\' cy=\\'12\\' r=\\'3\\' fill=\\'white\\'/></svg>'">`;
+  fab.innerHTML = `<img src="assets/logo/mark-96-v2.png" alt="舞光戰將 AI 助教" onerror="this.style.display='none';this.parentElement.innerHTML='<svg width=\\'26\\' height=\\'26\\' viewBox=\\'0 0 24 24\\' fill=\\'none\\' stroke=\\'white\\' stroke-width=\\'2\\'><circle cx=\\'12\\' cy=\\'12\\' r=\\'10\\'/><circle cx=\\'12\\' cy=\\'12\\' r=\\'3\\' fill=\\'white\\'/></svg>'">`;
   document.body.appendChild(fab);
 
   const panel = document.createElement('div');
@@ -992,7 +1020,7 @@ export async function injectAIHelper() {
   panel.innerHTML = `
     <div class="ai-panel-header">
       <div class="ai-panel-icon">
-        <img src="assets/ai-helper-mascot.png" alt="舞光戰將 AI 助教" onerror="this.style.display='none';this.parentElement.innerHTML='<svg width=\\'20\\' height=\\'20\\' viewBox=\\'0 0 24 24\\' fill=\\'none\\' stroke=\\'white\\' stroke-width=\\'2\\'><circle cx=\\'12\\' cy=\\'12\\' r=\\'10\\'/><circle cx=\\'12\\' cy=\\'12\\' r=\\'3\\' fill=\\'white\\'/></svg>'">
+        <img src="assets/logo/mark-96-v2.png" alt="舞光戰將 AI 助教" onerror="this.style.display='none';this.parentElement.innerHTML='<svg width=\\'20\\' height=\\'20\\' viewBox=\\'0 0 24 24\\' fill=\\'none\\' stroke=\\'white\\' stroke-width=\\'2\\'><circle cx=\\'12\\' cy=\\'12\\' r=\\'10\\'/><circle cx=\\'12\\' cy=\\'12\\' r=\\'3\\' fill=\\'white\\'/></svg>'">
       </div>
       <div>
         <div class="ai-panel-title">舞光戰將的 AI 助教</div>
@@ -1041,24 +1069,22 @@ export async function injectAIHelper() {
     u.textContent = text;
     list.appendChild(u);
     history.push({ role: 'user', content: text });
-    // 思考中（NotebookLM RAG 比直接 LLM 慢，給使用者明確期待）
+    // 思考中（不暴露後端技術名詞，純動畫）
     const cfg = await getAIConfig().catch(() => ({}));
     const isRag = cfg.provider === 'notebooklm';
     const thinking = document.createElement('div');
     thinking.className = 'ai-chat-bubble ai thinking';
-    thinking.textContent = isRag
-      ? '查資料中⋯（RAG 約 10-25 秒）'
-      : '思考中⋯';
+    thinking.textContent = '思考中⋯';
     list.appendChild(thinking);
     list.scrollTop = list.scrollHeight;
     input.value = ''; input.style.height = 'auto';
     sendBtn.disabled = true;
 
-    // RAG 模式：每 5 秒更新一次提示，讓使用者知道沒當機
+    // 久等也不暴露 NotebookLM/RAG 字眼，只用「思考中」+ 計時暗示
     let elapsed = 0;
     const tick = isRag ? setInterval(() => {
       elapsed += 5;
-      thinking.textContent = `查資料中⋯ ${elapsed}s（NotebookLM 比較慢，約 10-25 秒）`;
+      thinking.textContent = `思考中⋯ ${elapsed}s`;
     }, 5000) : null;
 
     try {
@@ -1070,7 +1096,7 @@ export async function injectAIHelper() {
       thinking.remove();
       const a = document.createElement('div');
       a.className = 'ai-chat-bubble ai';
-      a.textContent = reply;
+      a.innerHTML = renderChatMarkdown(reply);
       list.appendChild(a);
       history.push({ role: 'assistant', content: reply });
     } catch (e) {
@@ -1120,7 +1146,20 @@ const DEFAULT_AI_CONFIG = {
   provider: 'gemini',        // 'gemini' | 'claude' | 'openai' | 'notebooklm'
   apiKey: '',
   model: '',                 // 空字串時使用 provider 預設
-  systemPrompt: '你是舞光 LED 業務新人訓練系統的 AI 助教。請用繁體中文，以友善、專業的口吻回答業務新人關於展晟照明集團、舞光 LED 產品、客戶經營、業務技巧的問題。回答簡潔明確，避免冗長，每次最多 200 字。',
+  systemPrompt: `你是舞光 LED 業務新人訓練系統的 AI 助教。請用繁體中文，以友善、口語的學長姐口吻回答新人關於展晟照明集團、舞光 LED 產品、客戶經營、業務技巧、規章與福利的問題。
+
+【回答風格】
+- 像真人對話，自然、簡潔、親切，不要像條文。
+- 每次最多 200 字，能用一句話說完就不要分點。
+- 盡量用完整句子，不要用粗體去框關鍵字。整段最多 1 個粗體強調，沒有也可以。
+- 不要硬塞「第一點 / 第二點 / 1. 2. 3.」標號，除非真的是步驟。
+- 不要寫標題（# ## ###）。
+- 引用知識庫時自然帶過，不需要列來源條目。
+
+【範圍限制】
+- 只回答跟舞光 / 展晟 / LED 業務工作相關的問題。
+- 範圍外（例如政治、八卦、其他公司產品）禮貌拒答：「這題不在我能回答的範圍，建議你問你的主管。」
+- 不確定就說不確定，不要編答案。`,
   enabled: false,
   // notebooklm provider 專用欄位
   endpointUrl: '',           // 例：https://meeting-minutes-bot.fly.dev
