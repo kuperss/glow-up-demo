@@ -479,6 +479,9 @@
     opacity: 0.6;
     animation: float-up-down 2.5s ease-in-out infinite;
   }
+  @media (max-width: 640px) {
+    .scroll-indicator { display: none; }
+  }
 
   @keyframes float-up-down {
     0%, 100% { transform: translate(-50%, 0); }

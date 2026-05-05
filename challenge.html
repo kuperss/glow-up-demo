@@ -1441,7 +1441,14 @@
     { key: 'hr',       name: '規章達人', test: (qIds) => ['q13','q14','q15','q16','q17'].every(id => qIds.has(id)), desc: '完成 STAGE 5 五題 HR 規章' },
     { key: 'sage',     name: '判斷力高手', test: (qIds) => ['q18','q19','q20','q21','q22'].every(id => qIds.has(id)), desc: '完成 STAGE 6 五題進階情境' },
     { key: 'matcher',  name: '配對達人', test: (qIds, sc) => sc.has('match_v1'), desc: '完成 STAGE 7 產品↔場域配對' },
-    { key: 'lighter',  name: '點燈者',   test: (qIds, sc) => qIds.size + sc.size >= 30, desc: '★ 30 / 30 全通關 · 最高榮譽' }
+    // 點燈者：必須做完全部 22 題 quiz + 8 個 AI 場景（共 30 個必修），match_v1 不算入
+    { key: 'lighter',  name: '點燈者', desc: '★ 30 / 30 全通關 · 最高榮譽',
+      test: (qIds, sc) => {
+        const REQUIRED_AI = ['dealer','designer','builder','shopkeeper','complaint','dealer_gen2','architect','competitor_steal'];
+        for (let i = 1; i <= 22; i++) if (!qIds.has('q' + i)) return false;
+        return REQUIRED_AI.every(s => sc.has(s));
+      }
+    }
   ];
   const SHOWN_BADGES_KEY = 'glow-shown-badges-v1';
   function shownBadges() {

@@ -361,13 +361,13 @@ export function injectUserPill() {
   const initial = (currentUserDoc.name || currentUserDoc.email || '?').charAt(0).toUpperCase();
   const isGuest = !!currentUserDoc.isGuest;
   wrapper.innerHTML = `
-    <button id="userPillBtn" class="flex items-center gap-2 px-3 py-1.5 rounded-full ${isGuest ? 'bg-gray-800/40 border border-gray-700' : 'bg-orange-500/10 border border-orange-500/30'} text-sm ${isGuest ? 'text-gray-300' : 'text-orange-200'} hover:bg-orange-500/15 transition-colors whitespace-nowrap">
+    <button id="userPillBtn" class="flex items-center gap-2 px-2 sm:px-3 py-1.5 rounded-full ${isGuest ? 'bg-gray-800/40 border border-gray-700' : 'bg-orange-500/10 border border-orange-500/30'} text-sm ${isGuest ? 'text-gray-300' : 'text-orange-200'} hover:bg-orange-500/15 transition-colors whitespace-nowrap max-w-[200px] sm:max-w-none">
       ${currentUserDoc.photoURL
-        ? `<img src="${currentUserDoc.photoURL}" referrerpolicy="no-referrer" class="w-6 h-6 rounded-full" alt="">`
-        : `<div class="w-6 h-6 rounded-full ${isGuest ? 'bg-gray-700' : 'bg-orange-500/30'} flex items-center justify-center text-xs font-bold">${initial}</div>`}
-      <span class="hidden sm:inline">${currentUserDoc.name || currentUserDoc.email}</span>
-      ${isGuest ? '<span class="text-[10px] px-1.5 py-0.5 rounded bg-gray-700 ml-1">DEMO</span>' :
-        (currentUserDoc.role === 'manager' ? '<span class="text-[10px] px-1.5 py-0.5 rounded bg-orange-500/25 ml-1">主管</span>' : '')}
+        ? `<img src="${currentUserDoc.photoURL}" referrerpolicy="no-referrer" class="w-6 h-6 rounded-full flex-shrink-0" alt="">`
+        : `<div class="w-6 h-6 rounded-full ${isGuest ? 'bg-gray-700' : 'bg-orange-500/30'} flex items-center justify-center text-xs font-bold flex-shrink-0">${initial}</div>`}
+      <span class="hidden sm:inline truncate max-w-[120px]">${currentUserDoc.name || currentUserDoc.email}</span>
+      ${isGuest ? '<span class="hidden sm:inline-block text-[10px] px-1.5 py-0.5 rounded bg-gray-700 ml-1">DEMO</span>' :
+        (currentUserDoc.role === 'manager' ? '<span class="hidden sm:inline-block text-[10px] px-1.5 py-0.5 rounded bg-orange-500/25 ml-1">主管</span>' : '')}
     </button>
     <div id="userPillMenu" class="hidden absolute right-0 top-full mt-2 w-60 rounded-xl bg-[#131316] border border-orange-500/20 shadow-2xl shadow-orange-500/10 overflow-hidden z-50">
       <div class="px-4 py-3 border-b border-gray-800/60">
