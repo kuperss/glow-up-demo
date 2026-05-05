@@ -339,65 +339,6 @@
     margin-top: 0.75rem;
   }
 
-  /* === Product Library Search === */
-  .lib-bar {
-    position: sticky; top: 64px; z-index: 30;
-    background: linear-gradient(180deg, rgba(8,8,10,0.85), rgba(8,8,10,0.7));
-    backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(245,130,32,0.15); border-radius: 14px;
-    padding: 14px 18px; display: flex; flex-wrap: wrap; gap: 10px;
-    align-items: center; margin-bottom: 18px;
-  }
-  .lib-search {
-    flex: 1 1 240px; min-width: 200px;
-    padding: 10px 14px; border-radius: 10px;
-    background: rgba(8,8,10,0.6); border: 1px solid rgba(255,255,255,0.08);
-    color: #F5F5F7; font-size: 14px;
-  }
-  .lib-search:focus { outline: none; border-color: rgba(245,130,32,0.5); background: rgba(8,8,10,0.9); }
-  .lib-chips { display: flex; flex-wrap: wrap; gap: 6px; }
-  .lib-chip {
-    padding: 6px 12px; border-radius: 999px; font-size: 12px;
-    background: rgba(38,38,44,0.6); border: 1px solid rgba(255,255,255,0.08);
-    color: #A0A0AB; cursor: pointer; transition: all 0.2s; white-space: nowrap;
-  }
-  .lib-chip:hover { background: rgba(245,130,32,0.1); color: #FFA050; border-color: rgba(245,130,32,0.3); }
-  .lib-chip.active {
-    background: linear-gradient(135deg, rgba(245,130,32,0.25), rgba(245,130,32,0.1));
-    color: #FFD27A; border-color: rgba(245,130,32,0.5);
-  }
-  .lib-count { font-size: 12px; color: #6B6B75; padding: 0 6px; }
-  .lib-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
-  .lib-item {
-    background: linear-gradient(180deg, rgba(26,26,31,0.6), rgba(19,19,22,0.4));
-    border: 1px solid rgba(38,38,44,0.7); border-radius: 12px;
-    padding: 14px 16px; cursor: pointer; transition: all 0.25s;
-    display: flex; flex-direction: column; gap: 6px;
-  }
-  .lib-item:hover { border-color: rgba(245,130,32,0.35); transform: translateY(-2px); box-shadow: 0 12px 28px -10px rgba(245,130,32,0.2); }
-  .lib-name { font-size: 13px; font-weight: 600; color: #F5F5F7; line-height: 1.45; }
-  .lib-sku { font-size: 11px; color: #6B6B75; font-family: 'Inter', sans-serif; letter-spacing: 0.05em; }
-  .lib-meta { font-size: 11px; color: #A0A0AB; display: flex; gap: 10px; flex-wrap: wrap; margin-top: 4px; padding-top: 6px; border-top: 1px dashed rgba(38,38,44,0.7); }
-  .lib-meta .label { color: #6B6B75; }
-  .lib-detail {
-    display: none; margin-top: 10px; padding-top: 10px;
-    border-top: 1px solid rgba(245,130,32,0.15);
-    font-size: 11px; color: #A0A0AB; line-height: 1.7;
-  }
-  .lib-item.expanded .lib-detail { display: block; }
-  .lib-detail .row { display: flex; justify-content: space-between; gap: 10px; padding: 3px 0; }
-  .lib-detail .row span:last-child { color: #F5F5F7; text-align: right; max-width: 60%; }
-  .lib-detail h4 { font-size: 11px; color: #FFA050; margin: 10px 0 4px; letter-spacing: 0.1em; }
-  .lib-detail .pill-list { display: flex; flex-wrap: wrap; gap: 4px; }
-  .lib-detail .pill-list span { background: rgba(245,130,32,0.08); border: 1px solid rgba(245,130,32,0.2); color: #FFA050; padding: 2px 8px; border-radius: 999px; font-size: 10px; }
-  .lib-load-more {
-    margin: 24px auto 0; display: block; padding: 10px 24px; border-radius: 999px;
-    background: rgba(245,130,32,0.1); border: 1px solid rgba(245,130,32,0.3);
-    color: #FFA050; font-size: 13px; cursor: pointer; transition: all 0.2s;
-  }
-  .lib-load-more:hover { background: rgba(245,130,32,0.2); }
-  .lib-empty { padding: 40px 20px; text-align: center; color: #6B6B75; font-size: 13px; }
-
   /* Space match card */
   .space-card {
     position: relative;
@@ -1348,42 +1289,6 @@
   </div>
 </section>
 
-<!-- ===== Product Library (1,359 SKU 即時搜尋) ===== -->
-<section class="relative py-32">
-  <div class="glow-orb" style="background:#F58220; width:500px; height:500px; top:10%; right:-100px; opacity:0.1;"></div>
-
-  <div class="relative max-w-7xl mx-auto px-6 lg:px-10">
-    <div class="text-center mb-12 reveal">
-      <div class="section-eyebrow justify-center" style="display:inline-flex;">PRODUCT LIBRARY · 完整產品庫</div>
-      <h2 class="font-display text-4xl md:text-5xl lg:text-6xl leading-[1.1] mb-4">
-        <span id="libTotal">1,359</span> 支產品，<br>
-        <span class="text-orange-300">客戶問哪一支都查得到</span>
-      </h2>
-      <p class="text-gray-500 max-w-xl mx-auto leading-relaxed mt-6">
-        即時搜尋型號、商品名稱、類型 · 點開看完整規格 + 適用場景 + 銷售切入點。
-      </p>
-    </div>
-
-    <!-- Sticky search bar -->
-    <div class="lib-bar reveal">
-      <input id="libSearch" class="lib-search" type="search" placeholder="搜尋商品名 / 型號 / 類型（如：拉斐爾、D-21、磁吸、戶外）">
-      <span id="libCount" class="lib-count">—</span>
-    </div>
-
-    <!-- Category chips -->
-    <div class="lib-chips mb-5 reveal" id="libChips">
-      <button class="lib-chip active" data-cat="">全部</button>
-    </div>
-
-    <!-- Results grid -->
-    <div id="libGrid" class="lib-grid">
-      <div class="lib-empty">載入中...</div>
-    </div>
-
-    <button id="libLoadMore" class="lib-load-more hidden">載入更多 (還有 <span id="libRemaining">0</span> 筆)</button>
-  </div>
-</section>
-
 <!-- ===== Space → Product Match ===== -->
 <section class="relative py-32 overflow-hidden">
   <div class="glow-orb" style="background:#FFA050; width:500px; height:500px; bottom:0; left:30%; opacity:0.1;"></div>
@@ -1396,12 +1301,12 @@
         <span class="text-orange-300">你說產品</span>
       </h2>
       <p class="text-gray-500 max-w-xl mx-auto leading-relaxed mt-6">
-        五大場景速查表 · 面對客戶提案不再卡關。
+        七大應用場域 · 滿足全方位照明需求，面對客戶提案不再卡關。
       </p>
     </div>
 
-    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
-      <!-- 居家 -->
+    <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-5">
+      <!-- 1. 居家空間 -->
       <div class="space-card reveal">
         <div class="flex items-center gap-3 mb-5">
           <div class="w-10 h-10 rounded-lg bg-orange-500/15 border border-orange-500/30 flex items-center justify-center text-orange-400">
@@ -1424,7 +1329,7 @@
         </div>
       </div>
 
-      <!-- 商空 -->
+      <!-- 2. 商業空間 -->
       <div class="space-card reveal" style="transition-delay:0.05s;">
         <div class="flex items-center gap-3 mb-5">
           <div class="w-10 h-10 rounded-lg bg-orange-500/15 border border-orange-500/30 flex items-center justify-center text-orange-400">
@@ -1447,7 +1352,7 @@
         </div>
       </div>
 
-      <!-- 辦公 -->
+      <!-- 3. 辦公空間 -->
       <div class="space-card reveal" style="transition-delay:0.1s;">
         <div class="flex items-center gap-3 mb-5">
           <div class="w-10 h-10 rounded-lg bg-orange-500/15 border border-orange-500/30 flex items-center justify-center text-orange-400">
@@ -1455,7 +1360,7 @@
           </div>
           <div>
             <div class="text-xs text-orange-400 font-mono-en tracking-widest">OFFICE</div>
-            <h3 class="font-display text-xl">辦公教室</h3>
+            <h3 class="font-display text-xl">辦公空間</h3>
           </div>
         </div>
         <div class="text-xs text-gray-500 mb-3">防眩、均光，避免螢幕反射</div>
@@ -1470,15 +1375,38 @@
         </div>
       </div>
 
-      <!-- 廠房 -->
+      <!-- 4. 學校照明 -->
       <div class="space-card reveal" style="transition-delay:0.15s;">
+        <div class="flex items-center gap-3 mb-5">
+          <div class="w-10 h-10 rounded-lg bg-orange-500/15 border border-orange-500/30 flex items-center justify-center text-orange-400">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10L12 4 2 10l10 6 10-6z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+          </div>
+          <div>
+            <div class="text-xs text-orange-400 font-mono-en tracking-widest">SCHOOL</div>
+            <h3 class="font-display text-xl">學校照明</h3>
+          </div>
+        </div>
+        <div class="text-xs text-gray-500 mb-3">護眼低藍光，符合教育部 CNS 標準</div>
+        <ul class="space-y-2 text-sm text-gray-300">
+          <li class="flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-orange-500"></span>教室：護眼平板燈</li>
+          <li class="flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-orange-500"></span>走廊：吸頂燈／崁燈</li>
+          <li class="flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-orange-500"></span>體育館：高天井燈</li>
+          <li class="flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-orange-500"></span>宿舍：吸頂燈／壁燈</li>
+        </ul>
+        <div class="mt-4 pt-4 border-t border-gray-800/60 text-xs text-gray-500">
+          <span class="text-orange-300">關鍵指標</span>　UGR &lt; 19、低藍光、Ra ≧ 80
+        </div>
+      </div>
+
+      <!-- 5. 工廠照明 -->
+      <div class="space-card reveal" style="transition-delay:0.2s;">
         <div class="flex items-center gap-3 mb-5">
           <div class="w-10 h-10 rounded-lg bg-orange-500/15 border border-orange-500/30 flex items-center justify-center text-orange-400">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 22V8l10-6 10 6v14"/><path d="M6 22V12h12v10"/></svg>
           </div>
           <div>
             <div class="text-xs text-orange-400 font-mono-en tracking-widest">INDUSTRIAL</div>
-            <h3 class="font-display text-xl">廠房工程</h3>
+            <h3 class="font-display text-xl">工廠照明</h3>
           </div>
         </div>
         <div class="text-xs text-gray-500 mb-3">高瓦數高流明，看清楚為主</div>
@@ -1493,15 +1421,38 @@
         </div>
       </div>
 
-      <!-- 戶外 -->
-      <div class="space-card reveal" style="transition-delay:0.2s;">
+      <!-- 6. 互聯數位 -->
+      <div class="space-card reveal" style="transition-delay:0.25s;">
+        <div class="flex items-center gap-3 mb-5">
+          <div class="w-10 h-10 rounded-lg bg-orange-500/15 border border-orange-500/30 flex items-center justify-center text-orange-400">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/></svg>
+          </div>
+          <div>
+            <div class="text-xs text-orange-400 font-mono-en tracking-widest">DIGITAL</div>
+            <h3 class="font-display text-xl">互聯數位</h3>
+          </div>
+        </div>
+        <div class="text-xs text-gray-500 mb-3">語音、APP、多情境一鍵切換</div>
+        <ul class="space-y-2 text-sm text-gray-300">
+          <li class="flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-orange-500"></span>智慧主燈：Ai 系列崁燈</li>
+          <li class="flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-orange-500"></span>智慧吸頂：智能雲朵</li>
+          <li class="flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-orange-500"></span>智控氛圍：軟條燈</li>
+          <li class="flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-orange-500"></span>生態相容：米家 / Google</li>
+        </ul>
+        <div class="mt-4 pt-4 border-t border-gray-800/60 text-xs text-gray-500">
+          <span class="text-orange-300">注意</span>　不支援 Apple HomeKit
+        </div>
+      </div>
+
+      <!-- 7. 戶外空間 -->
+      <div class="space-card reveal" style="transition-delay:0.3s;">
         <div class="flex items-center gap-3 mb-5">
           <div class="w-10 h-10 rounded-lg bg-orange-500/15 border border-orange-500/30 flex items-center justify-center text-orange-400">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M1 12h2M21 12h2"/></svg>
           </div>
           <div>
             <div class="text-xs text-orange-400 font-mono-en tracking-widest">OUTDOOR</div>
-            <h3 class="font-display text-xl">戶外景觀</h3>
+            <h3 class="font-display text-xl">戶外空間</h3>
           </div>
         </div>
         <div class="text-xs text-gray-500 mb-3">耐候、防水、防雷擊</div>
@@ -1513,29 +1464,6 @@
         </ul>
         <div class="mt-4 pt-4 border-t border-gray-800/60 text-xs text-gray-500">
           <span class="text-orange-300">關鍵指標</span>　IP65 起跳、耐候塗裝
-        </div>
-      </div>
-
-      <!-- 智慧 -->
-      <div class="space-card reveal" style="transition-delay:0.25s;">
-        <div class="flex items-center gap-3 mb-5">
-          <div class="w-10 h-10 rounded-lg bg-orange-500/15 border border-orange-500/30 flex items-center justify-center text-orange-400">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M9 9h.01M15 9h.01M9 15a3 3 0 0 0 6 0"/></svg>
-          </div>
-          <div>
-            <div class="text-xs text-orange-400 font-mono-en tracking-widest">SMART</div>
-            <h3 class="font-display text-xl">智慧家居</h3>
-          </div>
-        </div>
-        <div class="text-xs text-gray-500 mb-3">語音、APP、多情境一鍵切換</div>
-        <ul class="space-y-2 text-sm text-gray-300">
-          <li class="flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-orange-500"></span>主燈：Ai 智慧崁燈</li>
-          <li class="flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-orange-500"></span>吸頂：智能雲朵</li>
-          <li class="flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-orange-500"></span>氛圍：智控軟條燈</li>
-          <li class="flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-orange-500"></span>生態：米家 / Google</li>
-        </ul>
-        <div class="mt-4 pt-4 border-t border-gray-800/60 text-xs text-gray-500">
-          <span class="text-orange-300">注意</span>　不支援 Apple HomeKit
         </div>
       </div>
     </div>
@@ -1895,170 +1823,6 @@
     });
   })();
 </script>
-
-<!-- ===== Product Library Logic (fetch products.json + search + filter) ===== -->
-<script>
-(function(){
-  const PAGE_SIZE = 24;
-  let allProducts = [];
-  let filtered = [];
-  let displayCount = 0;
-  let currentCat = '';
-
-  const elGrid    = document.getElementById('libGrid');
-  const elSearch  = document.getElementById('libSearch');
-  const elCount   = document.getElementById('libCount');
-  const elTotal   = document.getElementById('libTotal');
-  const elChips   = document.getElementById('libChips');
-  const elMore    = document.getElementById('libLoadMore');
-  const elRem     = document.getElementById('libRemaining');
-
-  function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-  function safeText(s){ return (s||'').toString().trim(); }
-
-  function buildCategoryChips() {
-    const counts = {};
-    allProducts.forEach(p => {
-      const t = safeText(p['類型']) || '其他';
-      counts[t] = (counts[t]||0) + 1;
-    });
-    const sorted = Object.entries(counts).sort((a,b) => b[1]-a[1]).slice(0, 14);
-    sorted.forEach(([cat, n]) => {
-      const b = document.createElement('button');
-      b.className = 'lib-chip';
-      b.dataset.cat = cat;
-      b.textContent = `${cat} (${n})`;
-      elChips.appendChild(b);
-    });
-    elChips.addEventListener('click', e => {
-      const btn = e.target.closest('.lib-chip');
-      if (!btn) return;
-      currentCat = btn.dataset.cat || '';
-      elChips.querySelectorAll('.lib-chip').forEach(b => b.classList.toggle('active', b.dataset.cat === currentCat));
-      applyFilter();
-    });
-  }
-
-  function applyFilter() {
-    const q = (elSearch.value || '').trim().toLowerCase();
-    filtered = allProducts.filter(p => {
-      if (currentCat && safeText(p['類型']) !== currentCat) return false;
-      if (!q) return true;
-      const hay = (
-        safeText(p['商品名稱']) + ' ' +
-        safeText(p['產品型號']) + ' ' +
-        safeText(p['類型']) + ' ' +
-        (Array.isArray(p['適用場景']) ? p['適用場景'].join(' ') : '')
-      ).toLowerCase();
-      return hay.includes(q);
-    });
-    displayCount = 0;
-    elGrid.innerHTML = '';
-    renderMore();
-  }
-
-  function renderMore() {
-    const next = filtered.slice(displayCount, displayCount + PAGE_SIZE);
-    if (next.length === 0 && displayCount === 0) {
-      elGrid.innerHTML = '<div class="lib-empty">沒有符合的產品。試試其他關鍵字或分類。</div>';
-      elMore.classList.add('hidden');
-      elCount.textContent = '0 筆';
-      return;
-    }
-    next.forEach(p => elGrid.appendChild(buildItem(p)));
-    displayCount += next.length;
-    elCount.textContent = `${filtered.length} 筆 · 顯示 ${displayCount}`;
-    const remaining = filtered.length - displayCount;
-    if (remaining > 0) {
-      elMore.classList.remove('hidden');
-      elRem.textContent = remaining;
-    } else {
-      elMore.classList.add('hidden');
-    }
-  }
-
-  function buildItem(p) {
-    const item = document.createElement('div');
-    item.className = 'lib-item';
-    const watt = safeText(p['消耗電力']);
-    const cct  = safeText(p['色溫']);
-    const lm   = safeText(p['光通量']);
-    const ra   = safeText(p['演色性']);
-    const ip   = safeText(p['IP等級']);
-    const beam = safeText(p['光束角']) || safeText(p['發光角度']);
-    const size = safeText(p['尺寸']);
-    const life = safeText(p['平均壽命']);
-    const volt = safeText(p['電壓']);
-    const driver = safeText(p['驅動器']);
-    const scenes = Array.isArray(p['適用場景']) ? p['適用場景'] : [];
-    const usage  = Array.isArray(p['使用用途']) ? p['使用用途'] : [];
-    const pitches = Array.isArray(p['銷售切入點']) ? p['銷售切入點'] : [];
-    const audience = Array.isArray(p['建議客群']) ? p['建議客群'] : [];
-
-    let metaBits = [];
-    if (watt) metaBits.push(`<span><span class="label">瓦</span> ${esc(watt)}</span>`);
-    if (cct) metaBits.push(`<span><span class="label">色溫</span> ${esc(cct)}</span>`);
-    if (lm) metaBits.push(`<span><span class="label">流明</span> ${esc(lm)}</span>`);
-    if (ip) metaBits.push(`<span><span class="label">IP</span> ${esc(ip)}</span>`);
-    if (metaBits.length === 0) metaBits.push(`<span class="label">${esc(safeText(p['類型'])||'—')}</span>`);
-
-    let detailRows = '';
-    const addRow = (label, val) => { if (val) detailRows += `<div class="row"><span>${esc(label)}</span><span>${esc(val)}</span></div>`; };
-    addRow('類型', safeText(p['類型']));
-    addRow('瓦數', watt); addRow('色溫', cct); addRow('光通量', lm);
-    addRow('演色性 Ra', ra); addRow('光束角', beam);
-    if (ip) addRow('防護等級', 'IP' + ip);
-    addRow('電壓', volt); addRow('驅動器', driver);
-    addRow('尺寸', size); addRow('壽命', life);
-
-    const sceneHtml = scenes.length ? `<h4>適用場景</h4><div class="pill-list">${scenes.map(s=>`<span>${esc(s)}</span>`).join('')}</div>` : '';
-    const usageHtml = usage.length ? `<h4>使用用途</h4><div class="pill-list">${usage.map(s=>`<span>${esc(s)}</span>`).join('')}</div>` : '';
-    const pitchHtml = pitches.length ? `<h4>銷售切入點</h4>${pitches.map(s=>`<div style="padding:3px 0;">▸ ${esc(s)}</div>`).join('')}` : '';
-    const audHtml   = audience.length ? `<h4>建議客群</h4><div class="pill-list">${audience.map(s=>`<span>${esc(s)}</span>`).join('')}</div>` : '';
-
-    item.innerHTML = `
-      <div class="lib-name">${esc(safeText(p['商品名稱']))}</div>
-      <div class="lib-sku">${esc(safeText(p['產品型號']))} · ${esc(safeText(p['類型']))}</div>
-      <div class="lib-meta">${metaBits.join('')}</div>
-      <div class="lib-detail">
-        ${detailRows}
-        ${sceneHtml}
-        ${usageHtml}
-        ${pitchHtml}
-        ${audHtml}
-      </div>
-    `;
-    item.addEventListener('click', () => item.classList.toggle('expanded'));
-    return item;
-  }
-
-  let searchTimer = null;
-  elSearch.addEventListener('input', () => {
-    clearTimeout(searchTimer);
-    searchTimer = setTimeout(applyFilter, 200);
-  });
-  elMore.addEventListener('click', renderMore);
-
-  // 載入 JSON
-  fetch('./products.json', { cache: 'force-cache' })
-    .then(r => {
-      if (!r.ok) throw new Error('fetch failed: ' + r.status);
-      return r.json();
-    })
-    .then(data => {
-      allProducts = Array.isArray(data) ? data : [];
-      elTotal.textContent = allProducts.length.toLocaleString();
-      buildCategoryChips();
-      applyFilter();
-    })
-    .catch(err => {
-      console.error('Product library load failed:', err);
-      elGrid.innerHTML = '<div class="lib-empty">產品資料載入失敗：' + esc(err.message) + '</div>';
-      elCount.textContent = '錯誤';
-    });
-})();
-</script>
-
 
 <!-- ===== Firebase Auth Guard ===== -->
 <script type="module">
