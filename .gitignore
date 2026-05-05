@@ -28,6 +28,10 @@
 !assets/
 !assets/**
 
+# Re-allow backend folder (deploys to fly.io, not GitHub Pages)
+!backend/
+!backend/**
+
 # Explicitly never include
 research_notes.md
 content/
@@ -36,3 +40,10 @@ logo_base64.txt
 Thumbs.db
 *.tmp
 *.bak
+
+# Backend secrets / venv (絕對不能進 repo)
+backend/credentials/notebooklm_storage.json
+backend/credentials/*.json
+backend/.venv/
+backend/__pycache__/
+backend/.env

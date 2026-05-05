@@ -1,0 +1,38 @@
+# 部署這個 backend 到 fly.io（與 frontend GitHub Pages 完全分開的服務）
+#
+# 第一次部署：
+#   cd backend
+#   fly launch --no-deploy --copy-config --name <你想要的名字>
+#   ↑ 會把這份 fly.toml 留下，但 app 名字改成你輸入的
+#
+# 之後每次更新：
+#   cd backend
+#   fly deploy
+
+app = "dancelight-ai"  # ← 第一次 fly launch 時可以改成你想要的名字
+primary_region = "nrt"  # 東京 (離台灣最近)；其他選項：sin, hkg
+
+[build]
+
+[env]
+  PORT = "8000"
+
+[http_service]
+  internal_port = 8000
+  force_https = true
+  auto_stop_machines = "stop"      # 沒流量時自動停（省錢）
+  auto_start_machines = true        # 有請求時自動啟動
+  min_machines_running = 0
+  processes = ["app"]
+
+  [[http_service.checks]]
+    grace_period = "10s"
+    interval = "30s"
+    method = "GET"
+    timeout = "5s"
+    path = "/health"
+
+[[vm]]
+  cpu_kind = "shared"
+  cpus = 1
+  memory_mb = 512
