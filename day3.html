@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Day 3 · 工作職責與內部流程 | 舞光戰將點燈計劃</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Serif+TC:wght@500;600;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-base: #08080A;
+    --bg-card: rgba(26,26,31,0.7);
+    --border: rgba(38,38,44,0.8);
+    --orange: #F58220;
+    --orange-bright: #FFA050;
+    --text: #F5F5F7;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--bg-base);
+    color: var(--text);
+    font-family: 'Noto Serif TC', 'Inter', system-ui, sans-serif;
+    overflow-x: hidden;
+  }
+  body { scroll-snap-type: y mandatory; height: 100vh; overflow-y: scroll; }
+
+  /* Star background */
+  body::before {
+    content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    background:
+      radial-gradient(circle at 20% 30%, rgba(245,130,32,0.08), transparent 50%),
+      radial-gradient(circle at 80% 70%, rgba(245,130,32,0.06), transparent 50%),
+      radial-gradient(circle at 50% 50%, rgba(0,0,0,0.6), transparent);
+  }
+  body::after {
+    content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    background-image:
+      radial-gradient(1.5px 1.5px at 12% 18%, #FFA050 50%, transparent),
+      radial-gradient(1px 1px at 88% 22%, #FFD27A 50%, transparent),
+      radial-gradient(1.5px 1.5px at 25% 78%, #F58220 50%, transparent),
+      radial-gradient(1px 1px at 65% 65%, #FFA050 50%, transparent),
+      radial-gradient(1.2px 1.2px at 92% 88%, #FFD27A 50%, transparent),
+      radial-gradient(1px 1px at 8% 50%, #FFA050 50%, transparent);
+    opacity: 0.6;
+  }
+
+  /* Slide */
+  .slide {
+    position: relative; z-index: 1;
+    min-height: 100vh; height: 100vh;
+    scroll-snap-align: start;
+    display: flex; flex-direction: column;
+    padding: 4vh 8vw;
+    overflow: hidden;
+  }
+  .slide-inner { width: 100%; max-width: 1280px; margin: 0 auto; flex: 1; display: flex; flex-direction: column; justify-content: center; }
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 12px;
+    font-family: 'Inter', sans-serif; font-size: 12px; letter-spacing: 0.25em;
+    color: var(--orange); text-transform: uppercase; font-weight: 600;
+    margin-bottom: 1.2rem;
+  }
+  .eyebrow::before { content: ''; width: 32px; height: 1px; background: var(--orange); }
+  h1.slide-title {
+    font-family: 'Noto Serif TC', serif; font-weight: 700;
+    font-size: clamp(2.4rem, 5.5vw, 5.4rem);
+    line-height: 1.1; margin: 0 0 1.5rem 0;
+    letter-spacing: 0.02em;
+  }
+  h1.slide-title .accent {
+    background: linear-gradient(135deg, #FFD27A 0%, #FFA050 50%, #F58220 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    text-shadow: 0 0 80px rgba(245,130,32,0.3);
+  }
+  h2.slide-h2 {
+    font-family: 'Noto Serif TC', serif; font-weight: 600;
+    font-size: clamp(1.6rem, 3vw, 2.6rem);
+    line-height: 1.2; margin: 0 0 1.2rem 0;
+  }
+  .lead {
+    font-size: clamp(1.1rem, 1.6vw, 1.5rem); color: #C5C5CD;
+    line-height: 1.7; margin: 0 0 1.5rem 0;
+  }
+  ul.bullets, ol.bullets {
+    list-style: none; padding: 0; margin: 0;
+  }
+  ul.bullets li, ol.bullets li {
+    font-size: clamp(0.95rem, 1.3vw, 1.2rem);
+    line-height: 1.7;
+    padding: 0.45rem 0 0.45rem 1.6rem;
+    position: relative;
+    color: #D5D5DD;
+  }
+  ul.bullets li::before {
+    content: '▸'; position: absolute; left: 0;
+    color: var(--orange); font-weight: bold;
+  }
+  ol.bullets { counter-reset: step; }
+  ol.bullets li::before {
+    counter-increment: step;
+    content: counter(step);
+    position: absolute; left: 0;
+    width: 24px; height: 24px; border-radius: 50%;
+    background: rgba(245,130,32,0.15); color: var(--orange);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700; font-family: 'Inter', sans-serif;
+    top: 0.4rem;
+  }
+  ol.bullets li { padding-left: 2.2rem; }
+
+  .card-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1rem; margin-top: 1.5rem;
+  }
+  .info-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 14px; padding: 1.4rem 1.5rem;
+    backdrop-filter: blur(12px);
+  }
+  .info-card .card-num {
+    font-family: 'Inter', sans-serif; font-weight: 800; font-size: 0.75rem;
+    color: var(--orange); letter-spacing: 0.2em;
+  }
+  .info-card .card-title {
+    font-size: 1.2rem; font-weight: 700; color: var(--text); margin: 0.4rem 0 0.6rem;
+  }
+  .info-card .card-body { font-size: 0.95rem; color: #B5B5BD; line-height: 1.6; }
+
+  .speaker-note {
+    margin-top: auto;
+    background: rgba(245,130,32,0.06);
+    border-left: 3px solid var(--orange);
+    border-radius: 8px;
+    padding: 0.9rem 1.2rem;
+    font-size: 0.92rem; color: #B5B5BD; line-height: 1.6;
+  }
+  .speaker-note .label {
+    display: inline-block; font-weight: 600; color: var(--orange-bright);
+    margin-right: 8px; font-size: 0.85rem;
+  }
+
+  /* Big number/quote slides */
+  .big-num {
+    font-family: 'Inter', sans-serif; font-weight: 800;
+    font-size: clamp(8rem, 18vw, 18rem); line-height: 1;
+    background: linear-gradient(180deg, #FFD27A 0%, #F58220 50%, rgba(245,130,32,0.3) 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    text-shadow: 0 0 100px rgba(245,130,32,0.4);
+  }
+
+  /* Process flow */
+  .flow {
+    display: flex; align-items: center; flex-wrap: wrap; gap: 0.6rem; margin-top: 1.2rem;
+  }
+  .flow-step {
+    background: var(--bg-card); border: 1px solid rgba(245,130,32,0.3);
+    border-radius: 999px; padding: 0.6rem 1.2rem;
+    font-size: 0.95rem; font-weight: 600; color: var(--orange-bright);
+  }
+  .flow-arrow { color: var(--orange); font-size: 1.4rem; }
+
+  /* Two-column compare */
+  .two-col {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 1.2rem;
+  }
+  .col-bad, .col-good {
+    background: var(--bg-card); border-radius: 14px; padding: 1.4rem 1.6rem;
+    border: 1px solid var(--border);
+  }
+  .col-bad { border-left: 3px solid #f87171; }
+  .col-good { border-left: 3px solid #6ee7b7; }
+  .col-label { font-size: 0.8rem; font-weight: 700; letter-spacing: 0.2em; margin-bottom: 0.6rem; }
+  .col-bad .col-label { color: #f87171; }
+  .col-good .col-label { color: #6ee7b7; }
+  .col-content { font-size: 1rem; line-height: 1.7; color: #D5D5DD; }
+
+  /* Cover slide */
+  .slide-cover {
+    background:
+      radial-gradient(ellipse at center, rgba(245,130,32,0.15), transparent 60%),
+      var(--bg-base);
+    text-align: center;
+  }
+  .slide-cover .meta {
+    font-family: 'Inter', sans-serif; font-size: 14px; letter-spacing: 0.4em;
+    color: var(--orange); text-transform: uppercase; font-weight: 600;
+    margin-bottom: 1.5rem;
+  }
+  .slide-cover .day-tag {
+    display: inline-block;
+    background: linear-gradient(135deg, rgba(245,130,32,0.2), rgba(245,130,32,0.05));
+    border: 1px solid rgba(245,130,32,0.5);
+    border-radius: 999px;
+    padding: 0.5rem 1.5rem;
+    font-size: 0.95rem; color: var(--orange-bright);
+    margin-bottom: 2rem;
+  }
+  .slide-cover h1 {
+    font-size: clamp(3rem, 7vw, 6.5rem) !important;
+  }
+  .slide-cover .instructor {
+    font-size: 1.2rem; color: #A5A5AD; margin-top: 2rem;
+  }
+  .slide-cover .instructor strong { color: var(--orange-bright); margin: 0 8px; }
+
+  /* TOC slide */
+  .toc-grid {
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;
+  }
+  .toc-item {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: 14px; padding: 1.3rem 1.5rem;
+    display: flex; align-items: center; gap: 1rem;
+  }
+  .toc-num {
+    width: 48px; height: 48px; border-radius: 12px;
+    background: rgba(245,130,32,0.15); color: var(--orange);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Inter', sans-serif; font-weight: 800; font-size: 1.3rem;
+    flex-shrink: 0;
+  }
+  .toc-text strong { display: block; font-size: 1.05rem; color: var(--text); }
+  .toc-text span { font-size: 0.85rem; color: #888; margin-top: 0.2rem; display: block; }
+
+  /* Closing */
+  .slide-close {
+    background:
+      radial-gradient(ellipse at center, rgba(245,130,32,0.18), transparent 60%),
+      var(--bg-base);
+    text-align: center;
+  }
+
+  /* Progress bar / nav */
+  .nav-bar {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    height: 3px; background: rgba(38,38,44,0.5); z-index: 100;
+  }
+  .nav-bar-fill {
+    height: 100%; background: linear-gradient(90deg, #F58220, #FFD27A);
+    transition: width 0.3s ease;
+  }
+  .slide-num-badge {
+    position: fixed; bottom: 1.5rem; left: 1.5rem;
+    background: rgba(15,15,18,0.9); backdrop-filter: blur(12px);
+    border: 1px solid var(--border); border-radius: 999px;
+    padding: 0.4rem 1rem; font-family: 'Inter', sans-serif;
+    font-size: 0.8rem; color: #888; z-index: 50;
+    letter-spacing: 0.1em;
+  }
+  .slide-num-badge .current { color: var(--orange); font-weight: 700; }
+  .nav-help {
+    position: fixed; bottom: 1.5rem; right: 1.5rem;
+    background: rgba(15,15,18,0.9); backdrop-filter: blur(12px);
+    border: 1px solid var(--border); border-radius: 999px;
+    padding: 0.4rem 0.9rem; font-family: 'Inter', sans-serif;
+    font-size: 0.75rem; color: #888; z-index: 50;
+    letter-spacing: 0.05em;
+  }
+  .nav-help kbd {
+    background: rgba(245,130,32,0.15); border: 1px solid rgba(245,130,32,0.3);
+    border-radius: 4px; padding: 1px 6px; color: var(--orange-bright);
+    font-family: 'Inter', monospace; font-size: 0.7rem; margin: 0 2px;
+  }
+
+  /* Print */
+  @media print {
+    body { scroll-snap-type: none; height: auto; }
+    body::before, body::after { display: none; }
+    .slide { page-break-after: always; min-height: 100vh; height: auto; }
+    .nav-bar, .slide-num-badge, .nav-help { display: none !important; }
+  }
+
+  /* Mobile */
+  @media (max-width: 720px) {
+    .slide { padding: 4vh 6vw; }
+    .toc-grid { grid-template-columns: 1fr; }
+    .two-col { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== Slide 1: COVER ===== -->
+<section class="slide slide-cover">
+  <div class="slide-inner items-center" style="align-items:center;">
+    <div class="meta">舞光戰將點燈計劃 · TRAINING ACADEMY</div>
+    <div class="day-tag">📅 11 / 5（二）· DAY 3</div>
+    <h1 class="slide-title">工作職責<br><span class="accent">與內部流程</span></h1>
+    <p class="lead" style="max-width:720px; margin: 0 auto 2rem;">
+      你已經懂了公司、品牌、產品。<br>
+      今天要學的是 — 業務真正每天在跑的流程。
+    </p>
+    <div class="instructor">
+      講師：<strong>勇哥</strong>×<strong>大秉</strong> · 業務部
+    </div>
+  </div>
+</section>
+
+<!-- ===== Slide 2: TOC ===== -->
+<section class="slide">
+  <div class="slide-inner">
+    <div class="eyebrow">AGENDA · 今日六大主題</div>
+    <h2 class="slide-h2">三小時，學會在公司活下去的<span style="color:var(--orange-bright)">基本功</span></h2>
+    <div class="toc-grid">
+      <div class="toc-item">
+        <div class="toc-num">01</div>
+        <div class="toc-text"><strong>客戶服務 → 報價 → 訂單 → 出貨 → 收款</strong><span>業務一條龍流程</span></div>
+      </div>
+      <div class="toc-item">
+        <div class="toc-num">02</div>
+        <div class="toc-text"><strong>業務日常工作內容</strong><span>報表 · 拜訪紀錄</span></div>
+      </div>
+      <div class="toc-item">
+        <div class="toc-num">03</div>
+        <div class="toc-text"><strong>三大表單 + 請假作業</strong><span>費用 · 異折 · 特案</span></div>
+      </div>
+      <div class="toc-item">
+        <div class="toc-num">04</div>
+        <div class="toc-text"><strong>BI 系統介紹與實際操作</strong><span>看數字 · 找客戶 · 抓問題</span></div>
+      </div>
+      <div class="toc-item">
+        <div class="toc-num">05</div>
+        <div class="toc-text"><strong>內部跨部門協作</strong><span>業管 · 採購 · 財會</span></div>
+      </div>
+      <div class="toc-item">
+        <div class="toc-num">06</div>
+        <div class="toc-text"><strong>公司車輛使用規範</strong><span>分配 · 油資 · 出事 SOP</span></div>
+      </div>
+    </div>
+    <div class="speaker-note">
+      <span class="label">開場破冰</span>請新人在白板寫下「我以為業務一天在做什麼」 — 等今天結束再對照一次。
+    </div>
+  </div>
+</section>
+
+<!-- ===== Slide 3: TOPIC 1 INTRO ===== -->
+<section class="slide" style="background: radial-gradient(ellipse at left, rgba(245,130,32,0.1), transparent 60%);">
+  <div class="slide-inner">
+    <div class="eyebrow">TOPIC 01 · 客戶服務一條龍</div>
+    <h1 class="slide-title">客戶說<span class="accent">「我要報價」</span><br>那一刻起，你就在跑流程</h1>
+    <p class="lead">
+      展晟業務最容易出包的不是「不會賣」，是「流程斷掉」 — 報價沒回、訂單沒進、出貨延遲、收款拖到。
+    </p>
+    <div class="flow">
+      <div class="flow-step">詢價</div><span class="flow-arrow">→</span>
+      <div class="flow-step">報價</div><span class="flow-arrow">→</span>
+      <div class="flow-step">訂單</div><span class="flow-arrow">→</span>
+      <div class="flow-step">備貨</div><span class="flow-arrow">→</span>
+      <div class="flow-step">出貨</div><span class="flow-arrow">→</span>
+      <div class="flow-step">驗收</div><span class="flow-arrow">→</span>
+      <div class="flow-step">開票</div><span class="flow-arrow">→</span>
+      <div class="flow-step">收款</div>
+    </div>
+    <div class="speaker-note">
+      <span class="label">講師問</span>請每個人說：上一份工作有遇過「客戶氣噗噗、後來才發現是流程出包」的經驗嗎？
+    </div>
+  </div>
+</section>
+
+<!-- ===== Slide 4: 報價 ===== -->
+<section class="slide">
+  <div class="slide-inner">
+    <div class="eyebrow">STEP 1-2 · 詢價 + 報價</div>
+    <h2 class="slide-h2">報價不是丟一個數字，是<span style="color:var(--orange-bright)">給客戶一份決策依據</span></h2>
+    <div class="card-grid">
+      <div class="info-card">
+        <div class="card-num">什麼要寫</div>
+        <div class="card-title">完整報價單</div>
+        <div class="card-body">客戶名稱／案件名／品項型號／數量／單價／總價／<strong style="color:var(--orange-bright);">有效期（建議 14-30 天）</strong>／付款條件／交期。</div>
+      </div>
+      <div class="info-card">
+        <div class="card-num">毛利</div>
+        <div class="card-title">底價要記住</div>
+        <div class="card-body">主管會給你各品項的最低成交價（毛利下限）。報價低於底價必須走 <strong style="color:var(--orange-bright);">特案申請單</strong>。</div>
+      </div>
+      <div class="info-card">
+        <div class="card-num">系統</div>
+        <div class="card-title">ERP / 報價系統</div>
+        <div class="card-body">用公司報價系統開單，<strong>不要在 LINE 上口頭報</strong>。口頭報出問題你說了算 — 系統留檔才是依據。</div>
+      </div>
+    </div>
+    <div class="speaker-note">
+      <span class="label">真實案例</span>新人 A 用 LINE 報「特價 50 元」，客戶截圖後到 ERP 改 80 元被告 — 公司賠錢，業務記過。系統留檔不是麻煩你，是保護你。
+    </div>
+  </div>
+</section>
+
+<!-- ===== Slide 5: 訂單 ===== -->
+<section class="slide">
+  <div class="slide-inner">
+    <div class="eyebrow">STEP 3 · 訂單確認</div>
+    <h2 class="slide-h2">客戶下單那一刻，你要<span style="color:var(--orange-bright)">三件事同時做</span></h2>
+    <ol class="bullets" style="margin-top:1rem;">
+      <li><strong>確認訂單細節</strong> — 型號、數量、單價、交貨地址、收件人手機。一個欄位錯，整批貨就送錯。</li>
+      <li><strong>檢查信用額度</strong> — ERP 上看這客戶的應收餘額 + 票期。超額要先催收上一批，再進新單。</li>
+      <li><strong>確認交期</strong> — 跟業管確認庫存。<strong>沒貨不要硬接</strong>，提前告知客戶 = 信任，事後出包 = 失分。</li>
+    </ol>
+    <div class="two-col">
+      <div class="col-bad">
+        <div class="col-label">✕ 新人常踩的雷</div>
+        <div class="col-content">「客戶說要 100 套，那就先進系統，貨之後再講」 — 結果採購沒跟上，客戶等兩週還沒到貨。</div>
+      </div>
+      <div class="col-good">
+        <div class="col-label">✓ 老鳥的做法</div>
+        <div class="col-content">下單前先 LINE 業管確認「庫存能不能出 100 套」，得到「OK」再進系統。10 秒鐘的事。</div>
+      </div>
+    </div>
+    <div class="speaker-note">
+      <span class="label">大秉現場示範</span>打開 ERP 訂單畫面，逐欄解釋每個欄位的意義 + 漏填會發生什麼事。
+    </div>
+  </div>
+</section>
+
+<!-- ===== Slide 6: 出貨 ===== -->
+<section class="slide">
+  <div class="slide-inner">
+    <div class="eyebrow">STEP 4-6 · 備貨 → 出貨 → 驗收</div>
+    <h2 class="slide-h2">出貨不是業務的事，<span style="color:var(--orange-bright)">但客戶氣的時候找的是業務</span></h2>
+    <div class="card-grid">
+      <div class="info-card">
+        <div class="card-num">業務的責任</div>
+        <div class="card-title">追進度 + 通知客戶</div>
+        <div class="card-body">出貨前一天打電話／LINE 客戶：「明天上午到，請留人簽收」。<strong>沒通知 = 客戶撲空 = 客訴</strong>。</div>
+      </div>
+      <div class="info-card">
+        <div class="card-num">物流選擇</div>
+        <div class="card-title">小單宅配 / 大單配送</div>
+        <div class="card-body">3 件以下走 黑貓／新竹；棧板貨走公司車或大型物流。客戶在偏遠地區先確認運費誰出。</div>
+      </div>
+      <div class="info-card">
+        <div class="card-num">驗收</div>
+        <div class="card-title">簽收 = 法律意義</div>
+        <div class="card-body">客戶簽完字 = 視同貨物無瑕疵交付。<strong style="color:var(--orange-bright);">教客戶當場開箱驗，有問題當場拒簽。</strong></div>
+      </div>
+    </div>
+    <div class="speaker-note">
+      <span class="label">提醒</span>客戶說「先放著我等下驗」 — 業務一定要要求客戶在送貨單上備註「未當場驗收，後續發現瑕疵保留追訴權」。否則之後扯不清。
+    </div>
+  </div>
+</section>
+
+<!-- ===== Slide 7: 收款 ===== -->
+<section class="slide">
+  <div class="slide-inner">
+    <div class="eyebrow">STEP 7-8 · 開票 + 收款</div>
+    <h2 class="slide-h2">「賣得出去」是初級業務，<br><span style="color:var(--orange-bright)">「收得回來」才是合格業務</span></h2>
+    <ul class="bullets">
+      <li><strong>票期管理</strong> — 客戶開票通常 30 / 60 / 90 天。手機行事曆設提醒，到期前 3 天確認客戶有錢入帳。</li>
+      <li><strong>催收順序</strong> — 過期 1 天：LINE 提醒；過期 7 天：電話；過期 14 天：直接拜訪 + 主管知會；過期 30 天：上報財會走法務流程。</li>
+      <li><strong>發票開立</strong> — 公司發票 + 三聯式。客戶要二聯就要事先講，月底集中開。</li>
+      <li><strong>收款方式</strong> — 客戶轉帳要主動傳對帳單；現金（罕見）要兩人見證 + 簽收條。</li>
+    </ul>
+    <div class="speaker-note">
+      <span class="label">業務鐵則</span>沒收到錢的訂單只是「借錢給客戶讓他用」 — 業績是「貨出 + 錢進」，缺一不可。
+    </div>
+  </div>
+</section>
+
+<!-- ===== Slide 8: TOPIC 2 INTRO ===== -->
+<section class="slide" style="background: radial-gradient(ellipse at right, rgba(245,130,32,0.1), transparent 60%);">
+  <div class="slide-inner">
+    <div class="eyebrow">TOPIC 02 · 業務日常工作</div>
+    <h1 class="slide-title">業務的一天，<br><span class="accent">90% 是節奏</span></h1>
+    <p class="lead">
+      做業務不是天天打電話開單。是「<strong>每天做對的事，累積到月底自然有業績</strong>」。
+    </p>
+    <div class="speaker-note">
+      <span class="label">講師問</span>誰能說出「業務的一天」應該長什麼樣？聽完今天再對照看看猜中幾項。
+    </div>
+  </div>
+</section>
+
+<!-- ===== Slide 9: 業務一日節奏 ===== -->
+<section class="slide">
+  <div class="slide-inner">
+    <div class="eyebrow">DAILY · 業務一天的節奏</div>
+    <h2 class="slide-h2">標準一日<span style="color:var(--orange-bright)">時間表</span></h2>
+    <div class="card-grid">
+      <div class="info-card">
+        <div class="card-num">08:30 · 晨會</div>
+        <div class="card-title">同步進度</div>
+        <div class="card-body">主管 5 分鐘宣布事項 / 業務報今日拜訪計畫 / 重點客戶問題討論。</div>
+      </div>
+      <div class="info-card">
+        <div class="card-num">09:00-12:00 · 拜訪</div>
+        <div class="card-title">外勤主戰場</div>
+        <div class="card-body">3-5 家客戶。新客戶先 30 分鐘破冰，老客戶聊新案。<strong>不要在咖啡廳發呆。</strong></div>
+      </div>
+      <div class="info-card">
+        <div class="card-num">12:00-13:30 · 午餐</div>
+        <div class="card-title">回公司 / 跟客戶吃</div>
+        <div class="card-body">A 級客戶就一週請吃一次，建立交情。預算上限走費用申請。</div>
+      </div>
+      <div class="info-card">
+        <div class="card-num">13:30-17:00 · 拜訪 / 出貨</div>
+        <div class="card-title">下午衝量</div>
+        <div class="card-body">下午客戶比較有空談價、看樣品。也是出貨集中時段，要追物流回報。</div>
+      </div>
+      <div class="info-card">
+        <div class="card-num">17:00-18:00 · 進辦公室</div>
+        <div class="card-title">收尾 + 紀錄</div>
+        <div class="card-body">建單、報表、寫拜訪紀錄、回 LINE 訊息。<strong style="color:var(--orange-bright);">紀錄今天寫好，比明天補的 10 倍快。</strong></div>
+      </div>
+      <div class="info-card">
+        <div class="card-num">18:00 · 下班</div>
+        <div class="card-title">該休息就休息</div>
+        <div class="card-body">業務不是 24 小時待命。下班後客戶 LINE 急事處理，閒聊明天再回。</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Slide 10: 報表 ===== -->
+<section class="slide">
+  <div class="slide-inner">
+    <div class="eyebrow">REPORTING · 三層報表</div>
+    <h2 class="slide-h2">主管不會要你<span style="color:var(--orange-bright)">每天傳一堆 LINE</span>，<br>但要看到三種報表</h2>
+    <div class="card-grid">
+      <div class="info-card">
+        <div class="card-num">每日</div>
+        <div class="card-title">拜訪紀錄</div>
+        <div class="card-body">時間／客戶／談了什麼／下一步行動／預估金額。當天填，<strong>三天後叫你補你會忘</strong>。</div>
+      </div>
+      <div class="info-card">
+        <div class="card-num">每週</div>
+        <div class="card-title">週報</div>
+        <div class="card-body">本週業績達成 / 本週重點拜訪 / 下週計畫 / 卡關問題 — <strong style="color:var(--orange-bright);">主動講你卡哪，主管才能幫你</strong>。</div>
+      </div>
+      <div class="info-card">
+        <div class="card-num">每月</div>
+        <div class="card-title">MOR 月報</div>
+        <div class="card-body">月底 25 號交。包含當月業績、達成率、A/B/C 客戶分布、毛利結構、預估下月。<strong>是升等審查依據</strong>。</div>
+      </div>
+    </div>
+    <div class="speaker-note">
+      <span class="label">大秉提醒</span>不要把報表當作主管監督你。報表是「<strong>你給未來的自己看的</strong>」 — 三個月後想知道為什麼這客戶丟單，只能靠當時的紀錄。
+    </div>
+  </div>
+</section>
+
+<!-- ===== Slide 11: 拜訪紀錄 ===== -->
+<section class="slide">
+  <div class="slide-inner">
+    <div class="eyebrow">CALL REPORT · 拜訪紀錄</div>
+    <h2 class="slide-h2">一份好的拜訪紀錄 =<br><span style="color:var(--orange-bright)">隔天可以接著跑的劇本</span></h2>
+    <div class="two-col">
+      <div class="col-bad">
+        <div class="col-label">✕ 沒用的紀錄</div>
+        <div class="col-content">
+          「11/5 拜訪 ABC 燈飾，老闆人不錯，會考慮我們的崁燈」<br><br>
+          → <strong>三天後你看不懂這在寫什麼</strong>。
+        </div>
+      </div>
+      <div class="col-good">
+        <div class="col-label">✓ 有用的紀錄</div>
+        <div class="col-content">
+          11/5 14:30 拜訪 ABC 燈飾 · 林老闆<br>
+          · 詢問索爾 25W 100 套是否有量大優惠<br>
+          · 主推 Ra90 + 2 年保固差異化<br>
+          · 林關心：對手 X 牌降到 380<br>
+          · 下一步：11/8 前報價 + 樣品寄達<br>
+          · 預估：8 萬／毛利 25%<br>
+          · 注意：林老闆下週要去日本，11/12 再追
+        </div>
+      </div>
+    </div>
+    <div class="speaker-note">
+      <span class="label">公式</span>時間／人／談什麼／<strong style="color:var(--orange-bright);">下一步</strong>／預估／<strong>注意點</strong> — 五個欄位填好就贏一半人。
+    </div>
+  </div>
+</section>
+
+<!-- ===== Slide 12: TOPIC 3 INTRO ===== -->
+<section class="slide" style="background: radial-gradient(ellipse at center, rgba(245,130,32,0.1), transparent 60%);">
+  <div class="slide-inner">
+    <div class="eyebrow">TOPIC 03 · 表單作業 + 請假</div>
+    <h1 class="slide-title">三張表單，<br>學會了才能<span class="accent">把錢花得對</span></h1>
+    <p class="lead">
+      展晟給業務的權限是 — <strong style="color:var(--orange-bright)">只要你能說清楚為什麼，公司願意給</strong>。<br>
+      但你必須走對表單、簽對流程。
+    </p>
+  </div>
+</section>
+
+<!-- ===== Slide 13: 費用申請單 ===== -->
+<section class="slide">
+  <div class="slide-inner">
+    <div class="eyebrow">FORM 1 · 費用申請單</div>
+    <h2 class="slide-h2">業務帶客戶吃飯、加油、買樣品 — <br>都靠<span style="color:var(--orange-bright)">這張單</span></h2>
+    <div class="card-grid">
+      <div class="info-card">
+        <div class="card-num">用途</div>
+        <div class="card-title">業務開銷報帳</div>
+        <div class="card-body">客戶招待餐 / 通行費 / 樣品 / 印刷 / 雜支。<strong>不能報的：個人加油、私人聚餐</strong>。</div>
+      </div>
+      <div class="info-card">
+        <div class="card-num">流程</div>
+        <div class="card-title">填表 → 主管核 → 財會核</div>
+        <div class="card-body">事前申請（大額）/ 事後檢附發票（小額）。每月 25 號前交完，月底結算。</div>
+      </div>
+      <div class="info-card">
+        <div class="card-num">關鍵</div>
+        <div class="card-title">發票 + 客戶名稱</div>
+        <div class="card-body">發票統編 = 公司、抬頭 = 公司全名。<strong style="color:var(--orange-bright);">招待要寫被招待客戶名 + 案件名</strong>，不寫財會打回。</div>
+      </div>
+    </div>
+    <div class="speaker-note">
+      <span class="label">勇哥案例</span>新人請客戶吃 5,000 沒寫客戶名，財會退回三次。第四次寫「林老闆 / ABC 燈飾 / 索爾案 100 套」秒過。
+    </div>
+  </div>
+</section>
+
+<!-- ===== Slide 14: 異折單 ===== -->
+<section class="slide">
+  <div class="slide-inner">
+    <div class="eyebrow">FORM 2 · 異折單</div>
+    <h2 class="slide-h2">客戶說「<span style="color:var(--orange-bright)">這批貨有問題，少算一點</span>」<br>怎麼處理？</h2>
+    <ol class="bullets">
+      <li><strong>先確認問題</strong> — 真的是品質瑕疵？運送損壞？還是客戶想凹？回辦公室拍照存證。</li>
+      <li><strong>跟主管報告</strong> — 異折金額多少？品項？原因？主管判斷是否核准。</li>
+      <li><strong>填異折單</strong> — 系統開異折單，主管簽核 → 財會處理。客戶帳上自動扣抵下次貨款。</li>
+      <li><strong>絕對不要</strong> — 自己答應客戶「我幫你少算 5 千」 — <span style="color:#fca5a5">沒走系統 = 自己賠錢 + 主管罵</span>。</li>
+    </ol>
+    <div class="speaker-note">
+      <span class="label">原則</span>「給客戶台階下」是業務智慧，但<strong>所有金額調整必須走系統</strong>。沒走系統 = 公司不認 = 你自己吞。
+    </div>
+  </div>
+</section>
+
+<!-- ===== Slide 15: 特案申請單 ===== -->
+<section class="slide">
+  <div class="slide-inner">
+    <div class="eyebrow">FORM 3 · 特案申請單</div>
+    <h2 class="slide-h2">當客戶條件<span style="color:var(--orange-bright)">超出標準</span> — 你需要這張單</h2>
+    <div class="card-grid">
+      <div class="info-card">
+        <div class="card-num">什麼時候要</div>
+        <div class="card-title">三種情境</div>
+        <div class="card-body">
+          ① 報價低於底價（毛利不足）<br>
+          ② 量大要求超優惠（如 1,000 套以上）<br>
+          ③ 戰略性接單（虧本搶單，搶占案場）
+        </div>
+      </div>
+      <div class="info-card">
+        <div class="card-num">必填</div>
+        <div class="card-title">為什麼要批准</div>
+        <div class="card-body">
+          ① 客戶背景（A 級／重點工程）<br>
+          ② 案件規模 + 後續潛力<br>
+          ③ <strong style="color:var(--orange-bright);">不批的話誰會搶走</strong>（競品威脅）
+        </div>
+      </div>
+      <div class="info-card">
+        <div class="card-num">流程</div>
+        <div class="card-title">主管 → 區經 → 業總</div>
+        <div class="card-body">小額：主管核。中額：區經理。大額：業務總經理。<strong>事前申請</strong>，不能事後補單。</div>
+      </div>
+    </div>
+    <div class="speaker-note">
+      <span class="label">關鍵</span>特案不是「我談不下來」的藉口，是「<strong style="color:var(--orange-bright);">這個案值得公司投資</strong>」的提案。寫單時用提案的角度寫。
+    </div>
+  </div>
+</section>
+
+<!-- ===== Slide 16: 請假 ===== -->
+<section class="slide">
+  <div class="slide-inner">
+    <div class="eyebrow">LEAVE · 請假作業</div>
+    <h2 class="slide-h2">請假不是「<span style="color:var(--orange-bright)">打個 LINE 跟主管說</span>」就好</h2>
+    <div class="card-grid">
+      <div class="info-card">
+        <div class="card-num">事前流程</div>
+        <div class="card-title">系統請假單</div>
+        <div class="card-body">假別（事假／病假／特休／喪假）/ 起迄時間 / 代理人 / 待辦事項交接。<strong>三天前</strong>送出。</div>
+      </div>
+      <div class="info-card">
+        <div class="card-num">急事</div>
+        <div class="card-title">當天請假</div>
+        <div class="card-body">早上 9:00 前打電話跟主管講（不是 LINE）。回來後補請假單。<strong>不打電話 = 曠職</strong>。</div>
+      </div>
+      <div class="info-card">
+        <div class="card-num">代理人</div>
+        <div class="card-title">交接才能放心請</div>
+        <div class="card-body">A 級客戶聯絡方式 + 進行中的案 + 下單／出貨／收款待辦事項，全部給代理同事。回來主動感謝。</div>
+      </div>
+    </div>
+    <div class="speaker-note">
+      <span class="label">CH 00 已教過</span>病假要病假證明（請參考 onboarding.html）。月底衝刺週原則上不安排休假，特殊狀況要找主管商量。
+    </div>
+  </div>
+</section>
+
+<!-- ===== Slide 17: TOPIC 4 INTRO ===== -->
+<section class="slide" style="background: radial-gradient(ellipse at left, rgba(245,130,32,0.1), transparent 60%);">
+  <div class="slide-inner">
+    <div class="eyebrow">TOPIC 04 · BI 系統</div>
+    <h1 class="slide-title">數字會<span class="accent">說話</span>，<br>會看 BI 才能聽懂</h1>
+    <p class="lead">
+      Business Intelligence — 把全公司的銷售資料變成一張一張可以「<strong>看出規律</strong>」的圖表。<br>
+      看不懂 BI 的業務 = 拿到雷達卻只會猜方向的駕駛員。
+    </p>
+  </div>
+</section>
+
+<!-- ===== Slide 18: BI 是什麼 ===== -->
+<section class="slide">
+  <div class="slide-inner">
+    <div class="eyebrow">BI · 三件事</div>
+    <h2 class="slide-h2">BI 給業務的<span style="color:var(--orange-bright)">三個答案</span></h2>
+    <div class="card-grid">
+      <div class="info-card">
+        <div class="card-num">Q1</div>
+        <div class="card-title">我這個月做得怎樣？</div>
+        <div class="card-body">業績儀表板：當月達成率 / 與上月比 / 與去年同期比 / 在區域排名。一打開就看得到。</div>
+      </div>
+      <div class="info-card">
+        <div class="card-num">Q2</div>
+        <div class="card-title">我的客戶誰最值錢？</div>
+        <div class="card-body">客戶分析：A/B/C 級分布 / 月度貢獻 / 毛利率 / 拜訪頻率。<strong style="color:var(--orange-bright);">把 70% 時間放在 A 級客戶上</strong>的依據。</div>
+      </div>
+      <div class="info-card">
+        <div class="card-num">Q3</div>
+        <div class="card-title">什麼產品最好賣？</div>
+        <div class="card-body">產品熱銷榜：本月銷量 TOP / 毛利貢獻 TOP / 退貨率高的品項。新品要不要推這個就靠它。</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Slide 19: BI 操作 ===== -->
+<section class="slide">
+  <div class="slide-inner">
+    <div class="eyebrow">BI · 實際操作</div>
+    <h2 class="slide-h2"><span style="color:var(--orange-bright)">這台電腦</span>，現場示範一輪</h2>
+    <ol class="bullets">
+      <li><strong>登入入口</strong> — 公司 BI 系統網址（大秉現場提供）+ 個人帳密。第一次登入要改密碼。</li>
+      <li><strong>切到「我的儀表板」</strong> — 看當月業績達成 / 應收帳款狀況 / 拜訪達成率。</li>
+      <li><strong>看「客戶分析」</strong> — 篩選你責任區，看 A 級客戶清單 + 最近一個月活躍度。</li>
+      <li><strong>看「產品熱銷」</strong> — 篩選本季 TOP 20 產品，記住排名變化。客戶問什麼最好賣，你才有答案。</li>
+      <li><strong>匯出 Excel</strong> — 月底 MOR 報表，從 BI 匯出原始資料 + 自己加註解，比手動算快 10 倍。</li>
+    </ol>
+    <div class="speaker-note">
+      <span class="label">大秉示範</span>實際操作：登入→ 我的儀表板 → 客戶分析 → 產品熱銷 → 匯出。請新人各自登入跟著做一次。
+    </div>
+  </div>
+</section>
+
+<!-- ===== Slide 20: BI 應用案例 ===== -->
+<section class="slide">
+  <div class="slide-inner">
+    <div class="eyebrow">BI · 真實案例</div>
+    <h2 class="slide-h2">老鳥怎麼<span style="color:var(--orange-bright)">用 BI 找錢</span></h2>
+    <div class="two-col">
+      <div class="col-bad">
+        <div class="col-label">✕ 不會用 BI</div>
+        <div class="col-content">
+          每個月底主管問「為什麼這月差 20%」<br>
+          → 你只能說「客戶都不下單」。<br><br>
+          隔月還是不知道哪裡可以補。
+        </div>
+      </div>
+      <div class="col-good">
+        <div class="col-label">✓ 會用 BI</div>
+        <div class="col-content">
+          月中看 BI 發現：<br>
+          · A 級客戶 X 連續 2 月沒下單<br>
+          · 上季熱銷的索爾，這月跌出 TOP 10<br>
+          → 主動拜訪 X / 推索爾促銷 / 月底逆轉。
+        </div>
+      </div>
+    </div>
+    <div class="speaker-note">
+      <span class="label">給新人</span>BI 不是月底交差用，是<strong>每週一上班第一件事打開看</strong>。你要比主管早發現問題。
+    </div>
+  </div>
+</section>
+
+<!-- ===== Slide 21: TOPIC 5 INTRO ===== -->
+<section class="slide" style="background: radial-gradient(ellipse at right, rgba(245,130,32,0.1), transparent 60%);">
+  <div class="slide-inner">
+    <div class="eyebrow">TOPIC 05 · 跨部門協作</div>
+    <h1 class="slide-title">業務不是孤狼，<br><span class="accent">是團隊的前線</span></h1>
+    <p class="lead">
+      你拉到的每一張單，背後是業管／採購／財會／物流／工程一群人在跑。<br>
+      會跟內部部門合作的業務，<strong>跑得遠得多</strong>。
+    </p>
+  </div>
+</section>
+
+<!-- ===== Slide 22: 業管 ===== -->
+<section class="slide">
+  <div class="slide-inner">
+    <div class="eyebrow">業管 · OPERATIONS</div>
+    <h2 class="slide-h2">業管 = 你的<span style="color:var(--orange-bright)">後方司令部</span></h2>
+    <div class="card-grid">
+      <div class="info-card">
+        <div class="card-num">他們做什麼</div>
+        <div class="card-title">訂單 + 客戶資料 + 出貨</div>
+        <div class="card-body">把你 ERP 的訂單轉成實際的揀貨／包裝／物流安排。客戶資料、信用額度、票期管理也是他們在管。</div>
+      </div>
+      <div class="info-card">
+        <div class="card-num">什麼時候找他們</div>
+        <div class="card-title">下單前 + 出貨追蹤</div>
+        <div class="card-body">下單前：「庫存夠不夠？」／ 出貨後：「貨到哪？」／ 客戶問：「我的訂單編號？」</div>
+      </div>
+      <div class="info-card">
+        <div class="card-num">合作關鍵</div>
+        <div class="card-title">給他們完整資料</div>
+        <div class="card-body">客戶名 / 統編 / 收件人手機 / 地址 / 特殊指示（裝箱方式、要不要收件人簽）— 一次給全，他們省力你也省事。</div>
+      </div>
+    </div>
+    <div class="speaker-note">
+      <span class="label">大秉</span>業管要每天下午跑出貨單，5 點後才丟急單會被白眼。<strong>真有急事先打電話打招呼，再丟單。</strong>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Slide 23: 採購 ===== -->
+<section class="slide">
+  <div class="slide-inner">
+    <div class="eyebrow">採購 · PURCHASING</div>
+    <h2 class="slide-h2">採購控制<span style="color:var(--orange-bright)">公司命脈</span> — 庫存</h2>
+    <div class="card-grid">
+      <div class="info-card">
+        <div class="card-num">他們做什麼</div>
+        <div class="card-title">進貨 + 庫存 + 缺貨預警</div>
+        <div class="card-body">跟工廠下訂、安排進貨、控管最低庫存量、缺貨時找替代品。每個品項的補貨週期都是他們在算。</div>
+      </div>
+      <div class="info-card">
+        <div class="card-num">什麼時候找</div>
+        <div class="card-title">大單 + 缺貨</div>
+        <div class="card-body">超過正常量的訂單（如 500 套以上）要先問採購，避免吃光庫存。客戶要急貨缺貨時也是找採購想辦法。</div>
+      </div>
+      <div class="info-card">
+        <div class="card-num">合作關鍵</div>
+        <div class="card-title">提早通知 + 信用</div>
+        <div class="card-body">案場確定下單就先 LINE 採購預告。<strong style="color:var(--orange-bright);">「業務說這單一定會中」結果三次有兩次跳票，採購就不再相信你</strong>。</div>
+      </div>
+    </div>
+    <div class="speaker-note">
+      <span class="label">關鍵詞</span>跟採購建立信用 = <strong>承諾的單一定要中</strong>。一次跳票兩次扣分，第三次他們自己會把預留庫存收回去。
+    </div>
+  </div>
+</section>
+
+<!-- ===== Slide 24: 財會 ===== -->
+<section class="slide">
+  <div class="slide-inner">
+    <div class="eyebrow">財會 · FINANCE</div>
+    <h2 class="slide-h2">財會看<span style="color:var(--orange-bright)">每張單的真假</span></h2>
+    <div class="card-grid">
+      <div class="info-card">
+        <div class="card-num">他們做什麼</div>
+        <div class="card-title">應收 + 發票 + 傳票</div>
+        <div class="card-body">追客戶錢有沒有進來、開立發票、處理你的費用核銷、月結結帳。<strong>業績達不達標他們都看得出來</strong>。</div>
+      </div>
+      <div class="info-card">
+        <div class="card-num">什麼時候找</div>
+        <div class="card-title">客戶逾期 + 報帳問題</div>
+        <div class="card-body">客戶過期沒付款 / 發票要重開 / 費用核銷被退 / 月結有疑問。每月 25 號是他們最忙時段。</div>
+      </div>
+      <div class="info-card">
+        <div class="card-num">合作關鍵</div>
+        <div class="card-title">資料完整 + 守時</div>
+        <div class="card-body">表單欄位填全（發票統編、客戶名、案件名）/ 25 號前交報帳。<strong>缺一個欄位 = 整單退回 = 自己重做</strong>。</div>
+      </div>
+    </div>
+    <div class="speaker-note">
+      <span class="label">勇哥</span>財會不是「擋你錢的人」，是「<strong style="color:var(--orange-bright);">確保公司不出包</strong>的人」。態度好一點他們會主動提醒你哪裡會被查稅。
+    </div>
+  </div>
+</section>
+
+<!-- ===== Slide 25: 跨部門總結 ===== -->
+<section class="slide">
+  <div class="slide-inner">
+    <div class="eyebrow">CROSS-DEPT · 黃金法則</div>
+    <h2 class="slide-h2">跟內部部門相處的<span style="color:var(--orange-bright)">三個原則</span></h2>
+    <ol class="bullets">
+      <li><strong>不把他們當服務生</strong> — 業務不是天王。業管／採購／財會的時間跟你一樣寶貴。</li>
+      <li><strong>事前溝通 &gt; 事後補救</strong> — 大單先告知、缺貨先預警、報帳先問清楚 — 90% 的內部摩擦都是「沒先講」造成的。</li>
+      <li><strong>幫他們解決問題</strong> — 客戶資料填完整、單據填正確、催款主動跟、結案主動回 — 你幫他們省力，他們幫你開綠燈。</li>
+    </ol>
+    <div class="speaker-note">
+      <span class="label">大秉</span>業務在公司被討厭通常不是因為「績效不好」，是因為「<strong>每次找人就是來丟事</strong>」。記住這三個原則，半年後你會發現整個公司都幫你跑。
+    </div>
+  </div>
+</section>
+
+<!-- ===== Slide 26: TOPIC 6 INTRO ===== -->
+<section class="slide" style="background: radial-gradient(ellipse at center, rgba(245,130,32,0.1), transparent 60%);">
+  <div class="slide-inner">
+    <div class="eyebrow">TOPIC 06 · 公司車輛規範</div>
+    <h1 class="slide-title">公司車是<span class="accent">工具</span>，<br>不是給你開回老家的</h1>
+    <p class="lead">
+      展晟業務有公務車是<strong>大利</strong>，但出包率也最高。今天把規範講清楚，<strong>後面少踩雷</strong>。
+    </p>
+  </div>
+</section>
+
+<!-- ===== Slide 27: 車輛規範 ===== -->
+<section class="slide">
+  <div class="slide-inner">
+    <div class="eyebrow">CAR · 使用規範</div>
+    <h2 class="slide-h2">用公務車的<span style="color:var(--orange-bright)">五件事</span></h2>
+    <div class="card-grid">
+      <div class="info-card">
+        <div class="card-num">01 油資</div>
+        <div class="card-title">公司油卡</div>
+        <div class="card-body">配發油卡。加滿後保留收據黏在<strong>油資登記簿</strong>。月底交給業管核對里程數。</div>
+      </div>
+      <div class="info-card">
+        <div class="card-num">02 行車紀錄器</div>
+        <div class="card-title">永遠開著</div>
+        <div class="card-body">每天上車自動錄影。<strong style="color:var(--orange-bright);">出事故的關鍵證物</strong>。檔案不能自己刪，需事故 SOP 處理。</div>
+      </div>
+      <div class="info-card">
+        <div class="card-num">03 保養</div>
+        <div class="card-title">里程數提醒</div>
+        <div class="card-body">5,000 km 換機油 / 10,000 km 大保養。儀表板會提示。提早一週跟業管預約保養廠。</div>
+      </div>
+      <div class="info-card">
+        <div class="card-num">04 罰單</div>
+        <div class="card-title">誰違規誰付</div>
+        <div class="card-body">超速 / 違停 / 闖紅燈 — <strong>業務自己付</strong>，公司不代繳。記點累積會被收回車輛。</div>
+      </div>
+      <div class="info-card">
+        <div class="card-num">05 私人使用</div>
+        <div class="card-title">原則禁止</div>
+        <div class="card-body">公務車是工作配備，不是家用車。下班停公司或家。<strong>不能用來搬家、載親友、私人外送</strong>。</div>
+      </div>
+      <div class="info-card">
+        <div class="card-num">06 事故 SOP</div>
+        <div class="card-title">已在 CH 00 教過</div>
+        <div class="card-body">立即報警 → 通知主管 → 警局做筆錄 → 保險公司 → 30 天後拿事故證明。<strong>不私下和解</strong>。</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Slide 28: 車輛 - 出車前後 ===== -->
+<section class="slide">
+  <div class="slide-inner">
+    <div class="eyebrow">CAR · 日常 SOP</div>
+    <h2 class="slide-h2">出車前 / 收車後 — <span style="color:var(--orange-bright)">兩分鐘檢查</span></h2>
+    <div class="two-col">
+      <div class="col-good">
+        <div class="col-label">✓ 出車前</div>
+        <div class="col-content">
+          ☐ 油量足（少於 1/4 先加）<br>
+          ☐ 胎壓正常（每月 1 號自檢）<br>
+          ☐ 行車紀錄器開機 / 燈號正常<br>
+          ☐ 後車廂無<strong>未繳罰單</strong>累積<br>
+          ☐ 樣品 / 名片 / DM 補齊
+        </div>
+      </div>
+      <div class="col-good">
+        <div class="col-label">✓ 收車後</div>
+        <div class="col-content">
+          ☐ 停回公司停車場（除非加班過夜停家）<br>
+          ☐ 油卡放手套箱不要帶走<br>
+          ☐ 車內樣品鎖好<br>
+          ☐ 行車紀錄器有出錯提示時通報業管<br>
+          ☐ 加油單 / 過路費收據放袋
+        </div>
+      </div>
+    </div>
+    <div class="speaker-note">
+      <span class="label">大秉</span>養成 SOP，半年後不用想就會做。<strong>業務的職業習慣 80% 來自前 3 個月</strong>。
+    </div>
+  </div>
+</section>
+
+<!-- ===== Slide 29: TODAY SUMMARY ===== -->
+<section class="slide">
+  <div class="slide-inner">
+    <div class="eyebrow">RECAP · 今日總結</div>
+    <h2 class="slide-h2">回想<span style="color:var(--orange-bright)">早上寫的那句</span><br>「我以為業務一天在做什麼」</h2>
+    <div class="card-grid">
+      <div class="info-card">
+        <div class="card-num">客戶端</div>
+        <div class="card-title">8 步流程</div>
+        <div class="card-body">詢價 → 報價 → 訂單 → 備貨 → 出貨 → 驗收 → 開票 → 收款。每一步斷掉都是客訴。</div>
+      </div>
+      <div class="info-card">
+        <div class="card-num">公司端</div>
+        <div class="card-title">日 / 週 / 月節奏</div>
+        <div class="card-body">晨會 → 拜訪 → 紀錄 → 週報 → MOR 月報。報表是給未來自己看的。</div>
+      </div>
+      <div class="info-card">
+        <div class="card-num">表單三張 + 請假</div>
+        <div class="card-title">把錢花得對</div>
+        <div class="card-body">費用申請 / 異折 / 特案 / 請假 — 全部走系統，<strong>口頭答應的都不算</strong>。</div>
+      </div>
+      <div class="info-card">
+        <div class="card-num">BI 系統</div>
+        <div class="card-title">數字會說話</div>
+        <div class="card-body">每週一第一件事打開 BI。客戶分級 / 業績達成 / 產品熱銷 — 三件事就能比 80% 業務早一步。</div>
+      </div>
+      <div class="info-card">
+        <div class="card-num">跨部門</div>
+        <div class="card-title">業管 / 採購 / 財會</div>
+        <div class="card-body">不把他們當服務生 / 事前 &gt; 事後 / 幫他們省力 — 半年後整個公司幫你跑。</div>
+      </div>
+      <div class="info-card">
+        <div class="card-num">公務車</div>
+        <div class="card-title">工具，不是私人車</div>
+        <div class="card-body">油資、保養、罰單、事故 SOP 都有規範。違規 = 收回車。出事故走流程不私下和解。</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Slide 30: CLOSING ===== -->
+<section class="slide slide-close">
+  <div class="slide-inner items-center" style="align-items:center;">
+    <div class="eyebrow" style="justify-content:center;">END OF DAY 3 · 你今天升級了</div>
+    <h1 class="slide-title">明天<span class="accent">出門拜訪</span>前，<br>記得做這三件事</h1>
+    <ol class="bullets" style="max-width:680px; margin: 2rem auto 0; text-align:left;">
+      <li><strong>登入 BI</strong> — 看自己的責任區、A 級客戶清單。</li>
+      <li><strong>填好今天拜訪計畫表</strong> — 時間 / 客戶 / 預期談什麼 / 要帶什麼樣品。</li>
+      <li><strong>檢查公務車</strong> — 油、胎壓、行車紀錄器、樣品 — 上路才不慌。</li>
+    </ol>
+    <p class="lead" style="margin-top: 3rem; max-width:680px;">
+      你已經完成 <strong style="color:var(--orange-bright)">Day 3 / 5</strong> — 還剩兩天就能正式上線。<br>
+      有問題隨時來問<strong style="color:var(--orange-bright)">勇哥</strong>或<strong style="color:var(--orange-bright)">大秉</strong>。
+    </p>
+    <div class="instructor" style="margin-top: 2rem;">
+      🎯 闖完整套挑戰：<a href="challenge.html" style="color:var(--orange-bright); text-decoration:underline;">舞光戰將點燈計劃 · 闖關挑戰</a>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Navigation ===== -->
+<div class="nav-bar"><div class="nav-bar-fill" id="navFill"></div></div>
+<div class="slide-num-badge" id="slideNumBadge"><span class="current">01</span> / 30</div>
+<div class="nav-help">← / → 切換 · <kbd>F11</kbd> 全螢幕 · <kbd>Ctrl+P</kbd> 列印</div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const navFill = document.getElementById('navFill');
+  const slideBadge = document.getElementById('slideNumBadge');
+  const total = slides.length;
+
+  function getCurrentSlide() {
+    const scrollY = window.scrollY + window.innerHeight / 2;
+    let idx = 0;
+    slides.forEach((s, i) => {
+      if (s.offsetTop <= scrollY) idx = i;
+    });
+    return idx;
+  }
+
+  function updateNav() {
+    const idx = getCurrentSlide();
+    const num = String(idx + 1).padStart(2, '0');
+    slideBadge.innerHTML = `<span class="current">${num}</span> / ${String(total).padStart(2, '0')}`;
+    navFill.style.width = ((idx + 1) / total * 100) + '%';
+  }
+
+  window.addEventListener('scroll', updateNav, { passive: true });
+  updateNav();
+
+  function goSlide(idx) {
+    if (idx < 0) idx = 0;
+    if (idx >= total) idx = total - 1;
+    slides[idx].scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  document.addEventListener('keydown', (e) => {
+    const cur = getCurrentSlide();
+    if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') {
+      e.preventDefault();
+      goSlide(cur + 1);
+    } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+      e.preventDefault();
+      goSlide(cur - 1);
+    } else if (e.key === 'Home') {
+      e.preventDefault(); goSlide(0);
+    } else if (e.key === 'End') {
+      e.preventDefault(); goSlide(total - 1);
+    }
+  });
+</script>
+
+</body>
+</html>
