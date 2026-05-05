@@ -2677,8 +2677,21 @@
       fields.forEach(([sel, key]) => {
         elFlagCards.querySelectorAll(sel).forEach(el => {
           el.addEventListener('input', (e) => {
-            flagState.cards[+e.target.dataset.idx][key] = e.target.value;
+            const idx = +e.target.dataset.idx;
+            flagState.cards[idx][key] = e.target.value;
             flagCheckDirty();
+            // Live-sync 卡片頂部 header 顯示（標題／短標題 會即時更新）
+            if (key === 'shortName' || key === 'title') {
+              const card = flagState.cards[idx];
+              const headerEl = elFlagCards.querySelector(`[data-flag-idx="${idx}"] .font-bold.text-sm`);
+              if (headerEl) {
+                headerEl.textContent = card.shortName || (card.title || '').replace(/<br\s*\/?>/gi, ' ') || '（未命名）';
+              }
+            }
+            if (key === 'sku') {
+              const skuEl = elFlagCards.querySelector(`[data-flag-idx="${idx}"] .font-mono-en`);
+              if (skuEl) skuEl.textContent = e.target.value || '—';
+            }
           });
         });
       });
