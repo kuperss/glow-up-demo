@@ -888,17 +888,16 @@ function injectAIHelperCSS() {
   s.textContent = `
     .ai-helper-fab {
       position: fixed; right: 24px; bottom: 24px; z-index: 9998;
-      width: 64px; height: 64px; border-radius: 50%;
-      background: linear-gradient(135deg, #F58220, #C66510);
-      border: 2px solid rgba(255,255,255,0.9);
+      width: 72px; height: 72px;
+      background: transparent; border: none; padding: 0;
       display: flex; align-items: center; justify-content: center;
-      cursor: pointer; box-shadow: 0 12px 40px -8px rgba(245,130,32,0.55);
-      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      cursor: pointer;
+      filter: drop-shadow(0 8px 18px rgba(245,130,32,0.45));
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), filter 0.3s ease;
       animation: ai-fab-pulse 3s ease-in-out infinite;
-      overflow: hidden;
     }
-    .ai-helper-fab:hover { transform: scale(1.08) translateY(-2px); }
-    @keyframes ai-fab-pulse { 0%,100% { box-shadow: 0 12px 40px -8px rgba(245,130,32,0.6); } 50% { box-shadow: 0 16px 60px -8px rgba(245,130,32,0.9); } }
+    .ai-helper-fab:hover { transform: scale(1.08) translateY(-2px); filter: drop-shadow(0 12px 28px rgba(245,130,32,0.7)); }
+    @keyframes ai-fab-pulse { 0%,100% { filter: drop-shadow(0 8px 18px rgba(245,130,32,0.45)); } 50% { filter: drop-shadow(0 12px 28px rgba(245,130,32,0.7)); } }
     .ai-helper-panel {
       position: fixed; right: 24px; bottom: 92px; z-index: 9998;
       width: 380px; max-width: calc(100vw - 32px);
@@ -917,18 +916,17 @@ function injectAIHelperCSS() {
       background: linear-gradient(180deg, rgba(245,130,32,0.08), transparent);
     }
     .ai-panel-icon {
-      width: 44px; height: 44px; border-radius: 50%;
-      background: linear-gradient(135deg, #F58220, #C66510);
-      border: 2px solid rgba(255,255,255,0.9);
+      width: 48px; height: 48px;
+      background: transparent; border: none;
       display: flex; align-items: center; justify-content: center;
-      overflow: hidden; flex-shrink: 0;
+      flex-shrink: 0;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4));
     }
     .ai-panel-icon img,
     .ai-helper-fab img {
-      width: 110%; height: 110%;
-      object-fit: contain; object-position: center 25%;
+      width: 100%; height: 100%;
+      object-fit: contain;
       display: block;
-      transform: translateY(2px);
     }
     .ai-panel-title { font-weight: 700; font-size: 15px; color: #F5F5F7; }
     .ai-panel-subtitle { font-size: 11px; color: #6B6B75; }
