@@ -53,8 +53,9 @@
     display: flex; flex-direction: column;
     padding: 4vh 8vw;
     overflow: hidden;
+    isolation: isolate;
   }
-  .slide-inner { width: 100%; max-width: 1280px; margin: 0 auto; flex: 1; display: flex; flex-direction: column; justify-content: center; }
+  .slide-inner { width: 100%; max-width: 1280px; margin: 0 auto; flex: 1; display: flex; flex-direction: column; justify-content: center; position: relative; z-index: 2; }
   .eyebrow {
     display: inline-flex; align-items: center; gap: 12px;
     font-family: 'Inter', sans-serif; font-size: 12px; letter-spacing: 0.25em;
@@ -232,6 +233,79 @@
     text-align: center;
   }
 
+  /* Contextual slide illustrations */
+  .slide-art {
+    position: absolute;
+    z-index: 1;
+    top: 50%;
+    right: clamp(0.75rem, 4.5vw, 5rem);
+    width: clamp(260px, 32vw, 500px);
+    max-height: 70vh;
+    transform: translateY(-50%);
+    pointer-events: none;
+    opacity: 0.72;
+    filter:
+      drop-shadow(0 18px 42px rgba(245,130,32,0.34))
+      drop-shadow(0 0 14px rgba(255,160,80,0.18));
+    mix-blend-mode: screen;
+  }
+  .slide-art::before {
+    content: '';
+    position: absolute;
+    inset: -12%;
+    border-radius: 50%;
+    background:
+      radial-gradient(circle at 50% 45%, rgba(245,130,32,0.20), transparent 58%),
+      radial-gradient(circle at 54% 52%, rgba(255,210,122,0.08), transparent 38%);
+    filter: blur(8px);
+    z-index: -1;
+  }
+  .slide-art svg { display: block; width: 100%; height: auto; overflow: visible; }
+  .slide-art .line {
+    fill: none;
+    stroke: #FFB15F;
+    stroke-width: 7;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .slide-art .thin { stroke-width: 3.5; opacity: 0.9; }
+  .slide-art .hair { stroke-width: 2.5; opacity: 0.72; }
+  .slide-art .panel {
+    fill: rgba(37,25,18,0.76);
+    stroke: rgba(255,160,80,0.78);
+    stroke-width: 2;
+  }
+  .slide-art .panel-soft {
+    fill: rgba(245,130,32,0.18);
+    stroke: rgba(255,160,80,0.62);
+    stroke-width: 2;
+  }
+  .slide-art .muted {
+    fill: rgba(245,245,247,0.14);
+    stroke: rgba(245,245,247,0.42);
+    stroke-width: 2;
+  }
+  .slide-art .dot { fill: #FFD27A; }
+  .slide-art .orange { fill: #F58220; }
+  .slide-art .bright { fill: #FFA050; }
+  .slide-art .danger { fill: #f87171; }
+  .slide-art .ok { fill: #6ee7b7; }
+  .slide-art .ghost { opacity: 0.2; }
+  .slide-cover .slide-art,
+  .slide-close .slide-art {
+    left: 50%;
+    right: auto;
+    top: 48%;
+    width: min(72vw, 760px);
+    transform: translate(-50%, -50%);
+    opacity: 0.44;
+  }
+  .slide[data-art$="intro"] .slide-art {
+    width: clamp(340px, 42vw, 620px);
+    right: clamp(0rem, 2.5vw, 3rem);
+    opacity: 0.64;
+  }
+
   /* Progress bar / nav */
   .nav-bar {
     position: fixed; bottom: 0; left: 0; right: 0;
@@ -269,6 +343,7 @@
     body { scroll-snap-type: none; height: auto; }
     body::before, body::after { display: none; }
     .slide { page-break-after: always; min-height: 100vh; height: auto; }
+    .slide-art { opacity: 0.36; mix-blend-mode: normal; }
     .nav-bar, .slide-num-badge, .nav-help { display: none !important; }
   }
 
@@ -277,13 +352,25 @@
     .slide { padding: 4vh 6vw; }
     .toc-grid { grid-template-columns: 1fr; }
     .two-col { grid-template-columns: 1fr; }
+    .slide-art {
+      width: min(66vw, 300px);
+      top: 28%;
+      right: -1rem;
+      opacity: 0.28;
+      mix-blend-mode: screen;
+    }
+    .slide-cover .slide-art,
+    .slide-close .slide-art {
+      width: 92vw;
+      top: 44%;
+    }
   }
 </style>
 </head>
 <body>
 
 <!-- ===== Slide 1: COVER ===== -->
-<section class="slide slide-cover">
+<section class="slide slide-cover" data-art="cover">
   <div class="slide-inner items-center" style="align-items:center;">
     <div class="meta">舞光戰將點燈計劃 · TRAINING ACADEMY</div>
     <div class="day-tag">📅 11 / 5（二）· DAY 3</div>
@@ -299,7 +386,7 @@
 </section>
 
 <!-- ===== Slide 2: TOC ===== -->
-<section class="slide">
+<section class="slide" data-art="agenda">
   <div class="slide-inner">
     <div class="eyebrow">AGENDA · 今日六大主題</div>
     <h2 class="slide-h2">三小時，學會在公司活下去的<span style="color:var(--orange-bright)">基本功</span></h2>
@@ -336,7 +423,7 @@
 </section>
 
 <!-- ===== Slide 3: TOPIC 1 INTRO ===== -->
-<section class="slide" style="background: radial-gradient(ellipse at left, rgba(245,130,32,0.1), transparent 60%);">
+<section class="slide" data-art="workflow-intro" style="background: radial-gradient(ellipse at left, rgba(245,130,32,0.1), transparent 60%);">
   <div class="slide-inner">
     <div class="eyebrow">TOPIC 01 · 客戶服務一條龍</div>
     <h1 class="slide-title">客戶說<span class="accent">「我要報價」</span><br>那一刻起，你就在跑流程</h1>
@@ -360,7 +447,7 @@
 </section>
 
 <!-- ===== Slide 4: 報價 ===== -->
-<section class="slide">
+<section class="slide" data-art="quote">
   <div class="slide-inner">
     <div class="eyebrow">STEP 1-2 · 詢價 + 報價</div>
     <h2 class="slide-h2">報價不是丟一個數字，是<span style="color:var(--orange-bright)">給客戶一份決策依據</span></h2>
@@ -388,7 +475,7 @@
 </section>
 
 <!-- ===== Slide 5: 訂單 ===== -->
-<section class="slide">
+<section class="slide" data-art="order">
   <div class="slide-inner">
     <div class="eyebrow">STEP 3 · 訂單確認</div>
     <h2 class="slide-h2">客戶下單那一刻，你要<span style="color:var(--orange-bright)">三件事同時做</span></h2>
@@ -414,7 +501,7 @@
 </section>
 
 <!-- ===== Slide 6: 出貨 ===== -->
-<section class="slide">
+<section class="slide" data-art="shipping">
   <div class="slide-inner">
     <div class="eyebrow">STEP 4-6 · 備貨 → 出貨 → 驗收</div>
     <h2 class="slide-h2">出貨不是業務的事，<span style="color:var(--orange-bright)">但客戶氣的時候找的是業務</span></h2>
@@ -442,7 +529,7 @@
 </section>
 
 <!-- ===== Slide 7: 收款 ===== -->
-<section class="slide">
+<section class="slide" data-art="collection">
   <div class="slide-inner">
     <div class="eyebrow">STEP 7-8 · 開票 + 收款</div>
     <h2 class="slide-h2">「賣得出去」是初級業務，<br><span style="color:var(--orange-bright)">「收得回來」才是合格業務</span></h2>
@@ -459,7 +546,7 @@
 </section>
 
 <!-- ===== Slide 8: TOPIC 2 INTRO ===== -->
-<section class="slide" style="background: radial-gradient(ellipse at right, rgba(245,130,32,0.1), transparent 60%);">
+<section class="slide" data-art="rhythm-intro" style="background: radial-gradient(ellipse at right, rgba(245,130,32,0.1), transparent 60%);">
   <div class="slide-inner">
     <div class="eyebrow">TOPIC 02 · 業務日常工作</div>
     <h1 class="slide-title">業務的一天，<br><span class="accent">90% 是節奏</span></h1>
@@ -473,7 +560,7 @@
 </section>
 
 <!-- ===== Slide 9: 業務一日節奏 ===== -->
-<section class="slide">
+<section class="slide" data-art="schedule">
   <div class="slide-inner">
     <div class="eyebrow">DAILY · 業務一天的節奏</div>
     <h2 class="slide-h2">標準一日<span style="color:var(--orange-bright)">時間表</span></h2>
@@ -513,7 +600,7 @@
 </section>
 
 <!-- ===== Slide 10: 報表 ===== -->
-<section class="slide">
+<section class="slide" data-art="reporting">
   <div class="slide-inner">
     <div class="eyebrow">REPORTING · 三層報表</div>
     <h2 class="slide-h2">主管不會要你<span style="color:var(--orange-bright)">每天傳一堆 LINE</span>，<br>但要看到三種報表</h2>
@@ -541,7 +628,7 @@
 </section>
 
 <!-- ===== Slide 11: 拜訪紀錄 ===== -->
-<section class="slide">
+<section class="slide" data-art="call-report">
   <div class="slide-inner">
     <div class="eyebrow">CALL REPORT · 拜訪紀錄</div>
     <h2 class="slide-h2">一份好的拜訪紀錄 =<br><span style="color:var(--orange-bright)">隔天可以接著跑的劇本</span></h2>
@@ -573,7 +660,7 @@
 </section>
 
 <!-- ===== Slide 12: TOPIC 3 INTRO ===== -->
-<section class="slide" style="background: radial-gradient(ellipse at center, rgba(245,130,32,0.1), transparent 60%);">
+<section class="slide" data-art="forms-intro" style="background: radial-gradient(ellipse at center, rgba(245,130,32,0.1), transparent 60%);">
   <div class="slide-inner">
     <div class="eyebrow">TOPIC 03 · 表單作業 + 請假</div>
     <h1 class="slide-title">三張表單，<br>學會了才能<span class="accent">把錢花得對</span></h1>
@@ -585,7 +672,7 @@
 </section>
 
 <!-- ===== Slide 13: 費用申請單 ===== -->
-<section class="slide">
+<section class="slide" data-art="expense">
   <div class="slide-inner">
     <div class="eyebrow">FORM 1 · 費用申請單</div>
     <h2 class="slide-h2">業務帶客戶吃飯、加油、買樣品 — <br>都靠<span style="color:var(--orange-bright)">這張單</span></h2>
@@ -613,7 +700,7 @@
 </section>
 
 <!-- ===== Slide 14: 異折單 ===== -->
-<section class="slide">
+<section class="slide" data-art="adjustment">
   <div class="slide-inner">
     <div class="eyebrow">FORM 2 · 異折單</div>
     <h2 class="slide-h2">客戶說「<span style="color:var(--orange-bright)">這批貨有問題，少算一點</span>」<br>怎麼處理？</h2>
@@ -630,7 +717,7 @@
 </section>
 
 <!-- ===== Slide 15: 特案申請單 ===== -->
-<section class="slide">
+<section class="slide" data-art="special-case">
   <div class="slide-inner">
     <div class="eyebrow">FORM 3 · 特案申請單</div>
     <h2 class="slide-h2">當客戶條件<span style="color:var(--orange-bright)">超出標準</span> — 你需要這張單</h2>
@@ -666,7 +753,7 @@
 </section>
 
 <!-- ===== Slide 16: 請假 ===== -->
-<section class="slide">
+<section class="slide" data-art="leave">
   <div class="slide-inner">
     <div class="eyebrow">LEAVE · 請假作業</div>
     <h2 class="slide-h2">請假不是「<span style="color:var(--orange-bright)">打個 LINE 跟主管說</span>」就好</h2>
@@ -694,7 +781,7 @@
 </section>
 
 <!-- ===== Slide 17: TOPIC 4 INTRO ===== -->
-<section class="slide" style="background: radial-gradient(ellipse at left, rgba(245,130,32,0.1), transparent 60%);">
+<section class="slide" data-art="bi-intro" style="background: radial-gradient(ellipse at left, rgba(245,130,32,0.1), transparent 60%);">
   <div class="slide-inner">
     <div class="eyebrow">TOPIC 04 · BI 系統</div>
     <h1 class="slide-title">數字會<span class="accent">說話</span>，<br>會看 BI 才能聽懂</h1>
@@ -706,7 +793,7 @@
 </section>
 
 <!-- ===== Slide 18: BI 是什麼 ===== -->
-<section class="slide">
+<section class="slide" data-art="bi-answers">
   <div class="slide-inner">
     <div class="eyebrow">BI · 三件事</div>
     <h2 class="slide-h2">BI 給業務的<span style="color:var(--orange-bright)">三個答案</span></h2>
@@ -731,7 +818,7 @@
 </section>
 
 <!-- ===== Slide 19: BI 操作 ===== -->
-<section class="slide">
+<section class="slide" data-art="bi-demo">
   <div class="slide-inner">
     <div class="eyebrow">BI · 實際操作</div>
     <h2 class="slide-h2"><span style="color:var(--orange-bright)">這台電腦</span>，現場示範一輪</h2>
@@ -749,7 +836,7 @@
 </section>
 
 <!-- ===== Slide 20: BI 應用案例 ===== -->
-<section class="slide">
+<section class="slide" data-art="bi-money">
   <div class="slide-inner">
     <div class="eyebrow">BI · 真實案例</div>
     <h2 class="slide-h2">老鳥怎麼<span style="color:var(--orange-bright)">用 BI 找錢</span></h2>
@@ -779,7 +866,7 @@
 </section>
 
 <!-- ===== Slide 21: TOPIC 5 INTRO ===== -->
-<section class="slide" style="background: radial-gradient(ellipse at right, rgba(245,130,32,0.1), transparent 60%);">
+<section class="slide" data-art="team-intro" style="background: radial-gradient(ellipse at right, rgba(245,130,32,0.1), transparent 60%);">
   <div class="slide-inner">
     <div class="eyebrow">TOPIC 05 · 跨部門協作</div>
     <h1 class="slide-title">業務不是孤狼，<br><span class="accent">是團隊的前線</span></h1>
@@ -791,7 +878,7 @@
 </section>
 
 <!-- ===== Slide 22: 業管 ===== -->
-<section class="slide">
+<section class="slide" data-art="ops">
   <div class="slide-inner">
     <div class="eyebrow">業管 · OPERATIONS</div>
     <h2 class="slide-h2">業管 = 你的<span style="color:var(--orange-bright)">後方司令部</span></h2>
@@ -819,7 +906,7 @@
 </section>
 
 <!-- ===== Slide 23: 採購 ===== -->
-<section class="slide">
+<section class="slide" data-art="purchasing">
   <div class="slide-inner">
     <div class="eyebrow">採購 · PURCHASING</div>
     <h2 class="slide-h2">採購控制<span style="color:var(--orange-bright)">公司命脈</span> — 庫存</h2>
@@ -847,7 +934,7 @@
 </section>
 
 <!-- ===== Slide 24: 財會 ===== -->
-<section class="slide">
+<section class="slide" data-art="finance">
   <div class="slide-inner">
     <div class="eyebrow">財會 · FINANCE</div>
     <h2 class="slide-h2">財會看<span style="color:var(--orange-bright)">每張單的真假</span></h2>
@@ -875,7 +962,7 @@
 </section>
 
 <!-- ===== Slide 25: 跨部門總結 ===== -->
-<section class="slide">
+<section class="slide" data-art="cross-dept">
   <div class="slide-inner">
     <div class="eyebrow">CROSS-DEPT · 黃金法則</div>
     <h2 class="slide-h2">跟內部部門相處的<span style="color:var(--orange-bright)">三個原則</span></h2>
@@ -891,7 +978,7 @@
 </section>
 
 <!-- ===== Slide 26: TOPIC 6 INTRO ===== -->
-<section class="slide" style="background: radial-gradient(ellipse at center, rgba(245,130,32,0.1), transparent 60%);">
+<section class="slide" data-art="vehicle-intro" style="background: radial-gradient(ellipse at center, rgba(245,130,32,0.1), transparent 60%);">
   <div class="slide-inner">
     <div class="eyebrow">TOPIC 06 · 公司車輛規範</div>
     <h1 class="slide-title">公司車是<span class="accent">工具</span>，<br>不是給你開回老家的</h1>
@@ -902,7 +989,7 @@
 </section>
 
 <!-- ===== Slide 27: 車輛規範 ===== -->
-<section class="slide">
+<section class="slide" data-art="vehicle-rules">
   <div class="slide-inner">
     <div class="eyebrow">CAR · 使用規範</div>
     <h2 class="slide-h2">用公務車的<span style="color:var(--orange-bright)">五件事</span></h2>
@@ -942,7 +1029,7 @@
 </section>
 
 <!-- ===== Slide 28: 車輛 - 出車前後 ===== -->
-<section class="slide">
+<section class="slide" data-art="vehicle-check">
   <div class="slide-inner">
     <div class="eyebrow">CAR · 日常 SOP</div>
     <h2 class="slide-h2">出車前 / 收車後 — <span style="color:var(--orange-bright)">兩分鐘檢查</span></h2>
@@ -975,7 +1062,7 @@
 </section>
 
 <!-- ===== Slide 29: TODAY SUMMARY ===== -->
-<section class="slide">
+<section class="slide" data-art="recap">
   <div class="slide-inner">
     <div class="eyebrow">RECAP · 今日總結</div>
     <h2 class="slide-h2">回想<span style="color:var(--orange-bright)">早上寫的那句</span><br>「我以為業務一天在做什麼」</h2>
@@ -1015,7 +1102,7 @@
 </section>
 
 <!-- ===== Slide 30: CLOSING ===== -->
-<section class="slide slide-close">
+<section class="slide slide-close" data-art="closing">
   <div class="slide-inner items-center" style="align-items:center;">
     <div class="eyebrow" style="justify-content:center;">END OF DAY 3 · 你今天升級了</div>
     <h1 class="slide-title">明天<span class="accent">出門拜訪</span>前，<br>記得做這三件事</h1>
@@ -1041,12 +1128,385 @@
 
 <script>
   const slides = document.querySelectorAll('.slide');
+
+  function artShell(key, body) {
+    const uid = `art-${key}`;
+    return `
+      <svg viewBox="0 0 520 360" focusable="false" aria-hidden="true">
+        <defs>
+          <radialGradient id="${uid}-halo" cx="50%" cy="50%" r="65%">
+            <stop offset="0%" stop-color="#F58220" stop-opacity="0.32"/>
+            <stop offset="58%" stop-color="#F58220" stop-opacity="0.08"/>
+            <stop offset="100%" stop-color="#F58220" stop-opacity="0"/>
+          </radialGradient>
+          <linearGradient id="${uid}-gold" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#FFD27A"/>
+            <stop offset="48%" stop-color="#FFA050"/>
+            <stop offset="100%" stop-color="#F58220"/>
+          </linearGradient>
+          <linearGradient id="${uid}-steel" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#F5F5F7" stop-opacity="0.42"/>
+            <stop offset="100%" stop-color="#F5F5F7" stop-opacity="0.08"/>
+          </linearGradient>
+          <filter id="${uid}-shadow" x="-25%" y="-25%" width="150%" height="150%">
+            <feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#F58220" flood-opacity="0.22"/>
+          </filter>
+        </defs>
+        <circle cx="360" cy="112" r="170" fill="url(#${uid}-halo)"/>
+        <path class="line hair ghost" d="M32 302 C126 234, 182 318, 272 248 S416 184, 492 250"/>
+        <g filter="url(#${uid}-shadow)">
+          ${body(uid)}
+        </g>
+      </svg>`;
+  }
+
+  const ART_TEMPLATES = {
+    cover: artShell('cover', (uid) => `
+      <circle class="panel-soft" cx="260" cy="178" r="118"/>
+      <circle class="line thin" cx="260" cy="178" r="74"/>
+      <path class="line" d="M260 56 V34 M260 322 V300 M138 178 H116 M404 178 H382"/>
+      <path fill="url(#${uid}-gold)" d="M260 88 L284 176 L260 272 L236 176 Z"/>
+      <circle class="muted" cx="260" cy="178" r="19"/>
+      <path class="line thin" d="M164 256 C198 228, 218 224, 246 196 M356 104 C324 126, 302 132, 278 158"/>
+      <circle class="dot" cx="164" cy="256" r="7"/>
+      <circle class="dot" cx="356" cy="104" r="7"/>
+    `),
+    agenda: artShell('agenda', (uid) => `
+      <circle class="line thin" cx="260" cy="180" r="106"/>
+      <circle class="panel" cx="260" cy="180" r="42"/>
+      <path fill="url(#${uid}-gold)" d="M244 159 H276 V201 H244 Z"/>
+      <path class="line hair" d="M260 74 V116 M260 244 V286 M154 180 H196 M324 180 H366 M185 105 L214 134 M335 105 L306 134 M185 255 L214 226 M335 255 L306 226"/>
+      <g>
+        <circle class="panel-soft" cx="260" cy="58" r="26"/><circle class="panel-soft" cx="378" cy="112" r="26"/>
+        <circle class="panel-soft" cx="378" cy="248" r="26"/><circle class="panel-soft" cx="260" cy="302" r="26"/>
+        <circle class="panel-soft" cx="142" cy="248" r="26"/><circle class="panel-soft" cx="142" cy="112" r="26"/>
+      </g>
+      <path class="line thin" d="M250 58 H270 M368 112 H388 M368 248 H388 M250 302 H270 M132 248 H152 M132 112 H152"/>
+    `),
+    'workflow-intro': artShell('workflow-intro', () => `
+      <path class="line" d="M58 188 H128 C164 188, 164 126, 200 126 H284 C326 126, 326 236, 368 236 H462"/>
+      <circle class="panel" cx="76" cy="188" r="28"/>
+      <circle class="panel" cx="202" cy="126" r="28"/>
+      <circle class="panel" cx="328" cy="126" r="28"/>
+      <circle class="panel" cx="370" cy="236" r="28"/>
+      <circle class="panel" cx="462" cy="236" r="28"/>
+      <path class="line thin" d="M63 188 H89 M190 126 H214 M316 126 H340 M358 236 H382 M450 236 H474"/>
+      <path class="line thin" d="M434 218 L462 236 L434 254"/>
+      <rect class="panel-soft" x="188" y="212" width="116" height="72" rx="12"/>
+      <path class="line hair" d="M210 236 H282 M210 258 H258"/>
+    `),
+    quote: artShell('quote', (uid) => `
+      <rect class="panel" x="150" y="68" width="190" height="230" rx="16"/>
+      <path class="line thin" d="M184 122 H306 M184 154 H286 M184 186 H306 M184 218 H258"/>
+      <path class="panel-soft" d="M324 92 H420 V184 H324 Z"/>
+      <path fill="url(#${uid}-gold)" d="M372 116 C393 116, 407 131, 407 150 C407 169, 393 184, 372 184 C351 184, 337 169, 337 150 C337 131, 351 116, 372 116 Z"/>
+      <path class="line thin" d="M372 130 V171 M354 146 H390 M354 157 H390"/>
+      <path class="line" d="M318 252 L392 300"/>
+      <circle class="line thin" cx="286" cy="232" r="42"/>
+    `),
+    order: artShell('order', () => `
+      <rect class="panel" x="124" y="74" width="170" height="238" rx="18"/>
+      <rect class="panel-soft" x="172" y="52" width="74" height="42" rx="10"/>
+      <path class="line thin" d="M160 142 L184 166 L232 118 M160 212 L184 236 L232 188"/>
+      <path class="line hair" d="M244 152 H276 M244 222 H276"/>
+      <path class="panel-soft" d="M326 186 H430 L454 226 V296 H326 Z"/>
+      <path class="line thin" d="M348 210 H408 M348 240 H430 M348 270 H396"/>
+      <circle class="panel" cx="350" cy="300" r="18"/>
+      <circle class="panel" cx="426" cy="300" r="18"/>
+    `),
+    shipping: artShell('shipping', () => `
+      <path class="panel" d="M92 188 H300 V274 H92 Z"/>
+      <path class="panel-soft" d="M300 214 H386 L430 252 V274 H300 Z"/>
+      <path class="line thin" d="M326 226 H374 L396 248 H326 Z"/>
+      <circle class="panel" cx="150" cy="278" r="28"/>
+      <circle class="panel" cx="364" cy="278" r="28"/>
+      <path class="line hair" d="M112 150 C168 104, 234 120, 286 78 S392 72, 440 118"/>
+      <circle class="dot" cx="112" cy="150" r="7"/>
+      <circle class="dot" cx="440" cy="118" r="7"/>
+      <path class="line thin" d="M408 102 L440 118 L414 138"/>
+      <rect class="muted" x="142" y="120" width="74" height="52" rx="9"/>
+      <path class="line hair" d="M142 144 H216 M179 120 V172"/>
+    `),
+    collection: artShell('collection', (uid) => `
+      <rect class="panel" x="132" y="76" width="172" height="218" rx="16"/>
+      <path class="line thin" d="M166 128 H270 M166 160 H252 M166 192 H270"/>
+      <path class="line" d="M168 242 L194 268 L252 216"/>
+      <circle fill="url(#${uid}-gold)" cx="360" cy="190" r="68"/>
+      <path class="line thin" d="M360 145 V234 M328 176 H392 M328 202 H392"/>
+      <path class="line hair" d="M336 282 C368 304, 414 302, 446 276"/>
+      <path class="line thin" d="M424 270 L448 274 L436 296"/>
+    `),
+    'rhythm-intro': artShell('rhythm-intro', () => `
+      <circle class="panel-soft" cx="260" cy="180" r="122"/>
+      <path class="line" d="M260 82 V180 L334 226"/>
+      <circle class="panel" cx="260" cy="180" r="18"/>
+      <path class="line thin" d="M260 58 V34 M260 326 V302 M136 180 H112 M408 180 H384"/>
+      <path class="line" d="M104 260 C150 218, 178 276, 220 226 C260 178, 292 236, 334 190 C372 148, 400 182, 446 134"/>
+      <circle class="dot" cx="104" cy="260" r="6"/>
+      <circle class="dot" cx="446" cy="134" r="6"/>
+    `),
+    schedule: artShell('schedule', () => `
+      <path class="line thin" d="M196 58 V304"/>
+      <g>
+        <circle class="panel" cx="196" cy="82" r="24"/><circle class="panel" cx="196" cy="132" r="24"/>
+        <circle class="panel" cx="196" cy="182" r="24"/><circle class="panel" cx="196" cy="232" r="24"/>
+        <circle class="panel" cx="196" cy="282" r="24"/>
+      </g>
+      <path class="line hair" d="M230 82 H408 M230 132 H360 M230 182 H430 M230 232 H390 M230 282 H412"/>
+      <rect class="panel-soft" x="314" y="74" width="92" height="76" rx="14"/>
+      <circle class="line hair" cx="360" cy="112" r="24"/>
+      <path class="line hair" d="M360 96 V112 L376 122"/>
+    `),
+    reporting: artShell('reporting', () => `
+      <rect class="panel" x="112" y="86" width="116" height="166" rx="14"/>
+      <rect class="panel-soft" x="202" y="66" width="116" height="206" rx="14"/>
+      <rect class="panel" x="292" y="106" width="116" height="146" rx="14"/>
+      <path class="line thin" d="M136 132 H202 M136 164 H190 M226 118 H292 M226 150 H280 M316 150 H382 M316 182 H364"/>
+      <path class="line" d="M142 226 L168 202 L194 216 M232 236 L258 190 L286 210 M320 220 L348 168 L382 196"/>
+      <circle class="dot" cx="168" cy="202" r="5"/>
+      <circle class="dot" cx="258" cy="190" r="5"/>
+      <circle class="dot" cx="348" cy="168" r="5"/>
+    `),
+    'call-report': artShell('call-report', () => `
+      <path class="panel" d="M140 74 H350 C362 74, 372 84, 372 96 V286 C372 298, 362 308, 350 308 H140 Z"/>
+      <path class="line thin" d="M176 126 H326 M176 160 H316 M176 194 H326 M176 228 H278"/>
+      <path class="line" d="M326 78 L396 148 L284 260 L234 278 L252 228 Z"/>
+      <path class="panel-soft" d="M382 132 L412 162 L306 268 L276 238 Z"/>
+      <circle class="panel" cx="162" cy="126" r="6"/>
+      <circle class="panel" cx="162" cy="160" r="6"/>
+      <circle class="panel" cx="162" cy="194" r="6"/>
+    `),
+    'forms-intro': artShell('forms-intro', (uid) => `
+      <rect class="panel" x="104" y="98" width="104" height="146" rx="12"/>
+      <rect class="panel-soft" x="208" y="70" width="104" height="174" rx="12"/>
+      <rect class="panel" x="312" y="98" width="104" height="146" rx="12"/>
+      <path class="line hair" d="M128 142 H184 M128 174 H174 M232 126 H288 M232 158 H278 M336 142 H392 M336 174 H382"/>
+      <path class="line thin" d="M156 244 C182 288, 224 310, 260 310 C296 310, 338 288, 364 244"/>
+      <circle fill="url(#${uid}-gold)" cx="260" cy="292" r="34"/>
+      <path class="line hair" d="M260 274 V310 M246 286 H274 M246 298 H274"/>
+    `),
+    expense: artShell('expense', () => `
+      <path class="panel" d="M154 62 H344 V304 L322 288 L300 304 L278 288 L256 304 L234 288 L212 304 L190 288 L154 304 Z"/>
+      <path class="line thin" d="M190 120 H308 M190 154 H296 M190 188 H320"/>
+      <path class="line" d="M204 238 H294"/>
+      <rect class="panel-soft" x="318" y="182" width="104" height="66" rx="14"/>
+      <path class="line hair" d="M334 208 H406 M334 228 H376"/>
+      <circle class="panel-soft" cx="122" cy="182" r="42"/>
+      <path class="line thin" d="M104 184 H140 M122 164 V202"/>
+    `),
+    adjustment: artShell('adjustment', () => `
+      <path class="panel" d="M122 120 L230 78 L338 120 V250 L230 294 L122 250 Z"/>
+      <path class="line thin" d="M122 120 L230 164 L338 120 M230 164 V294"/>
+      <path class="danger" d="M194 184 L218 160 L242 184 L218 208 Z"/>
+      <path class="line" d="M328 86 L444 202"/>
+      <circle class="panel-soft" cx="390" cy="148" r="52"/>
+      <circle class="bright" cx="372" cy="132" r="8"/>
+      <circle class="bright" cx="408" cy="164" r="8"/>
+      <path class="line thin" d="M410 126 L370 170"/>
+    `),
+    'special-case': artShell('special-case', () => `
+      <rect class="panel" x="124" y="90" width="168" height="216" rx="16"/>
+      <path class="line thin" d="M158 140 H258 M158 174 H248 M158 208 H258"/>
+      <path class="line" d="M144 258 H280"/>
+      <path class="panel-soft" d="M330 98 H424 V190 H330 Z"/>
+      <path class="line thin" d="M348 154 L370 174 L408 128"/>
+      <path class="line" d="M320 260 C346 216, 384 214, 424 248"/>
+      <path class="line thin" d="M402 238 L426 250 L404 264"/>
+      <circle class="panel" cx="330" cy="260" r="18"/>
+    `),
+    leave: artShell('leave', () => `
+      <rect class="panel" x="122" y="88" width="178" height="184" rx="18"/>
+      <path class="line thin" d="M122 136 H300 M170 70 V110 M252 70 V110"/>
+      <circle class="panel-soft" cx="174" cy="180" r="18"/>
+      <circle class="panel-soft" cx="230" cy="180" r="18"/>
+      <circle class="panel-soft" cx="174" cy="230" r="18"/>
+      <path class="line" d="M338 132 H424 M396 104 L424 132 L396 160"/>
+      <rect class="panel-soft" x="338" y="202" width="104" height="74" rx="14"/>
+      <path class="line hair" d="M362 228 H418 M362 250 H402"/>
+    `),
+    'bi-intro': artShell('bi-intro', () => `
+      <circle class="line thin" cx="260" cy="182" r="122"/>
+      <circle class="line hair" cx="260" cy="182" r="78"/>
+      <path class="line" d="M260 182 L382 132"/>
+      <circle class="panel" cx="260" cy="182" r="20"/>
+      <circle class="dot" cx="382" cy="132" r="8"/>
+      <path class="line thin" d="M100 270 L160 214 L214 236 L274 158 L334 194 L420 94"/>
+      <circle class="panel-soft" cx="100" cy="270" r="12"/>
+      <circle class="panel-soft" cx="214" cy="236" r="12"/>
+      <circle class="panel-soft" cx="334" cy="194" r="12"/>
+      <circle class="panel-soft" cx="420" cy="94" r="12"/>
+    `),
+    'bi-answers': artShell('bi-answers', () => `
+      <rect class="panel" x="90" y="82" width="340" height="224" rx="20"/>
+      <path class="line hair" d="M90 132 H430"/>
+      <circle class="orange" cx="122" cy="108" r="6"/>
+      <circle class="bright" cx="144" cy="108" r="6"/>
+      <circle class="dot" cx="166" cy="108" r="6"/>
+      <rect class="panel-soft" x="124" y="160" width="82" height="94" rx="12"/>
+      <rect class="panel-soft" x="220" y="160" width="82" height="94" rx="12"/>
+      <rect class="panel-soft" x="316" y="160" width="82" height="94" rx="12"/>
+      <path class="line thin" d="M144 226 C152 202, 178 202, 186 226 M166 206 V188"/>
+      <circle class="line hair" cx="260" cy="194" r="16"/>
+      <circle class="line hair" cx="242" cy="224" r="14"/>
+      <circle class="line hair" cx="278" cy="224" r="14"/>
+      <path class="line thin" d="M338 232 V196 M360 232 V176 M382 232 V208"/>
+    `),
+    'bi-demo': artShell('bi-demo', () => `
+      <rect class="panel" x="116" y="82" width="288" height="186" rx="18"/>
+      <rect class="muted" x="92" y="268" width="336" height="34" rx="12"/>
+      <path class="line thin" d="M148 130 H250 M148 166 H220 M148 202 H282"/>
+      <path class="line" d="M308 142 V226 H374"/>
+      <path class="line thin" d="M350 204 L374 226 L350 248"/>
+      <path class="panel-soft" d="M314 108 H382 V174 H314 Z"/>
+      <path class="line hair" d="M332 132 H364 M332 152 H354"/>
+      <path class="bright" d="M292 226 L318 292 L334 264 L366 258 Z"/>
+    `),
+    'bi-money': artShell('bi-money', (uid) => `
+      <rect class="panel" x="98" y="84" width="292" height="196" rx="18"/>
+      <path class="line hair" d="M134 236 H352 M134 132 V236"/>
+      <path class="line" d="M144 220 L198 180 L244 194 L304 124 L356 154"/>
+      <circle class="dot" cx="198" cy="180" r="7"/>
+      <circle class="dot" cx="304" cy="124" r="7"/>
+      <circle fill="url(#${uid}-gold)" cx="398" cy="246" r="46"/>
+      <path class="line hair" d="M398 216 V276 M376 238 H420 M376 254 H420"/>
+      <circle class="line thin" cx="192" cy="180" r="44"/>
+      <path class="line" d="M224 212 L262 250"/>
+    `),
+    'team-intro': artShell('team-intro', () => `
+      <path class="line thin" d="M260 98 V180 M164 240 L260 180 L356 240"/>
+      <circle class="panel" cx="260" cy="98" r="38"/>
+      <circle class="panel" cx="164" cy="240" r="34"/>
+      <circle class="panel" cx="356" cy="240" r="34"/>
+      <path class="line hair" d="M238 98 C244 82, 276 82, 282 98 M144 240 C150 226, 178 226, 184 240 M336 240 C342 226, 370 226, 376 240"/>
+      <path class="line" d="M260 180 L424 110"/>
+      <path class="panel-soft" d="M424 88 H476 V126 H424 Z"/>
+      <path class="line thin" d="M424 88 V154"/>
+    `),
+    ops: artShell('ops', () => `
+      <rect class="panel" x="112" y="76" width="260" height="168" rx="18"/>
+      <rect class="muted" x="150" y="264" width="186" height="28" rx="10"/>
+      <path class="line thin" d="M154 138 H254 M154 174 H220 M154 210 H286"/>
+      <path class="line" d="M314 116 C362 132, 382 164, 374 212"/>
+      <path class="line thin" d="M354 202 L374 212 L392 194"/>
+      <circle class="panel-soft" cx="312" cy="116" r="18"/>
+      <circle class="panel-soft" cx="374" cy="212" r="18"/>
+      <rect class="panel-soft" x="386" y="130" width="70" height="86" rx="12"/>
+      <path class="line hair" d="M404 160 H438 M404 184 H428"/>
+    `),
+    purchasing: artShell('purchasing', () => `
+      <rect class="panel" x="104" y="114" width="304" height="166" rx="16"/>
+      <path class="line thin" d="M104 170 H408 M104 224 H408 M164 114 V280 M256 114 V280 M348 114 V280"/>
+      <rect class="panel-soft" x="124" y="132" width="54" height="30" rx="6"/>
+      <rect class="panel-soft" x="198" y="186" width="54" height="30" rx="6"/>
+      <rect class="panel-soft" x="274" y="132" width="54" height="30" rx="6"/>
+      <rect class="panel-soft" x="350" y="238" width="38" height="30" rx="6"/>
+      <path class="line" d="M116 84 H396"/>
+      <path class="line thin" d="M142 84 V114 M370 84 V114"/>
+      <path class="line hair" d="M430 238 V154 M430 154 L452 176 M430 154 L408 176"/>
+    `),
+    finance: artShell('finance', () => `
+      <rect class="panel" x="116" y="78" width="162" height="230" rx="18"/>
+      <path class="line thin" d="M150 132 H244 M150 166 H228 M150 200 H244"/>
+      <rect class="panel-soft" x="310" y="112" width="110" height="152" rx="18"/>
+      <path class="line hair" d="M334 150 H396 M334 182 H396 M334 214 H396"/>
+      <circle class="panel-soft" cx="210" cy="252" r="36"/>
+      <path class="line" d="M194 252 L208 266 L232 234"/>
+      <path class="line" d="M362 78 L420 104 V150 C420 188, 396 216, 362 230 C328 216, 304 188, 304 150 V104 Z"/>
+      <path class="line thin" d="M340 150 L356 166 L386 132"/>
+    `),
+    'cross-dept': artShell('cross-dept', () => `
+      <circle class="panel" cx="260" cy="180" r="44"/>
+      <path class="line thin" d="M260 136 V74 M304 180 H394 M260 224 V286 M216 180 H126"/>
+      <circle class="panel-soft" cx="260" cy="60" r="34"/>
+      <circle class="panel-soft" cx="410" cy="180" r="34"/>
+      <circle class="panel-soft" cx="260" cy="300" r="34"/>
+      <circle class="panel-soft" cx="110" cy="180" r="34"/>
+      <path class="line hair" d="M238 180 C246 164, 274 164, 282 180"/>
+      <path class="line thin" d="M244 194 C254 206, 266 206, 276 194"/>
+      <path class="line hair" d="M246 60 H274 M396 180 H424 M246 300 H274 M96 180 H124"/>
+    `),
+    'vehicle-intro': artShell('vehicle-intro', () => `
+      <path class="line hair" d="M68 286 C146 218, 220 280, 286 210 S408 124, 474 176"/>
+      <path class="line thin" d="M446 158 L474 176 L444 192"/>
+      <path class="panel" d="M132 188 H340 L388 226 V268 H106 V226 Z"/>
+      <path class="line thin" d="M172 188 L204 138 H286 L326 188"/>
+      <circle class="panel" cx="164" cy="270" r="28"/>
+      <circle class="panel" cx="328" cy="270" r="28"/>
+      <path class="line" d="M390 96 C418 96, 440 118, 440 146 C440 172, 418 194, 390 194 C364 194, 342 172, 342 146 C342 118, 364 96, 390 96 Z"/>
+      <path class="line thin" d="M390 122 V154 H414"/>
+    `),
+    'vehicle-rules': artShell('vehicle-rules', () => `
+      <path class="panel" d="M92 198 H300 L344 232 V276 H74 V232 Z"/>
+      <path class="line thin" d="M128 198 L158 154 H240 L278 198"/>
+      <circle class="panel" cx="128" cy="278" r="24"/>
+      <circle class="panel" cx="286" cy="278" r="24"/>
+      <circle class="panel-soft" cx="390" cy="102" r="34"/>
+      <path class="line thin" d="M374 102 H406 M390 86 V118"/>
+      <rect class="panel-soft" x="354" y="160" width="86" height="54" rx="12"/>
+      <path class="line hair" d="M372 186 H422 M372 200 H400"/>
+      <path class="line" d="M396 242 C430 242, 448 262, 448 288 C448 314, 430 334, 396 334"/>
+      <path class="line hair" d="M396 242 V264 M396 312 V334"/>
+    `),
+    'vehicle-check': artShell('vehicle-check', () => `
+      <rect class="panel" x="116" y="72" width="174" height="236" rx="18"/>
+      <path class="line thin" d="M154 132 L172 150 L208 112 M154 188 L172 206 L208 168 M154 244 L172 262 L208 224"/>
+      <path class="line hair" d="M222 132 H260 M222 188 H260 M222 244 H260"/>
+      <path class="panel-soft" d="M324 202 H430 L446 242 V286 H310 V242 Z"/>
+      <circle class="panel" cx="342" cy="288" r="22"/>
+      <circle class="panel" cx="416" cy="288" r="22"/>
+      <path class="line thin" d="M342 288 L358 272 M416 288 L432 272"/>
+    `),
+    recap: artShell('recap', () => `
+      <circle class="panel-soft" cx="260" cy="178" r="64"/>
+      <path class="line" d="M232 178 L254 202 L296 150"/>
+      <path class="line thin" d="M260 88 V114 M334 124 L312 144 M334 232 L312 212 M260 268 V242 M186 232 L208 212 M186 124 L208 144"/>
+      <g>
+        <rect class="panel" x="230" y="48" width="60" height="42" rx="10"/>
+        <rect class="panel" x="350" y="104" width="60" height="42" rx="10"/>
+        <rect class="panel" x="350" y="214" width="60" height="42" rx="10"/>
+        <rect class="panel" x="230" y="270" width="60" height="42" rx="10"/>
+        <rect class="panel" x="110" y="214" width="60" height="42" rx="10"/>
+        <rect class="panel" x="110" y="104" width="60" height="42" rx="10"/>
+      </g>
+      <path class="line hair" d="M244 70 H276 M364 126 H396 M364 236 H396 M244 292 H276 M124 236 H156 M124 126 H156"/>
+    `),
+    closing: artShell('closing', () => `
+      <path class="line" d="M78 260 C142 194, 204 246, 250 178 C296 110, 370 140, 442 78"/>
+      <circle class="panel" cx="78" cy="260" r="22"/>
+      <circle class="panel" cx="250" cy="178" r="22"/>
+      <circle class="panel" cx="442" cy="78" r="22"/>
+      <path class="line thin" d="M64 260 L76 274 L96 248 M236 178 L248 192 L268 166 M428 78 L440 92 L460 66"/>
+      <path class="line thin" d="M442 78 V148"/>
+      <path class="panel-soft" d="M442 78 H494 V116 H442 Z"/>
+      <rect class="panel-soft" x="166" y="246" width="196" height="56" rx="14"/>
+      <path class="line hair" d="M190 274 H338"/>
+    `)
+  };
+
+  slides.forEach((slide) => {
+    const artKey = slide.dataset.art;
+    if (!artKey || !ART_TEMPLATES[artKey] || slide.querySelector('.slide-art')) return;
+    const art = document.createElement('div');
+    art.className = 'slide-art';
+    art.setAttribute('aria-hidden', 'true');
+    art.innerHTML = ART_TEMPLATES[artKey];
+    slide.prepend(art);
+  });
+
   const navFill = document.getElementById('navFill');
   const slideBadge = document.getElementById('slideNumBadge');
   const total = slides.length;
 
+  function getScrollTop() {
+    return Math.max(
+      window.scrollY || 0,
+      document.documentElement.scrollTop || 0,
+      document.body.scrollTop || 0
+    );
+  }
+
   function getCurrentSlide() {
-    const scrollY = window.scrollY + window.innerHeight / 2;
+    const scrollY = getScrollTop() + window.innerHeight / 2;
     let idx = 0;
     slides.forEach((s, i) => {
       if (s.offsetTop <= scrollY) idx = i;
@@ -1061,7 +1521,9 @@
     navFill.style.width = ((idx + 1) / total * 100) + '%';
   }
 
-  window.addEventListener('scroll', updateNav, { passive: true });
+  [window, document, document.documentElement, document.body].forEach((target) => {
+    target.addEventListener('scroll', updateNav, { passive: true });
+  });
   updateNav();
 
   function goSlide(idx) {
