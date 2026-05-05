@@ -32,6 +32,10 @@
 !backend/
 !backend/**
 
+# Re-allow knowledge base markdown for NotebookLM upload
+!kb/
+!kb/**
+
 # Explicitly never include
 research_notes.md
 content/
