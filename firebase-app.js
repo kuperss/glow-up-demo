@@ -200,11 +200,15 @@ export function requireAuth(opts = {}) {
         onFlagshipProductsUpdate(cb) { cb(null); return () => {}; },
         async generateFlagshipCard() { throw new Error('訪客模式：AI 功能不可用，請登入正式帳號'); },
         DEFAULT_FLAGSHIP_PRODUCTS, FLAGSHIP_TAG_PRESETS,
-        async getAIConfig() { return { provider: 'gemini', apiKey: '', model: '', systemPrompt: '', enabled: false }; },
+        // AI 助教在訪客模式也可用 — 直接 pass-through 真的實作
+        // 需 firestore.rules 允許未登入讀 aiConfig（已調整）
+        getAIConfig: getAIConfig,
         async saveAIConfig() { alert('訪客模式：無法儲存 AI 設定'); },
-        onAIConfigUpdate(cb) { cb({ provider: 'gemini', apiKey: '', model: '', systemPrompt: '', enabled: false }); return () => {}; },
-        async callAI() { throw new Error('訪客模式：AI 功能不可用，請登入正式帳號'); },
-        getProviderDefaults() { return PROVIDER_DEFAULTS; }
+        onAIConfigUpdate: onAIConfigUpdate,
+        callAI: callAI,
+        getProviderDefaults: getProviderDefaults,
+        injectAIHelper: injectAIHelper,
+        renderChatMarkdown: renderChatMarkdown
       };
       document.dispatchEvent(new CustomEvent('glow-firebase-ready', { detail: { user: currentUser, doc: guestDoc } }));
       resolve({ user: currentUser, doc: guestDoc });
@@ -888,14 +892,17 @@ function injectAIHelperCSS() {
   s.textContent = `
     .ai-helper-fab {
       position: fixed; right: 24px; bottom: 24px; z-index: 9998;
-      width: 72px; height: 72px;
+      width: 72px; height: 72px; border-radius: 50%;
       background: transparent; border: none; padding: 0;
       display: flex; align-items: center; justify-content: center;
       cursor: pointer;
       filter: drop-shadow(0 8px 18px rgba(245,130,32,0.45));
       transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), filter 0.3s ease;
       animation: ai-fab-pulse 3s ease-in-out infinite;
+      -webkit-tap-highlight-color: transparent;
+      outline: none;
     }
+    .ai-helper-fab:focus { outline: none; }
     .ai-helper-fab:hover { transform: scale(1.08) translateY(-2px); filter: drop-shadow(0 12px 28px rgba(245,130,32,0.7)); }
     @keyframes ai-fab-pulse { 0%,100% { filter: drop-shadow(0 8px 18px rgba(245,130,32,0.45)); } 50% { filter: drop-shadow(0 12px 28px rgba(245,130,32,0.7)); } }
     .ai-helper-panel {
@@ -1107,9 +1114,27 @@ export async function injectAIHelper() {
     } catch (e) {
       if (tick) clearInterval(tick);
       thinking.remove();
+      // 技術細節只丟 console，使用者看友善訊息
+      console.warn('[AI 助教] 後端錯誤：', e);
+      const raw = String(e && e.message || e || '');
+      const lower = raw.toLowerCase();
+      let friendly;
+      if (lower.includes('cookie expired') || lower.includes('authentication') || lower.includes('signin') || lower.includes('login')) {
+        friendly = '舞妞剛剛去打瞌睡了，麻煩請聯絡管理員幫她「重新登入」一下，馬上就回來。';
+      } else if (lower.includes('timeout') || lower.includes('timed out')) {
+        friendly = '剛剛想太久沒回你，再問一次試試看？';
+      } else if (lower.includes('429') || lower.includes('rate')) {
+        friendly = '今天問太多舞妞累了，休息一下再來吧～';
+      } else if (lower.includes('endpoint') && lower.includes('5')) {
+        friendly = '舞妞的腦袋暫時連不上，過幾分鐘再試一次。如果一直這樣請告訴管理員。';
+      } else if (lower.includes('endpoint') || lower.includes('network') || lower.includes('failed to fetch')) {
+        friendly = '網路怪怪的，舞妞收不到訊息，再試一次看看。';
+      } else {
+        friendly = '舞妞剛剛恍神了一下，再問一次試試看～';
+      }
       const err = document.createElement('div');
-      err.className = 'ai-chat-error';
-      err.textContent = '⚠ ' + (e.message || e);
+      err.className = 'ai-chat-bubble ai';
+      err.textContent = friendly;
       list.appendChild(err);
     } finally {
       list.scrollTop = list.scrollHeight;

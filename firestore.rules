@@ -34,10 +34,12 @@ service cloud.firestore {
     }
 
     // ===== AI Config =====
-    // 任何登入者都能讀（呼叫 AI 需要 apiKey）；只有主管能寫
-    // 注意：此設計下 apiKey 對所有登入用戶可見。Production 建議部署 Cloudflare Worker 代理。
+    // 任何人都能讀（包括訪客模式 — 讓 demo 可以體驗 AI 助教）
+    // 寫入仍限主管。
+    // 注意：此設計下 apiKey / secretToken 對所有訪客可見。
+    //       Production 建議部署 Cloudflare Worker 代理隱藏 secret。
     match /aiConfig/{configId} {
-      allow read: if isSignedIn();
+      allow read: if true;
       allow create, update, delete: if isManagerOrSuper();
     }
 
