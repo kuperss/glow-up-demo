@@ -154,11 +154,102 @@
     .benefit-table { font-size: 12px; }
     .benefit-table th, .benefit-table td { padding: 10px 8px; }
   }
+
+  /* === Sticky TOC (desktop only) === */
+  .onb-toc { display: none; }
+  @media (min-width: 1280px) {
+    .onb-toc {
+      display: block;
+      position: fixed;
+      left: max(20px, calc((100vw - 1280px) / 2 - 20px));
+      top: 50%;
+      transform: translateY(-50%);
+      width: 220px;
+      max-height: 78vh;
+      overflow-y: auto;
+      z-index: 30;
+      padding: 18px 16px;
+      background: linear-gradient(180deg, rgba(15,15,18,0.85), rgba(10,10,12,0.7));
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(245,130,32,0.18);
+      border-radius: 14px;
+      box-shadow: 0 20px 50px -20px rgba(0,0,0,0.6);
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.35s ease;
+    }
+    .onb-toc.visible { opacity: 1; pointer-events: auto; }
+    .onb-toc::-webkit-scrollbar { width: 4px; }
+    .onb-toc::-webkit-scrollbar-thumb { background: rgba(245,130,32,0.3); border-radius: 2px; }
+  }
+  .onb-toc-title {
+    font-family: 'Inter', sans-serif; font-size: 10px; letter-spacing: 0.25em;
+    color: var(--glow-orange-bright); text-transform: uppercase; font-weight: 700;
+    padding-bottom: 10px; margin-bottom: 12px;
+    border-bottom: 1px solid rgba(245,130,32,0.15);
+  }
+  .onb-toc-part { margin-bottom: 14px; }
+  .onb-toc-part:last-child { margin-bottom: 0; }
+  .onb-toc-part-label {
+    font-family: 'Inter', sans-serif; font-size: 9px; letter-spacing: 0.2em;
+    color: var(--glow-orange); font-weight: 700; margin-bottom: 6px;
+    padding-left: 8px;
+  }
+  .onb-toc-part-name {
+    font-size: 11px; color: #C5C5CD; font-weight: 600;
+    padding-left: 8px; margin-bottom: 8px;
+    display: block;
+  }
+  .onb-toc-link {
+    display: block; padding: 5px 10px; margin: 2px 0;
+    font-size: 12.5px; color: #9CA3AF;
+    border-left: 2px solid transparent;
+    border-radius: 0 6px 6px 0;
+    transition: all 0.2s ease;
+    text-decoration: none;
+  }
+  .onb-toc-link:hover { color: var(--glow-orange-bright); background: rgba(245,130,32,0.05); }
+  .onb-toc-link.active {
+    color: var(--glow-orange-bright);
+    background: rgba(245,130,32,0.1);
+    border-left-color: var(--glow-orange);
+    font-weight: 600;
+  }
+
+  html { scroll-padding-top: 90px; scroll-behavior: smooth; }
 </style>
 </head>
 <body>
 
 <canvas id="particle-canvas"></canvas>
+
+<!-- ===== Sticky TOC (desktop xl+ only) ===== -->
+<aside class="onb-toc" id="onbToc" aria-label="入職須知章節導航">
+  <div class="onb-toc-title">章節導航</div>
+
+  <div class="onb-toc-part">
+    <div class="onb-toc-part-label">PART 01</div>
+    <div class="onb-toc-part-name">日常節奏</div>
+    <a href="#attendance" class="onb-toc-link" data-toc="attendance">出勤節奏</a>
+    <a href="#leave" class="onb-toc-link" data-toc="leave">請假規則</a>
+    <a href="#overtime" class="onb-toc-link" data-toc="overtime">加班規範</a>
+    <a href="#dresscode" class="onb-toc-link" data-toc="dresscode">服裝儀容</a>
+  </div>
+
+  <div class="onb-toc-part">
+    <div class="onb-toc-part-label">PART 02</div>
+    <div class="onb-toc-part-name">危機與保障</div>
+    <a href="#carcrash" class="onb-toc-link" data-toc="carcrash">公務車事故 SOP</a>
+    <a href="#benefits" class="onb-toc-link" data-toc="benefits">福利速覽</a>
+    <a href="#triwell" class="onb-toc-link" data-toc="triwell">三安福祉</a>
+  </div>
+
+  <div class="onb-toc-part">
+    <div class="onb-toc-part-label">PART 03</div>
+    <div class="onb-toc-part-name">同行默契</div>
+    <a href="#legal" class="onb-toc-link" data-toc="legal">法定須知</a>
+  </div>
+</aside>
 
 <!-- ===== Nav ===== -->
 <nav class="fixed top-0 left-0 right-0 z-50 nav-blur">
@@ -196,18 +287,27 @@
       <span class="bg-gradient-to-r from-orange-200 via-orange-300 to-orange-500 bg-clip-text text-transparent glow-text">再開始一切。</span>
     </h1>
     <p class="text-lg md:text-xl text-gray-400 leading-relaxed max-w-3xl reveal">
-      30 分鐘 · 把規矩、福利、保護機制一次裝進腦子。<br>
+      30 分鐘 · 帶你了解展展文化、員工守則與福利制度。<br>
       <span class="text-gray-400 text-base">展晟照明集團工作規則 · 出勤規定· 久任年資獎勵辦法 · 三安福祉 · 雙軌職涯路徑表 — 全方位實質指引。</span>
     </p>
-    <div class="mt-10 flex flex-wrap gap-3 reveal">
-      <a href="#attendance" class="badge-pill">① 出勤</a>
-      <a href="#leave" class="badge-pill">② 請假</a>
-      <a href="#overtime" class="badge-pill">③ 加班</a>
-      <a href="#dresscode" class="badge-pill">④ 服儀</a>
-      <a href="#carcrash" class="badge-pill">⑤ 公務車事故</a>
-      <a href="#benefits" class="badge-pill">⑥ 福利速覽</a>
-      <a href="#triwell" class="badge-pill">⑦ 三安福祉</a>
-      <a href="#legal" class="badge-pill">⑧ 法定須知</a>
+    <div class="mt-10 space-y-3 reveal">
+      <div class="flex flex-wrap items-center gap-2">
+        <span class="text-[11px] text-orange-300 font-mono-en tracking-widest mr-1 whitespace-nowrap">PART 1 · 日常節奏</span>
+        <a href="#attendance" class="badge-pill">出勤</a>
+        <a href="#leave" class="badge-pill">請假</a>
+        <a href="#overtime" class="badge-pill">加班</a>
+        <a href="#dresscode" class="badge-pill">服儀</a>
+      </div>
+      <div class="flex flex-wrap items-center gap-2">
+        <span class="text-[11px] text-orange-300 font-mono-en tracking-widest mr-1 whitespace-nowrap">PART 2 · 危機與保障</span>
+        <a href="#carcrash" class="badge-pill">公務車事故</a>
+        <a href="#benefits" class="badge-pill">福利速覽</a>
+        <a href="#triwell" class="badge-pill">三安福祉</a>
+      </div>
+      <div class="flex flex-wrap items-center gap-2">
+        <span class="text-[11px] text-orange-300 font-mono-en tracking-widest mr-1 whitespace-nowrap">PART 3 · 同行默契</span>
+        <a href="#legal" class="badge-pill">法定須知</a>
+      </div>
     </div>
   </div>
 </section>
@@ -224,6 +324,7 @@
         <div class="space-y-3 text-sm text-gray-300">
           <div class="flex justify-between"><span class="text-gray-500">內勤人員</span><span class="text-white font-semibold">08:00 – 17:00</span></div>
           <div class="flex justify-between"><span class="text-gray-500">業務人員</span><span class="text-orange-300 font-semibold">08:30 – 17:30</span></div>
+          <div class="flex justify-between text-xs pl-3"><span class="text-gray-500">└ 週一／連假後首日</span><span class="text-orange-300 font-semibold">08:00 報到</span></div>
           <div class="flex justify-between"><span class="text-gray-500">午休</span><span class="text-white">12:00 – 13:00</span></div>
           <div class="flex justify-between border-t border-gray-800 pt-3 mt-3"><span class="text-gray-500">通勤彈性</span><span class="text-orange-300">10 分鐘內</span></div>
         </div>
@@ -574,7 +675,7 @@
 <section id="legal" class="relative py-20 z-10">
   <div class="max-w-5xl mx-auto px-6 lg:px-10">
     <div class="section-eyebrow reveal">SECTION 08 · 法定須知</div>
-    <h2 class="font-display text-3xl md:text-4xl lg:text-5xl mb-10 reveal">展晟人的<span class="text-orange-300">底線與紀律</span></h2>
+    <h2 class="font-display text-3xl md:text-4xl lg:text-5xl mb-10 reveal">展晟人的<span class="text-orange-300">同行默契</span></h2>
     <div class="grid md:grid-cols-2 gap-5">
       <div class="info-card reveal">
         <h3 class="text-lg font-bold mb-3">性騷擾防治</h3>
@@ -720,6 +821,54 @@
     entries.forEach(e => { if(e.isIntersecting){ e.target.classList.add('show'); io.unobserve(e.target); } });
   }, { threshold: 0.1 });
   document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+  // === Sticky TOC: scroll-spy + show after hero ===
+  (function(){
+    const toc = document.getElementById('onbToc');
+    if (!toc) return;
+    const links = toc.querySelectorAll('.onb-toc-link');
+    const map = new Map();
+    links.forEach(a => {
+      const id = a.dataset.toc;
+      const sec = document.getElementById(id);
+      if (sec) map.set(sec, a);
+    });
+
+    // Show TOC after scrolling past hero
+    const hero = document.querySelector('section');
+    let visible = false;
+    function checkVisibility() {
+      const past = window.scrollY > (hero ? hero.offsetHeight - 100 : 400);
+      if (past !== visible) {
+        visible = past;
+        toc.classList.toggle('visible', visible);
+      }
+    }
+    window.addEventListener('scroll', checkVisibility, { passive: true });
+    checkVisibility();
+
+    // Scroll-spy: highlight current section
+    const spy = new IntersectionObserver((entries) => {
+      // 取所有當前 intersecting 的 section，挑離視窗中央最近的
+      let best = null, bestDist = Infinity;
+      const mid = window.innerHeight / 2;
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          const r = e.target.getBoundingClientRect();
+          const d = Math.abs((r.top + r.bottom) / 2 - mid);
+          if (d < bestDist) { best = e.target; bestDist = d; }
+        }
+      });
+      // 更新 active 狀態
+      if (best) {
+        links.forEach(a => a.classList.remove('active'));
+        const link = map.get(best);
+        if (link) link.classList.add('active');
+      }
+    }, { threshold: [0, 0.25, 0.5, 0.75, 1], rootMargin: '-30% 0px -50% 0px' });
+
+    map.forEach((_, sec) => spy.observe(sec));
+  })();
 </script>
 
 
