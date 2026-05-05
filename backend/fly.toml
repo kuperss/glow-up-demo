@@ -20,9 +20,9 @@ primary_region = "nrt"  # 東京 (離台灣最近)；其他選項：sin, hkg
 [http_service]
   internal_port = 8000
   force_https = true
-  auto_stop_machines = "stop"      # 沒流量時自動停（省錢）
+  auto_stop_machines = "stop"      # 多餘的機器自動停
   auto_start_machines = true        # 有請求時自動啟動
-  min_machines_running = 0
+  min_machines_running = 1          # 但至少保留 1 台溫機（避開冷啟動 5-10 秒延遲）
   processes = ["app"]
 
   [[http_service.checks]]

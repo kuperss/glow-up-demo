@@ -1041,20 +1041,32 @@ export async function injectAIHelper() {
     u.textContent = text;
     list.appendChild(u);
     history.push({ role: 'user', content: text });
-    // 思考中
+    // 思考中（NotebookLM RAG 比直接 LLM 慢，給使用者明確期待）
+    const cfg = await getAIConfig().catch(() => ({}));
+    const isRag = cfg.provider === 'notebooklm';
     const thinking = document.createElement('div');
     thinking.className = 'ai-chat-bubble ai thinking';
-    thinking.textContent = '思考中⋯';
+    thinking.textContent = isRag
+      ? '查資料中⋯（RAG 約 10-25 秒）'
+      : '思考中⋯';
     list.appendChild(thinking);
     list.scrollTop = list.scrollHeight;
     input.value = ''; input.style.height = 'auto';
     sendBtn.disabled = true;
+
+    // RAG 模式：每 5 秒更新一次提示，讓使用者知道沒當機
+    let elapsed = 0;
+    const tick = isRag ? setInterval(() => {
+      elapsed += 5;
+      thinking.textContent = `查資料中⋯ ${elapsed}s（NotebookLM 比較慢，約 10-25 秒）`;
+    }, 5000) : null;
 
     try {
       const reply = await callAI({
         messages: history,
         // system 由 aiConfig 提供
       });
+      if (tick) clearInterval(tick);
       thinking.remove();
       const a = document.createElement('div');
       a.className = 'ai-chat-bubble ai';
@@ -1062,6 +1074,7 @@ export async function injectAIHelper() {
       list.appendChild(a);
       history.push({ role: 'assistant', content: reply });
     } catch (e) {
+      if (tick) clearInterval(tick);
       thinking.remove();
       const err = document.createElement('div');
       err.className = 'ai-chat-error';

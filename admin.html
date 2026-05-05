@@ -2288,10 +2288,21 @@
       const orig = elTestBtn.innerHTML;
       elTestBtn.innerHTML = '<span class="inline-block animate-pulse">呼叫中…</span>';
       const userPrompt = '你好，請用 1 句話介紹舞光 LED。';
+      const isNbProvider = elProvider.value === 'notebooklm';
+      const initialThinking = isNbProvider ? '查資料中…（NotebookLM 約 10-25 秒）' : '思考中…';
       elTestChat.innerHTML = `
         <div class="flex justify-end"><div class="max-w-[80%] px-4 py-2.5 rounded-2xl rounded-br-sm bg-orange-500/15 border border-orange-500/30 text-sm">${escapeHtml(userPrompt)}</div></div>
-        <div class="flex justify-start"><div class="max-w-[80%] px-4 py-2.5 rounded-2xl rounded-bl-sm bg-gray-800/50 border border-gray-700 text-sm text-gray-400 animate-pulse">思考中…</div></div>
+        <div class="flex justify-start"><div class="max-w-[80%] px-4 py-2.5 rounded-2xl rounded-bl-sm bg-gray-800/50 border border-gray-700 text-sm text-gray-400 animate-pulse" id="aiTestThinking">${initialThinking}</div></div>
       `;
+      // RAG 模式：每 5 秒更新已等待秒數
+      let _tick = null, _elapsed = 0;
+      if (isNbProvider) {
+        _tick = setInterval(() => {
+          _elapsed += 5;
+          const t = document.getElementById('aiTestThinking');
+          if (t) t.textContent = `查資料中… ${_elapsed}s（NotebookLM 比較慢，請耐心等候）`;
+        }, 5000);
+      }
       try {
         // 用當前表單即時值測試（不必先存）
         const reply = await fb.callAI({
@@ -2328,6 +2339,7 @@
           </div>
         `;
       } finally {
+        if (_tick) clearInterval(_tick);
         elTestBtn.disabled = false;
         elTestBtn.innerHTML = orig;
       }
