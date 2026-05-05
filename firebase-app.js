@@ -210,6 +210,10 @@ export function requireAuth(opts = {}) {
         injectAIHelper: injectAIHelper,
         renderChatMarkdown: renderChatMarkdown
       };
+      // 注入 AI 助教浮動按鈕（訪客也要顯示，admin.html 除外）
+      if (!location.pathname.endsWith('admin.html')) {
+        injectAIHelper();
+      }
       document.dispatchEvent(new CustomEvent('glow-firebase-ready', { detail: { user: currentUser, doc: guestDoc } }));
       resolve({ user: currentUser, doc: guestDoc });
       return;
