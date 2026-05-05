@@ -234,6 +234,62 @@
   @keyframes slide-in { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
   .feedback strong { color: var(--glow-orange-bright); }
 
+  /* === Stage 7: 配對挑戰 === */
+  .match-pool {
+    display: flex; flex-wrap: wrap; gap: 10px;
+    padding: 18px; min-height: 100px;
+    background: rgba(15,15,18,0.5);
+    border: 1px dashed rgba(245,130,32,0.3);
+    border-radius: 14px;
+  }
+  .match-pool:empty::before {
+    content: '所有產品都已分配 · 按下「檢查答案」';
+    color: #6B6B75; font-size: 13px; margin: auto;
+  }
+  .match-card {
+    user-select: none; cursor: pointer;
+    background: linear-gradient(180deg, rgba(26,26,31,0.8), rgba(19,19,22,0.6));
+    border: 1px solid rgba(245,130,32,0.25); border-radius: 12px;
+    padding: 10px 14px; min-width: 140px;
+    transition: all 0.2s ease;
+  }
+  .match-card:hover { border-color: rgba(245,130,32,0.55); transform: translateY(-2px); }
+  .match-card.selected {
+    background: linear-gradient(180deg, rgba(245,130,32,0.18), rgba(245,130,32,0.06));
+    border-color: rgba(245,130,32,0.85);
+    box-shadow: 0 0 24px -4px rgba(245,130,32,0.5);
+    transform: translateY(-2px);
+  }
+  .match-card.correct { border-color: rgba(34,197,94,0.7) !important; background: rgba(34,197,94,0.1) !important; }
+  .match-card.wrong { border-color: rgba(248,113,113,0.7) !important; background: rgba(248,113,113,0.1) !important; }
+  .match-card-name { font-size: 13px; font-weight: 600; color: #F5F5F7; }
+  .match-card-sku { font-size: 10px; color: #6B6B75; font-family: 'Inter', sans-serif; margin-top: 2px; }
+
+  .match-zones {
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 18px;
+  }
+  @media (min-width: 768px) { .match-zones { grid-template-columns: repeat(4, 1fr); } }
+  .match-zone {
+    background: rgba(15,15,18,0.5);
+    border: 1px solid rgba(38,38,44,0.7); border-radius: 12px;
+    padding: 12px; min-height: 130px;
+    transition: all 0.2s ease; cursor: pointer;
+  }
+  .match-zone:hover { border-color: rgba(245,130,32,0.45); background: rgba(245,130,32,0.04); }
+  .match-zone.target { border-color: rgba(245,130,32,0.7); background: rgba(245,130,32,0.08); }
+  .match-zone-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px dashed rgba(38,38,44,0.7); }
+  .match-zone-name { font-size: 13px; font-weight: 600; color: #FFA050; }
+  .match-zone-en { font-size: 9px; color: #6B6B75; font-family: 'Inter', sans-serif; letter-spacing: 0.1em; }
+  .match-zone-slot { display: flex; flex-direction: column; gap: 6px; }
+
+  .match-status-bar {
+    text-align: center; padding: 12px; margin-bottom: 16px;
+    border-radius: 10px; font-size: 13px;
+    background: rgba(245,130,32,0.06); border: 1px solid rgba(245,130,32,0.2); color: #FFA050;
+  }
+  .match-status-bar.success { background: rgba(34,197,94,0.1); border-color: rgba(34,197,94,0.4); color: #6ee7b7; }
+  .match-status-bar.partial { background: rgba(248,113,113,0.08); border-color: rgba(248,113,113,0.3); color: #fca5a5; }
+
   /* AI Chat */
   .chat-window {
     background: var(--bg-card);
@@ -474,7 +530,7 @@
     </div>
 
     <!-- 6 stages overview -->
-    <div class="grid grid-cols-2 lg:grid-cols-6 gap-4 max-w-6xl mx-auto mt-20 reveal" style="transition-delay:0.5s;">
+    <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 max-w-6xl mx-auto mt-20 reveal" style="transition-delay:0.5s;">
       <div class="stage-hero">
         <div class="stage-num">01</div>
         <div class="text-xs text-orange-400 font-mono-en tracking-widest mt-2 mb-1">STAGE 01</div>
@@ -510,6 +566,12 @@
         <div class="text-xs text-orange-400 font-mono-en tracking-widest mt-2 mb-1">STAGE 06</div>
         <div class="font-bold mb-1">進階情境演練</div>
         <div class="text-xs text-gray-500">5 題 · 判斷力</div>
+      </div>
+      <div class="stage-hero" style="transition-delay:0.3s;">
+        <div class="stage-num">07</div>
+        <div class="text-xs text-orange-400 font-mono-en tracking-widest mt-2 mb-1">STAGE 07</div>
+        <div class="font-bold mb-1">配對挑戰</div>
+        <div class="text-xs text-gray-500">9 卡 · 場域配對</div>
       </div>
     </div>
   </div>
@@ -1137,6 +1199,69 @@
   </div>
 </section>
 
+<!-- ===== Stage 7: 配對挑戰 ===== -->
+<section id="stage7" class="relative py-24">
+  <div class="max-w-5xl mx-auto px-6">
+    <div class="text-center mb-12 reveal">
+      <div class="section-eyebrow justify-center" style="display:inline-flex;">STAGE 07 · 配對挑戰</div>
+      <h2 class="font-display text-3xl md:text-4xl lg:text-5xl leading-[1.1] mb-4">
+        產品 ↔ 場域，<br>
+        <span class="text-orange-300">一眼配對</span>
+      </h2>
+      <p class="text-gray-500 max-w-xl mx-auto leading-relaxed mt-4">
+        把 9 張主打產品分到對的應用場域。產品可同時適用多個場域，放任一個正確場域都算對。<br>
+        <span class="text-orange-300">全部配對正確 +30 光點 · 解鎖「配對達人」徽章</span>
+      </p>
+    </div>
+
+    <div class="reveal">
+      <div id="matchStatus" class="match-status-bar">點選一張產品卡片，再點要放入的場域。已放置的卡片再點一次可送回上方候選區。</div>
+
+      <!-- Product pool -->
+      <div class="match-pool" id="matchPool"></div>
+
+      <!-- Dropzones -->
+      <div class="match-zones" id="matchZones">
+        <div class="match-zone" data-zone="居家">
+          <div class="match-zone-head"><span class="match-zone-name">居家空間</span><span class="match-zone-en">HOME</span></div>
+          <div class="match-zone-slot"></div>
+        </div>
+        <div class="match-zone" data-zone="商業">
+          <div class="match-zone-head"><span class="match-zone-name">商業空間</span><span class="match-zone-en">COMMERCIAL</span></div>
+          <div class="match-zone-slot"></div>
+        </div>
+        <div class="match-zone" data-zone="辦公">
+          <div class="match-zone-head"><span class="match-zone-name">辦公空間</span><span class="match-zone-en">OFFICE</span></div>
+          <div class="match-zone-slot"></div>
+        </div>
+        <div class="match-zone" data-zone="學校">
+          <div class="match-zone-head"><span class="match-zone-name">學校照明</span><span class="match-zone-en">SCHOOL</span></div>
+          <div class="match-zone-slot"></div>
+        </div>
+        <div class="match-zone" data-zone="工廠">
+          <div class="match-zone-head"><span class="match-zone-name">工廠照明</span><span class="match-zone-en">INDUSTRIAL</span></div>
+          <div class="match-zone-slot"></div>
+        </div>
+        <div class="match-zone" data-zone="互聯">
+          <div class="match-zone-head"><span class="match-zone-name">互聯數位</span><span class="match-zone-en">DIGITAL</span></div>
+          <div class="match-zone-slot"></div>
+        </div>
+        <div class="match-zone" data-zone="戶外">
+          <div class="match-zone-head"><span class="match-zone-name">戶外空間</span><span class="match-zone-en">OUTDOOR</span></div>
+          <div class="match-zone-slot"></div>
+        </div>
+      </div>
+
+      <div class="text-center mt-8 flex items-center justify-center gap-3">
+        <button id="matchSubmitBtn" class="btn btn-primary" disabled>檢查答案</button>
+        <button id="matchResetBtn" class="btn btn-ghost">重新配對</button>
+      </div>
+
+      <div id="matchResult" class="feedback mt-6"></div>
+    </div>
+  </div>
+</section>
+
 <!-- ===== End CTA ===== -->
 <section class="relative py-32 overflow-hidden">
   <div class="glow-orb" style="background:#F58220; width:600px; height:600px; bottom:-200px; left:50%; transform:translateX(-50%); opacity:0.2;"></div>
@@ -1315,6 +1440,7 @@
     { key: 'champion', name: '闖關王',   test: (qIds, sc) => sc.size >= 3, desc: '完成 3 個 AI 情境' },
     { key: 'hr',       name: '規章達人', test: (qIds) => ['q13','q14','q15','q16','q17'].every(id => qIds.has(id)), desc: '完成 STAGE 5 五題 HR 規章' },
     { key: 'sage',     name: '判斷力高手', test: (qIds) => ['q18','q19','q20','q21','q22'].every(id => qIds.has(id)), desc: '完成 STAGE 6 五題進階情境' },
+    { key: 'matcher',  name: '配對達人', test: (qIds, sc) => sc.has('match_v1'), desc: '完成 STAGE 7 產品↔場域配對' },
     { key: 'lighter',  name: '點燈者',   test: (qIds, sc) => qIds.size + sc.size >= 30, desc: '★ 30 / 30 全通關 · 最高榮譽' }
   ];
   const SHOWN_BADGES_KEY = 'glow-shown-badges-v1';
@@ -1793,6 +1919,176 @@
     });
     setTimeout(() => loadScenario('dealer'), 600);
   });
+
+  // ===========================================================
+  // ===== Stage 7: 配對挑戰（產品 ↔ 場域）=====
+  // ===========================================================
+  (function() {
+    const elPool = document.getElementById('matchPool');
+    const elZones = document.getElementById('matchZones');
+    const elSubmit = document.getElementById('matchSubmitBtn');
+    const elReset = document.getElementById('matchResetBtn');
+    const elStatus = document.getElementById('matchStatus');
+    const elResult = document.getElementById('matchResult');
+    if (!elPool || !elZones) return;
+
+    let products = [];     // [{sku, name, categories[]}]
+    let placement = {};    // sku -> zone (or null if in pool)
+    let selectedSku = null;
+    let locked = false;    // 提交後鎖住等重置
+
+    function loadProducts() {
+      const data = (window.glowFirebase && window.glowFirebase.DEFAULT_FLAGSHIP_PRODUCTS) || null;
+      const cards = (data && Array.isArray(data.cards)) ? data.cards : [];
+      products = cards.map(c => ({
+        sku: c.sku,
+        name: (c.shortName || (c.title || '').replace(/<br\s*\/?>/gi, ' ')).trim(),
+        categories: Array.isArray(c.categories) ? c.categories : []
+      })).filter(p => p.sku);
+      // 嘗試從 Firestore live 拿（主管自訂版）
+      if (window.glowFirebase && window.glowFirebase.onFlagshipProductsUpdate) {
+        window.glowFirebase.onFlagshipProductsUpdate(live => {
+          if (live && Array.isArray(live.cards) && live.cards.length) {
+            products = live.cards.map(c => ({
+              sku: c.sku,
+              name: (c.shortName || (c.title || '').replace(/<br\s*\/?>/gi, ' ')).trim(),
+              categories: Array.isArray(c.categories) ? c.categories : []
+            })).filter(p => p.sku);
+            resetGame();
+          }
+        });
+      }
+      resetGame();
+    }
+
+    function resetGame() {
+      placement = {};
+      products.forEach(p => { placement[p.sku] = null; });
+      selectedSku = null;
+      locked = false;
+      elResult.classList.remove('show');
+      elResult.innerHTML = '';
+      elStatus.className = 'match-status-bar';
+      elStatus.textContent = '點選一張產品卡片，再點要放入的場域。已放置的卡片再點一次可送回上方候選區。';
+      render();
+    }
+
+    function render() {
+      // Pool
+      const inPool = products.filter(p => !placement[p.sku]);
+      elPool.innerHTML = inPool.map(p => makeCardHtml(p, false)).join('');
+      // Zones
+      elZones.querySelectorAll('.match-zone').forEach(zone => {
+        const zoneName = zone.dataset.zone;
+        const slot = zone.querySelector('.match-zone-slot');
+        const placed = products.filter(p => placement[p.sku] === zoneName);
+        slot.innerHTML = placed.map(p => makeCardHtml(p, true)).join('');
+        zone.classList.toggle('target', !!selectedSku && !locked);
+      });
+      // Submit button enabled when all placed
+      const allPlaced = products.length > 0 && products.every(p => placement[p.sku]);
+      elSubmit.disabled = !allPlaced || locked;
+      bindEvents();
+    }
+
+    function makeCardHtml(p, placed) {
+      const sel = selectedSku === p.sku ? ' selected' : '';
+      // Show correct/wrong styles after submit
+      let resultCls = '';
+      if (locked && placed) {
+        resultCls = p.categories.includes(placement[p.sku]) ? ' correct' : ' wrong';
+      }
+      return `<div class="match-card${sel}${resultCls}" data-sku="${escAttr(p.sku)}">
+        <div class="match-card-name">${escAttr(p.name)}</div>
+        <div class="match-card-sku">${escAttr(p.sku)}</div>
+      </div>`;
+    }
+
+    function escAttr(s){ return String(s==null?'':s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+    function bindEvents() {
+      elPool.querySelectorAll('.match-card').forEach(el => {
+        el.addEventListener('click', (e) => {
+          if (locked) return;
+          const sku = el.dataset.sku;
+          selectedSku = (selectedSku === sku) ? null : sku;
+          render();
+        });
+      });
+      elZones.querySelectorAll('.match-card').forEach(el => {
+        el.addEventListener('click', (e) => {
+          if (locked) return;
+          e.stopPropagation();
+          const sku = el.dataset.sku;
+          // 點已放置的卡 → 送回 pool
+          placement[sku] = null;
+          selectedSku = null;
+          render();
+        });
+      });
+      elZones.querySelectorAll('.match-zone').forEach(zone => {
+        zone.addEventListener('click', () => {
+          if (locked) return;
+          if (!selectedSku) return;
+          placement[selectedSku] = zone.dataset.zone;
+          selectedSku = null;
+          render();
+        });
+      });
+    }
+
+    async function submit() {
+      locked = true;
+      const correct = products.filter(p => p.categories.includes(placement[p.sku])).length;
+      const total = products.length;
+      const allCorrect = correct === total;
+      render();
+
+      if (allCorrect) {
+        elStatus.className = 'match-status-bar success';
+        elStatus.textContent = `🎯 全部 ${total} 張配對正確！`;
+        const already = completedScenarios && completedScenarios.has('match_v1');
+        elResult.innerHTML = `
+          <strong>解析：</strong>產品分類能力是業務的基本盤——客戶開口前你就要知道這支產品該推哪個案場。
+          ${already ? '（已記錄過，本次不重複加分）' : '<span class="text-orange-300">+30 光點 已加入 · 解鎖「配對達人」徽章</span>'}
+        `;
+        elResult.classList.add('show');
+        if (!already && window.glowFirebase && window.glowFirebase.recordScenarioCompletion) {
+          try {
+            await window.glowFirebase.recordScenarioCompletion('match_v1', 30);
+            if (typeof completedScenarios !== 'undefined') completedScenarios.add('match_v1');
+            totalScore += 30;
+            const ts = document.getElementById('totalScore'); if (ts) ts.textContent = totalScore;
+            const sc = document.getElementById('scenariosCompleted'); if (sc) sc.textContent = completedScenarios.size;
+            // 觸發徽章 toast
+            if (typeof checkAndAnnounceBadges === 'function') checkAndAnnounceBadges();
+            if (window.showToast) {
+              window.showToast({ type: 'correct', title: '🎯 +30 光點', desc: '完成配對挑戰！', duration: 3500 });
+            }
+          } catch (e) { console.warn('match_v1 record failed', e); }
+        }
+      } else {
+        elStatus.className = 'match-status-bar partial';
+        elStatus.textContent = `配對結果：${correct} / ${total} 正確 · 紅色卡片位置錯誤`;
+        elResult.innerHTML = `
+          <strong>提示：</strong>每張產品上都有「正確場域」標示在其原始定義中（在 admin 的「主打產品」可看完整 categories）。<br>
+          <span class="text-gray-400">產品可以同時適用多個場域（如奧丁崁燈：居家+商業），放任一個正確場域都算對。再試試？</span>
+        `;
+        elResult.classList.add('show');
+        // 再試一次：等使用者按重新配對
+      }
+    }
+
+    elSubmit.addEventListener('click', submit);
+    elReset.addEventListener('click', resetGame);
+
+    // 等 quiz state ready 後初始化（確保 completedScenarios 已載入）
+    if (window.glowFirebase) {
+      loadProducts();
+    } else {
+      document.addEventListener('glow-firebase-ready', loadProducts, { once: true });
+    }
+  })();
 </script>
 
 
