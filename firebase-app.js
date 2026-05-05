@@ -889,8 +889,8 @@ function injectAIHelperCSS() {
     .ai-helper-fab {
       position: fixed; right: 24px; bottom: 24px; z-index: 9998;
       width: 64px; height: 64px; border-radius: 50%;
-      background: radial-gradient(circle at 35% 30%, #FFE4C4, #FFB57A 55%, #F58220 100%);
-      border: 2px solid rgba(255,255,255,0.85);
+      background: linear-gradient(135deg, #F58220, #C66510);
+      border: 2px solid rgba(255,255,255,0.9);
       display: flex; align-items: center; justify-content: center;
       cursor: pointer; box-shadow: 0 12px 40px -8px rgba(245,130,32,0.55);
       transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
@@ -918,8 +918,8 @@ function injectAIHelperCSS() {
     }
     .ai-panel-icon {
       width: 44px; height: 44px; border-radius: 50%;
-      background: radial-gradient(circle at 35% 30%, #FFE4C4, #FFB57A 55%, #F58220 100%);
-      border: 2px solid rgba(255,255,255,0.85);
+      background: linear-gradient(135deg, #F58220, #C66510);
+      border: 2px solid rgba(255,255,255,0.9);
       display: flex; align-items: center; justify-content: center;
       overflow: hidden; flex-shrink: 0;
     }
