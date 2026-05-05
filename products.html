@@ -228,6 +228,17 @@
     perspective: 1200px;
     height: 380px;
   }
+  .filter-match-badge {
+    position: absolute; top: 14px; right: 14px;
+    background: rgba(34,197,94,0.15);
+    border: 1px solid rgba(34,197,94,0.45);
+    color: #6ee7b7; font-size: 10px; font-weight: 600;
+    padding: 3px 9px; border-radius: 999px;
+    z-index: 5; letter-spacing: 0.05em;
+    pointer-events: none;
+    animation: filter-badge-in 0.3s ease;
+  }
+  @keyframes filter-badge-in { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
   .flip-card-inner {
     position: relative;
     width: 100%; height: 100%;
@@ -1389,6 +1400,19 @@
         card.classList.add('is-fading');
       } else {
         card.classList.add('is-hidden');
+      }
+      // 配對指示 chip：當 filter 不是 all 且該卡片有多個 categories 時，提示為什麼出現
+      let badge = card.querySelector('.filter-match-badge');
+      if (visible && currentFilter !== 'all' && cats.length > 1) {
+        if (!badge) {
+          badge = document.createElement('div');
+          badge.className = 'filter-match-badge';
+          const front = card.querySelector('.flip-face');
+          if (front) front.appendChild(badge);
+        }
+        badge.textContent = '✓ ' + currentFilter + ' 適用';
+      } else if (badge) {
+        badge.remove();
       }
     });
   }
