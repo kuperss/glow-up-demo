@@ -21,6 +21,10 @@
 !day3.html
 !firebase-app.js
 !firestore.rules
+!firebase.json
+!.firebaserc
+!package.json
+!package-lock.json
 !舞光_產品資料.json
 !products.json
 

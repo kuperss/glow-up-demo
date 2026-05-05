@@ -1,0 +1,16 @@
+{
+  "name": "dancelight-training",
+  "version": "1.0.0",
+  "private": true,
+  "description": "舞光戰將點燈計劃 - 業務新人訓練網站。靜態 HTML + Firebase。本 package.json 只給 firebase CLI 用（部署 firestore rules）。",
+  "scripts": {
+    "deploy:rules": "firebase deploy --only firestore:rules",
+    "deploy:rules:ci": "firebase deploy --only firestore:rules --token \"%FIREBASE_TOKEN%\"",
+    "login": "firebase login",
+    "logout": "firebase logout",
+    "rules:check": "firebase firestore:rules:get"
+  },
+  "devDependencies": {
+    "firebase-tools": "^13.29.1"
+  }
+}
