@@ -161,15 +161,14 @@
     .onb-toc {
       display: block;
       position: fixed;
-      left: max(20px, calc((100vw - 1280px) / 2 - 20px));
-      top: 50%;
-      transform: translateY(-50%);
-      width: 220px;
-      max-height: 78vh;
+      left: 16px;
+      top: 96px;
+      width: 200px;
+      max-height: calc(100vh - 130px);
       overflow-y: auto;
       z-index: 30;
-      padding: 18px 16px;
-      background: linear-gradient(180deg, rgba(15,15,18,0.85), rgba(10,10,12,0.7));
+      padding: 16px 14px;
+      background: linear-gradient(180deg, rgba(15,15,18,0.92), rgba(10,10,12,0.82));
       backdrop-filter: blur(14px);
       -webkit-backdrop-filter: blur(14px);
       border: 1px solid rgba(245,130,32,0.18);
@@ -181,6 +180,12 @@
     .onb-toc.visible { opacity: 1; pointer-events: auto; }
     .onb-toc::-webkit-scrollbar { width: 4px; }
     .onb-toc::-webkit-scrollbar-thumb { background: rgba(245,130,32,0.3); border-radius: 2px; }
+    /* Push 9 content sections (id present) right to avoid TOC overlap */
+    body > section[id] { padding-left: 240px; }
+  }
+  /* 更寬螢幕 (≥1536px) 多留呼吸空間 */
+  @media (min-width: 1536px) {
+    body > section[id] { padding-left: 260px; }
   }
   .onb-toc-title {
     font-family: 'Inter', sans-serif; font-size: 10px; letter-spacing: 0.25em;
@@ -704,7 +709,7 @@
 </section>
 
 <!-- ===== End CTA ===== -->
-<section class="relative py-24 z-10">
+<section id="onb-end" class="relative py-24 z-10">
   <div class="max-w-4xl mx-auto px-6 lg:px-10 text-center">
     <div class="divider-glow" style="margin: 0 auto 40px; max-width: 200px;"></div>
     <h2 class="font-display text-3xl md:text-4xl lg:text-5xl mb-6 reveal">入職須知，<span class="text-orange-300">完成。</span></h2>
