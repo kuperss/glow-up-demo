@@ -90,9 +90,10 @@ def main() -> int:
     print("  notebooklm auth check --test")
     print("  → 五項全 ✓ 表示成功")
     print("\n部署到 Fly（PowerShell — 用 base64 避開 shell escape）：")
-    print('  $bytes = [System.IO.File]::ReadAllBytes("credentials\\notebooklm_storage.json")')
+    print('  $bytes = [System.IO.File]::ReadAllBytes((Resolve-Path "credentials\\notebooklm_storage.json").Path)')
     print('  $b64 = [Convert]::ToBase64String($bytes)')
     print('  fly secrets set NOTEBOOKLM_STORAGE_JSON_B64="$b64"')
+    print("\n  ※ Resolve-Path 是必要的：.NET 的 cwd 不跟 PowerShell 的 cd")
     print("\n  最後一行會自動觸發 fly redeploy。")
     return 0
 
