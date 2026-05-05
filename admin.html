@@ -409,6 +409,11 @@
         <span>內容編輯</span>
         <span class="ml-auto text-[10px] px-1.5 py-0.5 rounded bg-orange-500/20 text-orange-300">CMS</span>
       </a>
+      <a class="sidebar-link" data-page="categorymap">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        <span>產品分類牆</span>
+        <span class="ml-auto text-[10px] px-1.5 py-0.5 rounded bg-orange-500/30 text-orange-200">NEW</span>
+      </a>
       <a class="sidebar-link" data-page="ai">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12a4 4 0 0 1 8 0"/><circle cx="12" cy="10" r="1"/><path d="M12 14v4"/></svg>
         <span>AI 設定</span>
@@ -896,6 +901,37 @@
         </div>
       </section>
 
+      <!-- ===== CATEGORY MAP EDITOR ===== -->
+      <section id="page-categorymap" class="page-section">
+        <div class="flex items-center justify-between mb-6">
+          <div>
+            <h2 class="text-2xl font-bold mb-1">產品分類牆</h2>
+            <div class="text-sm text-gray-500">編輯 products.html 七大應用場域內的產品類型卡片 · 支援新增／刪除／排序／更換 icon</div>
+          </div>
+          <div class="flex gap-2">
+            <button class="btn btn-ghost" id="catmapResetBtn">重置為預設</button>
+            <button class="btn btn-primary" id="catmapSaveBtn">儲存全部</button>
+          </div>
+        </div>
+
+        <div class="panel mb-6">
+          <div class="text-xs text-gray-400 p-3 rounded-lg bg-orange-500/5 border border-orange-500/15 flex items-start gap-2">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mt-0.5 flex-shrink-0 text-orange-400"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            <div class="leading-relaxed">
+              <strong class="text-orange-300">設計說明</strong>：七大應用場域（HOME / COMMERCIAL / OFFICE / SCHOOL / INDUSTRIAL / DIGITAL / OUTDOOR）為舞光官方分類，<strong>群組本身不可刪除</strong>。但每個群組內的卡片可任意新增、刪除、排序、改名、換 icon。儲存後 products.html 立即同步顯示。
+              <span id="catmapUpdatedAt" class="block mt-1 text-[10px] text-gray-500"></span>
+            </div>
+          </div>
+        </div>
+
+        <div id="catmapGroups" class="space-y-4"></div>
+        <div class="mt-6 flex items-center justify-end gap-3">
+          <span id="catmapDirty" class="text-xs text-orange-300 hidden">● 有未儲存變更</span>
+          <span id="catmapSaveMsg" class="text-xs"></span>
+          <button class="btn btn-primary" id="catmapSaveBtn2">儲存全部</button>
+        </div>
+      </section>
+
       <!-- ===== RESOURCES ===== -->
       <section id="page-resources" class="page-section">
         <div class="flex items-center justify-between mb-6">
@@ -1255,6 +1291,7 @@
         chapters: ['ADMIN · CHAPTERS', '章節管理'],
         quiz: ['ADMIN · QUIZ BANK', '題庫管理'],
         content: ['ADMIN · CONTENT CMS', '內容編輯'],
+        categorymap: ['ADMIN · CATEGORY MAP', '產品分類牆'],
         ai: ['ADMIN · AI CONFIG', 'AI 設定'],
         resources: ['ADMIN · RESOURCES', '資源庫'],
         analytics: ['ADMIN · ANALYTICS', '數據分析'],
@@ -2198,6 +2235,226 @@
         elTestBtn.disabled = false;
         elTestBtn.innerHTML = orig;
       }
+    });
+
+    // ===========================================================
+    // ===== 產品分類牆編輯器 =====
+    // ===========================================================
+    const CAT_ICONS = fb.CAT_ICONS || {};
+    const CAT_ICON_LABELS = fb.CAT_ICON_LABELS || {};
+    const CATEGORY_GROUPS = fb.CATEGORY_GROUPS || [];
+    const DEFAULT_MAP = fb.DEFAULT_CATEGORY_MAP || { groups: [] };
+    const elCatGroups = document.getElementById('catmapGroups');
+    const elCatSave = document.getElementById('catmapSaveBtn');
+    const elCatSave2 = document.getElementById('catmapSaveBtn2');
+    const elCatReset = document.getElementById('catmapResetBtn');
+    const elCatDirty = document.getElementById('catmapDirty');
+    const elCatSaveMsg = document.getElementById('catmapSaveMsg');
+    const elCatUpdated = document.getElementById('catmapUpdatedAt');
+
+    let catState = null;     // current editing state
+    let catBaseline = null;  // last saved snapshot (for dirty detection)
+
+    function svgFor(name) {
+      const inner = CAT_ICONS[name] || CAT_ICONS['circle-target'] || '';
+      return `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${inner}</svg>`;
+    }
+
+    function deepClone(o) { return JSON.parse(JSON.stringify(o)); }
+
+    function ensureFullStructure(data) {
+      // 保證 7 群組都存在，且 code/label 對齊官方
+      const map = {};
+      (data && data.groups || []).forEach(g => { map[g.code] = g; });
+      return {
+        groups: CATEGORY_GROUPS.map(spec => {
+          const existing = map[spec.code];
+          return {
+            code: spec.code,
+            label: spec.label,
+            cards: existing && Array.isArray(existing.cards) ? existing.cards.map(c => ({
+              icon: c.icon || 'circle-target',
+              title: c.title || '',
+              subtitle: c.subtitle || ''
+            })) : []
+          };
+        })
+      };
+    }
+
+    function checkDirty() {
+      const dirty = JSON.stringify(catState) !== JSON.stringify(catBaseline);
+      elCatDirty.classList.toggle('hidden', !dirty);
+      return dirty;
+    }
+
+    function buildIconOptions(currentValue) {
+      return Object.keys(CAT_ICONS).map(name =>
+        `<option value="${escapeHtml(name)}" ${name === currentValue ? 'selected' : ''}>${escapeHtml(CAT_ICON_LABELS[name] || name)}</option>`
+      ).join('');
+    }
+
+    function renderCatEditor() {
+      if (!catState) return;
+      elCatGroups.innerHTML = catState.groups.map((g, gi) => {
+        const cardRows = g.cards.map((c, ci) => `
+          <tr data-gi="${gi}" data-ci="${ci}">
+            <td class="text-center" style="width:80px;">
+              <div class="w-9 h-9 rounded-lg bg-orange-500/10 border border-orange-500/25 flex items-center justify-center text-orange-300 mx-auto">${svgFor(c.icon)}</div>
+            </td>
+            <td style="width:180px;">
+              <select class="form-input cat-icon-sel" data-gi="${gi}" data-ci="${ci}">${buildIconOptions(c.icon)}</select>
+            </td>
+            <td>
+              <input class="form-input cat-title-in" type="text" data-gi="${gi}" data-ci="${ci}" value="${escapeHtml(c.title)}" placeholder="例：崁燈">
+            </td>
+            <td>
+              <input class="form-input cat-sub-in" type="text" data-gi="${gi}" data-ci="${ci}" value="${escapeHtml(c.subtitle)}" placeholder="例：索爾 · 奧丁 · 馬爾">
+            </td>
+            <td class="text-right" style="width:160px; white-space:nowrap;">
+              <button class="btn btn-ghost text-xs cat-up-btn" data-gi="${gi}" data-ci="${ci}" ${ci === 0 ? 'disabled' : ''}>↑</button>
+              <button class="btn btn-ghost text-xs cat-dn-btn" data-gi="${gi}" data-ci="${ci}" ${ci === g.cards.length - 1 ? 'disabled' : ''}>↓</button>
+              <button class="btn btn-ghost text-xs cat-del-btn" data-gi="${gi}" data-ci="${ci}" style="color:#fca5a5;">刪除</button>
+            </td>
+          </tr>`).join('');
+        const empty = g.cards.length === 0
+          ? '<tr><td colspan="5" class="text-center text-gray-500 py-6">這個群組目前沒有卡片，點下方「新增卡片」</td></tr>'
+          : '';
+        return `
+          <div class="panel">
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center gap-3">
+                <div class="w-1 h-7 rounded-full bg-gradient-to-b from-orange-400 to-orange-600"></div>
+                <div>
+                  <div class="text-[11px] text-orange-400 font-mono-en tracking-widest">${escapeHtml(g.code)}</div>
+                  <div class="font-bold text-base">${escapeHtml(g.label)}</div>
+                </div>
+                <span class="ml-2 text-[11px] px-2 py-0.5 rounded-full bg-gray-800/60 text-gray-400">${g.cards.length} 張卡片</span>
+              </div>
+              <button class="btn btn-primary text-xs cat-add-btn" data-gi="${gi}">+ 新增卡片</button>
+            </div>
+            <div class="table-wrap">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th class="text-center" style="width:80px;">預覽</th>
+                    <th>Icon</th>
+                    <th>標題</th>
+                    <th>副標</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>${cardRows}${empty}</tbody>
+              </table>
+            </div>
+          </div>`;
+      }).join('');
+      bindCatEditorEvents();
+      checkDirty();
+    }
+
+    function bindCatEditorEvents() {
+      elCatGroups.querySelectorAll('.cat-icon-sel').forEach(sel => {
+        sel.addEventListener('change', (e) => {
+          const gi = +e.target.dataset.gi, ci = +e.target.dataset.ci;
+          catState.groups[gi].cards[ci].icon = e.target.value;
+          renderCatEditor();
+        });
+      });
+      elCatGroups.querySelectorAll('.cat-title-in').forEach(inp => {
+        inp.addEventListener('input', (e) => {
+          const gi = +e.target.dataset.gi, ci = +e.target.dataset.ci;
+          catState.groups[gi].cards[ci].title = e.target.value;
+          checkDirty();
+        });
+      });
+      elCatGroups.querySelectorAll('.cat-sub-in').forEach(inp => {
+        inp.addEventListener('input', (e) => {
+          const gi = +e.target.dataset.gi, ci = +e.target.dataset.ci;
+          catState.groups[gi].cards[ci].subtitle = e.target.value;
+          checkDirty();
+        });
+      });
+      elCatGroups.querySelectorAll('.cat-up-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const gi = +e.currentTarget.dataset.gi, ci = +e.currentTarget.dataset.ci;
+          if (ci === 0) return;
+          const arr = catState.groups[gi].cards;
+          [arr[ci-1], arr[ci]] = [arr[ci], arr[ci-1]];
+          renderCatEditor();
+        });
+      });
+      elCatGroups.querySelectorAll('.cat-dn-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const gi = +e.currentTarget.dataset.gi, ci = +e.currentTarget.dataset.ci;
+          const arr = catState.groups[gi].cards;
+          if (ci >= arr.length - 1) return;
+          [arr[ci+1], arr[ci]] = [arr[ci], arr[ci+1]];
+          renderCatEditor();
+        });
+      });
+      elCatGroups.querySelectorAll('.cat-del-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const gi = +e.currentTarget.dataset.gi, ci = +e.currentTarget.dataset.ci;
+          const c = catState.groups[gi].cards[ci];
+          if (!confirm(`確定刪除「${c.title || '（未命名）'}」？`)) return;
+          catState.groups[gi].cards.splice(ci, 1);
+          renderCatEditor();
+        });
+      });
+      elCatGroups.querySelectorAll('.cat-add-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const gi = +e.currentTarget.dataset.gi;
+          catState.groups[gi].cards.push({ icon: 'circle-target', title: '', subtitle: '' });
+          renderCatEditor();
+        });
+      });
+    }
+
+    async function saveCatMap() {
+      // 簡單驗證：標題/副標不為空
+      for (const g of catState.groups) {
+        for (const c of g.cards) {
+          if (!c.title || !c.title.trim()) {
+            elCatSaveMsg.innerHTML = `<span class="text-red-300">✗ 「${escapeHtml(g.label)}」內有空白標題的卡片</span>`;
+            return;
+          }
+        }
+      }
+      elCatSaveMsg.innerHTML = '<span class="text-gray-400">儲存中…</span>';
+      [elCatSave, elCatSave2].forEach(b => b.disabled = true);
+      try {
+        await fb.saveCategoryMap({ groups: catState.groups });
+        catBaseline = deepClone(catState);
+        elCatSaveMsg.innerHTML = '<span class="text-green-300">✓ 已儲存，前端 products.html 已即時更新</span>';
+        setTimeout(() => { elCatSaveMsg.textContent = ''; }, 3000);
+        checkDirty();
+      } catch (e) {
+        elCatSaveMsg.innerHTML = `<span class="text-red-300">✗ ${escapeHtml(e.message || e)}</span>`;
+      } finally {
+        [elCatSave, elCatSave2].forEach(b => b.disabled = false);
+      }
+    }
+    elCatSave.addEventListener('click', saveCatMap);
+    elCatSave2.addEventListener('click', saveCatMap);
+
+    elCatReset.addEventListener('click', () => {
+      if (!confirm('將整個分類牆重置為系統預設值？（仍需按「儲存全部」才會寫回 Firestore）')) return;
+      catState = ensureFullStructure(deepClone(DEFAULT_MAP));
+      renderCatEditor();
+    });
+
+    // 即時訂閱 Firestore（首次啟動 / 其他 admin 同步編輯）
+    fb.onCategoryMapUpdate((data) => {
+      const fresh = ensureFullStructure(data || DEFAULT_MAP);
+      catState = deepClone(fresh);
+      catBaseline = deepClone(fresh);
+      if (data && data.updatedAt) {
+        elCatUpdated.textContent = '上次更新：' + fmtTime(data.updatedAt) + (data.updatedBy ? ' · ' + data.updatedBy : '');
+      } else {
+        elCatUpdated.textContent = '尚未自訂過 · 目前顯示系統預設值';
+      }
+      renderCatEditor();
     });
   });
 </script>

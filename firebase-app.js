@@ -191,6 +191,10 @@ export function requireAuth(opts = {}) {
         async saveContentValue() { alert('訪客模式：無法儲存內容變更'); },
         onSiteContentUpdate(cb) { cb([]); return () => {}; },
         async applySiteContent() { /* no-op for guest */ },
+        async getCategoryMap() { return null; },
+        async saveCategoryMap() { alert('訪客模式：無法儲存分類牆變更'); },
+        onCategoryMapUpdate(cb) { cb(null); return () => {}; },
+        renderCatIcon, CAT_ICONS, CAT_ICON_LABELS, CATEGORY_GROUPS, DEFAULT_CATEGORY_MAP,
         async getAIConfig() { return { provider: 'gemini', apiKey: '', model: '', systemPrompt: '', enabled: false }; },
         async saveAIConfig() { alert('訪客模式：無法儲存 AI 設定'); },
         onAIConfigUpdate(cb) { cb({ provider: 'gemini', apiKey: '', model: '', systemPrompt: '', enabled: false }); return () => {}; },
@@ -229,6 +233,8 @@ export function requireAuth(opts = {}) {
         listAllUsers, getUserProgressDetail,
         onUsersUpdate, onAllowlistUpdate, getStuckPointAnalysis,
         listSiteContent, saveContentValue, onSiteContentUpdate, applySiteContent,
+        getCategoryMap, saveCategoryMap, onCategoryMapUpdate,
+        renderCatIcon, CAT_ICONS, CAT_ICON_LABELS, CATEGORY_GROUPS, DEFAULT_CATEGORY_MAP,
         getAIConfig, saveAIConfig, onAIConfigUpdate, callAI, getProviderDefaults,
         injectAIHelper
       };
@@ -523,6 +529,151 @@ export async function applySiteContent() {
       }
     });
   } catch(e) { console.warn('applySiteContent failed', e); }
+}
+
+// ========== 產品分類牆 CMS（categoryMap）==========
+// Firestore：siteContent/categoryMap = { type:'categoryMap', groups:[{code,label,cards:[{icon,title,subtitle}]}], updatedAt }
+// 群組 code/label 固定（舞光官方 7 大應用場域），admin 只能改 cards 陣列。
+// 前端 products.html 透過 onCategoryMapUpdate() 即時 render；無資料時 fallback 到 DEFAULT_CATEGORY_MAP。
+
+export const CAT_ICONS = {
+  'circle-target':  '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/>',
+  'circle-cross':   '<circle cx="12" cy="12" r="9"/><path d="M12 3v18M3 12h18"/>',
+  'circle-line':    '<circle cx="12" cy="12" r="8"/><path d="M8 12h8"/>',
+  'circle-double':  '<circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>',
+  'circle-half':    '<circle cx="12" cy="12" r="9"/><path d="M12 3v18"/>',
+  'shield-curve':   '<circle cx="12" cy="12" r="9"/><path d="M9 12a3 3 0 0 1 6 0"/>',
+  'shield-check':   '<path d="M12 2v3M12 19v3M3 12h3M18 12h3"/><circle cx="12" cy="12" r="6"/><path d="M9 12l2 2 4-4"/>',
+  'lines-vertical': '<path d="M3 12h18"/><path d="M5 8v8M9 6v12M13 8v8M17 6v12"/>',
+  'house':          '<path d="M5 21v-9l7-9 7 9v9"/><path d="M9 21v-6h6v6"/>',
+  'wall-light':     '<path d="M5 21v-9l7-9 7 9v9"/><circle cx="12" cy="14" r="2"/>',
+  'bulb':           '<path d="M12 2v8"/><path d="M5 12a7 7 0 0 0 14 0"/><circle cx="12" cy="20" r="2"/>',
+  'track':          '<rect x="3" y="9" width="18" height="3" rx="1.5"/><path d="M8 12v6M16 12v6"/>',
+  'spotlight':      '<circle cx="12" cy="6" r="3"/><path d="M5 22l7-13 7 13"/>',
+  'square-grid':    '<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/>',
+  'rect-grid':      '<rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 12h18M9 6v12M15 6v12"/>',
+  'rect-lines':     '<rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 9h18M3 12h18M3 15h18"/>',
+  'rect-board':     '<rect x="2" y="6" width="20" height="9" rx="1"/><path d="M12 18v3"/>',
+  'tube':           '<rect x="3" y="10" width="18" height="4" rx="2"/>',
+  'desk-lamp':      '<path d="M12 2v6M12 16v6M2 12h6M16 12h6"/><circle cx="12" cy="12" r="3"/>',
+  'bolt':           '<path d="M12 2L8 8h8l-4 6"/><path d="M12 14v8"/>',
+  'building':       '<path d="M12 2L4 8v12h16V8z"/><path d="M9 22v-6h6v6"/>',
+  'factory':        '<path d="M2 22V8l10-6 10 6v14"/><path d="M6 22V12h12v10"/>',
+  'damp-box':       '<rect x="6" y="8" width="12" height="8" rx="2"/><path d="M9 4v4M15 4v4"/>',
+  'uv':             '<circle cx="12" cy="8" r="4"/><path d="M12 12v6M9 18h6"/>',
+  'x-circle':       '<circle cx="12" cy="12" r="9"/><path d="M9 9l6 6M15 9l-6 6"/>',
+  'phone':          '<rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/>',
+  'globe':          '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a9 9 0 0 1 0 18M12 3a9 9 0 0 0 0 18"/>',
+  'sun':            '<circle cx="12" cy="12" r="6"/><path d="M12 4v2M12 18v2M4 12h2M18 12h2"/>',
+  'street-light':   '<path d="M12 22V8M5 14l7-6 7 6M3 22h18"/>',
+  'stairs':         '<path d="M12 22v-8M8 14l4-4 4 4"/><path d="M3 22h18"/>',
+  'tree':           '<path d="M12 2v8M9 6l3-3 3 3M5 22c0-4 4-7 7-7s7 3 7 7"/>'
+};
+
+export const CAT_ICON_LABELS = {
+  'circle-target':'崁燈／同心圓','circle-cross':'吸頂十字','circle-line':'環形橫線',
+  'circle-double':'筒燈雙圓','circle-half':'半圓分割','shield-curve':'防眩崁燈',
+  'shield-check':'盾牌打勾／防爆','lines-vertical':'軟條／格柵','house':'住家／壁燈',
+  'wall-light':'壁燈含燈頭','bulb':'燈泡','track':'軌道條','spotlight':'投射錐光',
+  'square-grid':'方格／線條燈','rect-grid':'輕鋼架','rect-lines':'格柵橫線',
+  'rect-board':'黑板／看板燈','tube':'日光管','desk-lamp':'檯燈／太陽',
+  'bolt':'閃電／緊急照明','building':'學校／建築','factory':'工廠廠房',
+  'damp-box':'防潮燈','uv':'UV 殺菌','x-circle':'交叉／滅蚊',
+  'phone':'手機／APP','globe':'地球／全球','sun':'太陽／泛光',
+  'street-light':'路燈','stairs':'階梯','tree':'樹木／景觀'
+};
+
+export function renderCatIcon(name) {
+  const inner = CAT_ICONS[name] || CAT_ICONS['circle-target'];
+  return `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${inner}</svg>`;
+}
+
+// 七大應用場域固定群組碼（不可由 admin 改名）
+export const CATEGORY_GROUPS = [
+  { code: 'HOME',        label: '居家空間' },
+  { code: 'COMMERCIAL',  label: '商業空間' },
+  { code: 'OFFICE',      label: '辦公空間' },
+  { code: 'SCHOOL',      label: '學校照明' },
+  { code: 'INDUSTRIAL',  label: '工廠照明' },
+  { code: 'DIGITAL',     label: '互聯數位' },
+  { code: 'OUTDOOR',     label: '戶外空間' }
+];
+
+export const DEFAULT_CATEGORY_MAP = {
+  groups: [
+    { code:'HOME', label:'居家空間', cards: [
+      { icon:'circle-target',  title:'崁燈',     subtitle:'索爾 · 奧丁 · 馬爾' },
+      { icon:'circle-cross',   title:'吸頂燈',   subtitle:'雲朵 · 星鑽 · 全光譜' },
+      { icon:'lines-vertical', title:'軟條燈',   subtitle:'COB · 鋁槽配件' },
+      { icon:'house',          title:'壁燈',     subtitle:'玄關 · 床頭裝飾' },
+      { icon:'bulb',           title:'光源類',   subtitle:'燈泡 · 燈管' }
+    ]},
+    { code:'COMMERCIAL', label:'商業空間', cards: [
+      { icon:'track',         title:'軌道燈',     subtitle:'拉斐爾 · 達文西' },
+      { icon:'spotlight',     title:'投射燈',     subtitle:'服飾 · 餐廳重點打燈' },
+      { icon:'circle-double', title:'筒燈',       subtitle:'商空主流光源' },
+      { icon:'shield-curve',  title:'防眩崁燈',   subtitle:'馬爾 · UGR < 19' },
+      { icon:'square-grid',   title:'線條燈',     subtitle:'展示櫃 · 招牌' }
+    ]},
+    { code:'OFFICE', label:'辦公空間', cards: [
+      { icon:'rect-grid',  title:'輕鋼架平板', subtitle:'辦公主力光源' },
+      { icon:'rect-lines', title:'格柵燈',     subtitle:'UGR < 19 防眩' },
+      { icon:'tube',       title:'日光燈具',   subtitle:'T5 · T8 · 經典款' },
+      { icon:'desk-lamp',  title:'護眼檯燈',   subtitle:'個人桌 · 全光譜' },
+      { icon:'bolt',       title:'緊急照明',   subtitle:'消防驗收必備' }
+    ]},
+    { code:'SCHOOL', label:'學校照明', cards: [
+      { icon:'rect-grid',   title:'護眼平板燈',     subtitle:'教室主光源' },
+      { icon:'rect-board',  title:'黑板燈',         subtitle:'板書照明專用' },
+      { icon:'circle-line', title:'走廊吸頂',       subtitle:'通道 · 玄關' },
+      { icon:'building',    title:'體育館高天井',   subtitle:'挑高大空間' },
+      { icon:'house',       title:'宿舍壁燈',       subtitle:'床頭 · 走道' }
+    ]},
+    { code:'INDUSTRIAL', label:'工廠照明', cards: [
+      { icon:'factory',      title:'高天井燈',  subtitle:'廠房 · 倉儲' },
+      { icon:'damp-box',     title:'防潮燈',    subtitle:'食品廠 · 停車場' },
+      { icon:'shield-check', title:'防爆燈',    subtitle:'化工 · 油氣區' },
+      { icon:'uv',           title:'殺菌燈',    subtitle:'UV 紫外線' },
+      { icon:'x-circle',     title:'滅蚊燈',    subtitle:'餐廳 · 廚房' }
+    ]},
+    { code:'DIGITAL', label:'互聯數位', cards: [
+      { icon:'circle-target',  title:'Ai 智慧崁燈',  subtitle:'語音 · APP 控制' },
+      { icon:'circle-half',    title:'智能吸頂',     subtitle:'智能雲朵 · 多情境' },
+      { icon:'lines-vertical', title:'智控軟條',     subtitle:'RGB · 氛圍' },
+      { icon:'phone',          title:'米家生態',     subtitle:'小米全屋 · APP' },
+      { icon:'globe',          title:'Google Home',  subtitle:'語音串接' }
+    ]},
+    { code:'OUTDOOR', label:'戶外空間', cards: [
+      { icon:'sun',          title:'泛光燈',       subtitle:'宙斯 · 阿波羅' },
+      { icon:'street-light', title:'高燈路燈',     subtitle:'街道 · 廣場' },
+      { icon:'stairs',       title:'階梯地底燈',   subtitle:'指引 · 嵌地' },
+      { icon:'tree',         title:'草皮 · 照樹',  subtitle:'景觀 · 庭園' },
+      { icon:'wall-light',   title:'戶外壁燈',     subtitle:'玄關 · 門口' }
+    ]}
+  ]
+};
+
+export async function getCategoryMap() {
+  try {
+    const snap = await getDoc(doc(db, 'siteContent', 'categoryMap'));
+    if (snap.exists()) return snap.data();
+  } catch(e) { console.warn('getCategoryMap failed', e); }
+  return null;
+}
+
+export async function saveCategoryMap(data) {
+  await setDoc(doc(db, 'siteContent', 'categoryMap'), {
+    type: 'categoryMap',
+    groups: data.groups || [],
+    updatedAt: serverTimestamp(),
+    updatedBy: (auth.currentUser && auth.currentUser.email) || 'unknown'
+  });
+}
+
+export function onCategoryMapUpdate(cb) {
+  return onSnapshot(doc(db, 'siteContent', 'categoryMap'), snap => {
+    cb(snap.exists() ? snap.data() : null);
+  }, err => console.warn('categoryMap onSnapshot err', err));
 }
 
 // ========== AI 浮動助教（學員端）==========
