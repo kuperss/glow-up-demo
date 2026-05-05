@@ -89,9 +89,11 @@ def main() -> int:
     print("\n下一步：")
     print("  notebooklm auth check --test")
     print("  → 五項全 ✓ 表示成功")
-    print("\n部署到 Fly：")
-    print("  $json = Get-Content credentials\\notebooklm_storage.json -Raw")
-    print("  fly secrets set NOTEBOOKLM_STORAGE_JSON=\"$json\"")
+    print("\n部署到 Fly（PowerShell — 用 base64 避開 shell escape）：")
+    print('  $bytes = [System.IO.File]::ReadAllBytes("credentials\\notebooklm_storage.json")')
+    print('  $b64 = [Convert]::ToBase64String($bytes)')
+    print('  fly secrets set NOTEBOOKLM_STORAGE_JSON_B64="$b64"')
+    print("\n  最後一行會自動觸發 fly redeploy。")
     return 0
 
 
