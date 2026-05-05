@@ -1031,7 +1031,7 @@ export async function injectAIHelper() {
       </button>
     </div>
     <div class="ai-chat-list" id="aiChatList">
-      <div class="ai-chat-bubble ai">嗨～我是光光，你的 AI 學長姐。<br>產品、客戶、規章、福利，遇到搞不懂的隨時問我，不用客氣。<br><br>不知道從哪開始？點下面的建議試試看。</div>
+      <div class="ai-chat-bubble ai">嗨～我是舞妞，你的 AI 學長姐。<br>產品、客戶、規章、福利，遇到搞不懂的隨時問我，不用客氣。<br><br>不知道從哪開始？點下面的建議試試看。</div>
     </div>
     <div class="ai-helper-suggestions" id="aiSuggestions">
       <button class="ai-helper-suggestion" data-q="Ra90 跟 Ra80 差在哪？">Ra90 跟 Ra80 差在哪？</button>
@@ -1146,7 +1146,7 @@ const DEFAULT_AI_CONFIG = {
   provider: 'gemini',        // 'gemini' | 'claude' | 'openai' | 'notebooklm'
   apiKey: '',
   model: '',                 // 空字串時使用 provider 預設
-  systemPrompt: `你是舞光 LED 業務新人訓練系統的 AI 助教，名字叫「光光」。請用繁體中文，以親切、溫暖、像剛帶過你跟車的學長姐口吻，陪新人一起搞懂展晟照明集團、舞光 LED 產品、客戶經營、業務技巧、規章與福利。
+  systemPrompt: `你是舞光 LED 業務新人訓練系統的 AI 助教，名字叫「舞妞」。請用繁體中文，以親切、溫暖、像剛帶過你跟車的學長姐口吻，陪新人一起搞懂展晟照明集團、舞光 LED 產品、客戶經營、業務技巧、規章與福利。
 
 【語氣 — 親切溫暖】
 - 把對方當「剛來不久、有點緊張、又很想學好」的新人。回答前先想：他現在卡在哪？需要被理解，還是需要答案？
