@@ -888,13 +888,14 @@ function injectAIHelperCSS() {
   s.textContent = `
     .ai-helper-fab {
       position: fixed; right: 24px; bottom: 24px; z-index: 9998;
-      width: 56px; height: 56px; border-radius: 50%;
-      background: linear-gradient(135deg, #F58220, #C66510);
-      border: 1px solid rgba(255,200,150,0.3);
+      width: 64px; height: 64px; border-radius: 50%;
+      background: radial-gradient(circle at 35% 30%, #FFE4C4, #FFB57A 55%, #F58220 100%);
+      border: 2px solid rgba(255,255,255,0.85);
       display: flex; align-items: center; justify-content: center;
-      cursor: pointer; box-shadow: 0 12px 40px -8px rgba(245,130,32,0.6);
+      cursor: pointer; box-shadow: 0 12px 40px -8px rgba(245,130,32,0.55);
       transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
       animation: ai-fab-pulse 3s ease-in-out infinite;
+      overflow: hidden;
     }
     .ai-helper-fab:hover { transform: scale(1.08) translateY(-2px); }
     @keyframes ai-fab-pulse { 0%,100% { box-shadow: 0 12px 40px -8px rgba(245,130,32,0.6); } 50% { box-shadow: 0 16px 60px -8px rgba(245,130,32,0.9); } }
@@ -916,14 +917,18 @@ function injectAIHelperCSS() {
       background: linear-gradient(180deg, rgba(245,130,32,0.08), transparent);
     }
     .ai-panel-icon {
-      width: 40px; height: 40px; border-radius: 50%;
-      background: linear-gradient(135deg, #FFA050, #F58220);
+      width: 44px; height: 44px; border-radius: 50%;
+      background: radial-gradient(circle at 35% 30%, #FFE4C4, #FFB57A 55%, #F58220 100%);
+      border: 2px solid rgba(255,255,255,0.85);
       display: flex; align-items: center; justify-content: center;
       overflow: hidden; flex-shrink: 0;
     }
     .ai-panel-icon img,
     .ai-helper-fab img {
-      width: 100%; height: 100%; object-fit: cover; display: block;
+      width: 110%; height: 110%;
+      object-fit: contain; object-position: center 25%;
+      display: block;
+      transform: translateY(2px);
     }
     .ai-panel-title { font-weight: 700; font-size: 15px; color: #F5F5F7; }
     .ai-panel-subtitle { font-size: 11px; color: #6B6B75; }
@@ -1012,7 +1017,7 @@ export async function injectAIHelper() {
   fab.id = 'aiHelperFab';
   fab.className = 'ai-helper-fab';
   fab.title = '舞光戰將的 AI 助教';
-  fab.innerHTML = `<img src="assets/logo/mark-96-v2.png" alt="舞光戰將 AI 助教" onerror="this.style.display='none';this.parentElement.innerHTML='<svg width=\\'26\\' height=\\'26\\' viewBox=\\'0 0 24 24\\' fill=\\'none\\' stroke=\\'white\\' stroke-width=\\'2\\'><circle cx=\\'12\\' cy=\\'12\\' r=\\'10\\'/><circle cx=\\'12\\' cy=\\'12\\' r=\\'3\\' fill=\\'white\\'/></svg>'">`;
+  fab.innerHTML = `<img src="assets/ai-helper-mascot.png" alt="舞光戰將 AI 助教" onerror="this.style.display='none';this.parentElement.innerHTML='<svg width=\\'26\\' height=\\'26\\' viewBox=\\'0 0 24 24\\' fill=\\'none\\' stroke=\\'white\\' stroke-width=\\'2\\'><circle cx=\\'12\\' cy=\\'12\\' r=\\'10\\'/><circle cx=\\'12\\' cy=\\'12\\' r=\\'3\\' fill=\\'white\\'/></svg>'">`;
   document.body.appendChild(fab);
 
   const panel = document.createElement('div');
@@ -1021,7 +1026,7 @@ export async function injectAIHelper() {
   panel.innerHTML = `
     <div class="ai-panel-header">
       <div class="ai-panel-icon">
-        <img src="assets/logo/mark-96-v2.png" alt="舞光戰將 AI 助教" onerror="this.style.display='none';this.parentElement.innerHTML='<svg width=\\'20\\' height=\\'20\\' viewBox=\\'0 0 24 24\\' fill=\\'none\\' stroke=\\'white\\' stroke-width=\\'2\\'><circle cx=\\'12\\' cy=\\'12\\' r=\\'10\\'/><circle cx=\\'12\\' cy=\\'12\\' r=\\'3\\' fill=\\'white\\'/></svg>'">
+        <img src="assets/ai-helper-mascot.png" alt="舞光戰將 AI 助教" onerror="this.style.display='none';this.parentElement.innerHTML='<svg width=\\'20\\' height=\\'20\\' viewBox=\\'0 0 24 24\\' fill=\\'none\\' stroke=\\'white\\' stroke-width=\\'2\\'><circle cx=\\'12\\' cy=\\'12\\' r=\\'10\\'/><circle cx=\\'12\\' cy=\\'12\\' r=\\'3\\' fill=\\'white\\'/></svg>'">
       </div>
       <div>
         <div class="ai-panel-title">舞光戰將的 AI 助教</div>
