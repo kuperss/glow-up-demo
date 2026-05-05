@@ -982,8 +982,9 @@ export function renderChatMarkdown(text) {
   if (!text) return '';
   // 1. HTML escape
   let h = String(text).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  // 2. 引用標號 [1] [2-3] → 縮小灰字上標（讓答覆看起來更專業不刺眼）
-  h = h.replace(/\[(\d+(?:[-,\s]\d+)*)\]/g, '<sup class="md-cite">[$1]</sup>');
+  // 2. 引用標號 [1] [2-3] [1, 2] → 直接吃掉（使用者看不到後端來源，標號沒意義）
+  //    順便清掉前面緊鄰的空白與多餘的中英文標點殘留
+  h = h.replace(/\s*\[\s*\d+(?:\s*[-,，、\s]\s*\d+)*\s*\]/g, '');
   // 3. 標題 ### / ## / # → 同 .md-h
   h = h.replace(/^#{1,4}\s+(.+)$/gm, '<div class="md-h">$1</div>');
   // 4. **bold** → <strong>
@@ -1177,7 +1178,7 @@ const PROVIDER_DEFAULTS = {
   gemini: { model: 'gemini-1.5-flash', label: 'Google Gemini', testEndpoint: 'https://generativelanguage.googleapis.com/' },
   claude: { model: 'claude-haiku-4-5-20251001', label: 'Anthropic Claude', testEndpoint: 'https://api.anthropic.com/' },
   openai: { model: 'gpt-4o-mini', label: 'OpenAI GPT', testEndpoint: 'https://api.openai.com/' },
-  notebooklm: { model: '(自有後端 RAG)', label: 'NotebookLM（RAG 知識庫）', testEndpoint: '' }
+  notebooklm: { model: '(自有後端)', label: '舞光知識庫（自有後端）', testEndpoint: '' }
 };
 
 export function getProviderDefaults() {

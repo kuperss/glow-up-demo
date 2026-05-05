@@ -2324,13 +2324,15 @@
             systemPrompt: elSystem.value
           }
         });
-        const modelLabel = elProvider.value === 'notebooklm'
-          ? 'NotebookLM RAG · ' + ((elNbEndpoint && elNbEndpoint.value) || '(no endpoint)')
+        const isNb = elProvider.value === 'notebooklm';
+        const providerLabel = isNb ? '舞光知識庫' : elProvider.value;
+        const modelLabel = isNb
+          ? '自有後端 · ' + ((elNbEndpoint && elNbEndpoint.value) || '(no endpoint)')
           : (elModel.value || providerDefaults[elProvider.value].model);
         elTestChat.innerHTML = `
           <div class="flex justify-end"><div class="max-w-[80%] px-4 py-2.5 rounded-2xl rounded-br-sm bg-orange-500/15 border border-orange-500/30 text-sm">${escapeHtml(userPrompt)}</div></div>
           <div class="flex justify-start"><div class="ai-chat-bubble ai max-w-[80%] px-4 py-2.5 rounded-2xl rounded-bl-sm bg-gray-800/50 border border-gray-700 text-sm">${fb.renderChatMarkdown ? fb.renderChatMarkdown(reply) : escapeHtml(reply)}</div></div>
-          <div class="text-[11px] text-green-300 text-center pt-2">✓ 連線正常 · ${escapeHtml(elProvider.value)} · ${escapeHtml(modelLabel)}</div>
+          <div class="text-[11px] text-green-300 text-center pt-2">✓ 連線正常 · ${escapeHtml(providerLabel)} · ${escapeHtml(modelLabel)}</div>
         `;
       } catch (e) {
         const isNb = elProvider.value === 'notebooklm';
