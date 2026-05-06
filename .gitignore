@@ -55,3 +55,8 @@ backend/credentials/*.json
 backend/.venv/
 backend/__pycache__/
 backend/.env
+
+# Generated system prompt (KB + persona) — 重新生成即可，不需進 git
+backend/kb_full_system_prompt.txt
+backend/cookie_lifetime_log*.csv
+backend/test_stdout.log
