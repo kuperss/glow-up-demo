@@ -1243,7 +1243,7 @@ const DEFAULT_AI_CONFIG = {
 };
 
 const PROVIDER_DEFAULTS = {
-  gemini: { model: 'gemini-1.5-flash', label: 'Google Gemini', testEndpoint: 'https://generativelanguage.googleapis.com/' },
+  gemini: { model: 'gemini-flash-latest', label: 'Google Gemini', testEndpoint: 'https://generativelanguage.googleapis.com/' },
   claude: { model: 'claude-haiku-4-5-20251001', label: 'Anthropic Claude', testEndpoint: 'https://api.anthropic.com/' },
   openai: { model: 'gpt-4o-mini', label: 'OpenAI GPT', testEndpoint: 'https://api.openai.com/' },
   notebooklm: { model: '(自有後端)', label: '舞光知識庫（自有後端）', testEndpoint: '' }
