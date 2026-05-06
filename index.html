@@ -1124,7 +1124,7 @@
         </div>
         <div class="px-8 py-4 bg-black/30 border-t border-gray-800/60 text-xs text-gray-500 flex items-center justify-between">
           <span>答對 +10 光點</span>
-          <span class="text-orange-400">點選看解析 →</span>
+          <span class="text-orange-400" id="quizDemoFeedback">點選看解析 →</span>
         </div>
       </div>
 
@@ -1496,6 +1496,7 @@
   // === Quiz Demo ===
   document.querySelectorAll('#quizDemo .quiz-option').forEach(opt => {
     opt.addEventListener('click', () => {
+      const feedback = document.getElementById('quizDemoFeedback');
       document.querySelectorAll('#quizDemo .quiz-option').forEach(o => {
         o.classList.remove('correct');
         const svg = o.querySelector('svg');
@@ -1505,9 +1506,11 @@
         opt.classList.add('correct');
         const svg = opt.querySelector('svg');
         if (svg) svg.style.opacity = '1';
+        if (feedback) feedback.textContent = '✓ 答對！永遠在規格上比，不在情緒上比 — 把對話從價格拉回 Ra/保固/責任險';
       } else {
         opt.style.background = 'rgba(255, 80, 80, 0.06)';
         opt.style.borderColor = 'rgba(255, 100, 100, 0.3)';
+        if (feedback) feedback.textContent = '× 再想想：跟客戶比規格、保固、服務的差異，不要比情緒或殺價';
         setTimeout(() => {
           opt.style.background = '';
           opt.style.borderColor = '';
