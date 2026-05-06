@@ -13,7 +13,7 @@
 | CH 01 | [brand.html](./brand.html) | 品牌之光：39 年沿革時間軸、領航團隊、三大體驗館 |
 | CH 02 | [products.html](./products.html) | 產品實驗室：800+ 產品、6 主打翻轉卡、規格速查 |
 | CH 03 | [academy.html](./academy.html) | 業務學院：客戶分層、報價議價、5 大異議處理 |
-| CH 04 | [challenge.html](./challenge.html) | 闖關挑戰：12 道情境題 + 3 輪 AI 客戶對話模擬 |
+| CH 04 | [challenge.html](./challenge.html) | 闖關挑戰：12 道情境題 + 8 輪 AI 客戶對話模擬 |
 | CH 05 | [digital.html](./digital.html) | 數位行銷整合：6 觸點、新世代學院、O2O、ESG |
 | 後台 | [admin.html](./admin.html) | 主管 CMS 原型：儀表板、學員、章節、題庫管理 |
 
