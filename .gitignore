@@ -40,6 +40,10 @@
 !kb/
 !kb/**
 
+# Re-allow model evaluation docs (測試題集、評分表、性價比試算)
+!model_eval/
+!model_eval/**
+
 # Explicitly never include
 research_notes.md
 content/

@@ -1274,17 +1274,175 @@ export function onAIConfigUpdate(cb) {
   }, (err) => console.warn('aiConfig onSnapshot err', err));
 }
 
+// ========== 產品資料動態 retrieval(RAG-lite)==========
+// 1500+ 支產品的 JSON 太大塞不進 system prompt，採前端 keyword match
+// 在每次 callAI 之前抓最後一句 user 問題，從產品庫挑 top 5 注入到 system 末尾
+let __productDBCache = null;
+let __productDBPromise = null;
+
+async function _loadProductDB() {
+  if (__productDBCache) return __productDBCache;
+  if (__productDBPromise) return __productDBPromise;
+  __productDBPromise = (async () => {
+    try {
+      const r = await fetch('./舞光_產品資料.json');
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      __productDBCache = await r.json();
+      return __productDBCache;
+    } catch (e) {
+      console.warn('[productDB] 載入失敗，跳過產品 retrieval:', e);
+      __productDBCache = []; // 失敗也設定為空陣列，避免重複嘗試
+      return __productDBCache;
+    }
+  })();
+  return __productDBPromise;
+}
+
+// 從使用者問題抽出產品相關關鍵字
+function _extractProductKeywords(text) {
+  const result = { models: [], specs: [], scenes: [], categories: [] };
+  if (!text) return result;
+
+  // 型號:D-XXX / E-XXX / OD-XXX 格式
+  const modelMatches = text.match(/\b(D|E|OD|EM)-[A-Z0-9]{2,}[A-Z0-9-]*/gi);
+  if (modelMatches) result.models = modelMatches.map(m => m.toUpperCase());
+
+  // 瓦數
+  const wattMatches = text.match(/\d+\s*W(?![a-z])/gi);
+  if (wattMatches) result.specs.push(...wattMatches.map(s => s.replace(/\s/g, '').toUpperCase()));
+
+  // 色溫
+  const kelvinMatches = text.match(/\d{4}\s*K(?![a-z])/gi);
+  if (kelvinMatches) result.specs.push(...kelvinMatches.map(s => s.replace(/\s/g, '').toUpperCase()));
+
+  // IP 等級
+  const ipMatches = text.match(/IP\d{2}/gi);
+  if (ipMatches) result.specs.push(...ipMatches.map(s => s.toUpperCase()));
+
+  // Ra / R9
+  const raMatches = text.match(/R[a9]\s*[≥>=]*\s*\d+/gi);
+  if (raMatches) result.specs.push(...raMatches.map(s => s.replace(/\s/g, '')));
+
+  // 場景關鍵字
+  const sceneList = [
+    '居家', '客廳', '臥室', '走道', '玄關', '廚房', '浴室', '陽台', '書房',
+    '商業', '服飾店', '餐廳', '咖啡廳', '咖啡店', '展示櫃', '精品店', '餐酒館',
+    '辦公室', '會議室', '教室', '學校', '宿舍', '診所',
+    '工廠', '廠房', '倉儲', '倉庫', '停車場', '食品廠',
+    '戶外', '招牌', '路燈', '庭園', '景觀', '階梯', '草皮', '走廊', '體育館'
+  ];
+  for (const s of sceneList) if (text.includes(s)) result.scenes.push(s);
+
+  // 類別關鍵字 + 產品線英雄名
+  const categoryList = [
+    '崁燈', '吸頂燈', '軌道燈', '投射燈', '泛光燈', '平板燈', '高天井',
+    '軟條燈', '燈管', '燈泡', '壁燈', '檯燈', '吊燈', '日光燈', '格柵燈',
+    '防潮燈', '緊急照明', '滅蚊燈', '殺菌燈', '黑板燈', '護眼',
+    '磁吸軌道', '智慧崁燈', 'Ai 崁燈', '智慧家居', '米家',
+    '索爾', '奧丁', '馬爾', '拉斐爾', '達文西', '阿波羅', '宙斯', '舞色', '雲朵', '星鑽'
+  ];
+  for (const c of categoryList) if (text.includes(c)) result.categories.push(c);
+
+  return result;
+}
+
+// 計算單一產品跟關鍵字的 match score
+function _scoreProductMatch(product, kw) {
+  let score = 0;
+
+  // 型號精準匹配 = 必選(超高分)
+  if (kw.models.length > 0 && product['產品型號']) {
+    const modelUpper = String(product['產品型號']).toUpperCase();
+    for (const m of kw.models) {
+      if (modelUpper === m || modelUpper.includes(m) || m.includes(modelUpper)) score += 100;
+    }
+  }
+
+  // 把產品所有可搜文字串起來
+  const haystack = [
+    product['商品名稱'], product['類型'],
+    ...(product['適用場景'] || []),
+    ...(product['使用用途'] || []),
+    ...(product['銷售切入點'] || []),
+    ...(product['建議客群'] || []),
+    product['消耗電力'], product['色溫'], product['演色性'], product['IP等級']
+  ].filter(Boolean).join(' ').toUpperCase();
+
+  for (const s of kw.specs) if (haystack.includes(s)) score += 5;
+  for (const s of kw.scenes) if (haystack.includes(s.toUpperCase())) score += 3;
+  for (const c of kw.categories) if (haystack.includes(c.toUpperCase())) score += 4;
+
+  return score;
+}
+
+// 把單一產品壓成 compact 文字
+function _formatProductCompact(p) {
+  const lines = [];
+  lines.push(`[${p['產品型號'] || '無型號'}] ${p['商品名稱'] || ''}`);
+
+  const specs = [];
+  if (p['消耗電力']) specs.push(p['消耗電力']);
+  if (p['色溫']) specs.push(p['色溫']);
+  if (p['光通量']) specs.push(p['光通量']);
+  if (p['演色性']) specs.push(`Ra ${p['演色性']}`);
+  if (p['光束角']) specs.push(`光束角 ${p['光束角']}`);
+  if (p['IP等級']) specs.push(`IP${p['IP等級']}`);
+  if (p['尺寸']) specs.push(p['尺寸']);
+  if (p['平均壽命']) specs.push(p['平均壽命']);
+  if (specs.length) lines.push(`規格:${specs.join(' / ')}`);
+
+  if (p['適用場景']?.length) lines.push(`場景:${p['適用場景'].join('、')}`);
+  if (p['銷售切入點']?.length) lines.push(`切入點:${p['銷售切入點'].slice(0, 3).join(';')}`);
+
+  return lines.join('\n');
+}
+
+// 主函數:抓相關產品,回傳格式化字串(沒有相關產品則回傳 null,不注入)
+async function _retrieveRelevantProducts(question) {
+  if (!question || question.length < 2) return null;
+
+  const kw = _extractProductKeywords(question);
+  const totalKw = kw.models.length + kw.specs.length + kw.scenes.length + kw.categories.length;
+  if (totalKw === 0) return null; // 沒抓到產品關鍵字 → 不注入,省 token
+
+  const db = await _loadProductDB();
+  if (!db || db.length === 0) return null;
+
+  const scored = db.map(p => ({ p, score: _scoreProductMatch(p, kw) }))
+                   .filter(x => x.score > 0)
+                   .sort((a, b) => b.score - a.score);
+  if (scored.length === 0) return null;
+
+  const top = scored.slice(0, 5).map(x => x.p);
+
+  return `\n\n========== 產品資料庫即時查詢結果(規格層面僅信此段)==========\n`
+       + `(從舞光 ${db.length} 支完整產品線中,根據使用者問題自動擷取 ${top.length} 筆最相關的)\n\n`
+       + top.map(_formatProductCompact).join('\n\n---\n\n')
+       + `\n=========================================================`;
+}
+
 // 統一呼叫介面
 // messages: [{ role: 'user' | 'assistant', content: string }, ...]
 // system: 可選，會覆蓋 config 的 systemPrompt
 export async function callAI({ messages, system, configOverride } = {}) {
   const cfg = configOverride || await getAIConfig();
-  const sysPrompt = system || cfg.systemPrompt || '';
+  let sysPrompt = system || cfg.systemPrompt || '';
 
-  // notebooklm 走自有後端，不需 apiKey（用 secretToken 即可）
+  // notebooklm 走自有後端，自帶 RAG，不做產品注入
   if (cfg.provider === 'notebooklm') {
     if (!cfg.endpointUrl) throw new Error('NotebookLM 模式：尚未設定後端 endpoint URL');
     return _callNotebookLM(cfg.endpointUrl, cfg.secretToken, messages, sysPrompt);
+  }
+
+  // 動態 retrieval:取最後一句 user 問題，在產品 DB 找相關產品注入到 system 末尾
+  try {
+    const lastUser = [...(messages || [])].reverse().find(m => m.role === 'user');
+    if (lastUser?.content) {
+      const productCtx = await _retrieveRelevantProducts(lastUser.content);
+      if (productCtx) sysPrompt += productCtx;
+    }
+  } catch (e) {
+    console.warn('[productRetrieval] 失敗，以無注入繼續:', e);
   }
 
   if (!cfg.apiKey) throw new Error('尚未設定 API Key（請主管至 admin.html → AI 設定）');
