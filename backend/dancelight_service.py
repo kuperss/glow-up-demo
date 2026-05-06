@@ -139,7 +139,11 @@ class DancelightService:
         self.storage_path = storage_path
         self.notebook_id = notebook_id
         # 持久化 client：連線、TLS 握手、cookie 解析只在第一次跑，省每次 1-3 秒
+        # 但設 30 分鐘 TTL — 每 30 分鐘重建一次，當磁碟上的 cookie 檔被
+        # auto_refresh_cookie.py 更新時，最多 30 分鐘內後端就會吃到新值
         self._client: NotebookLMClient | None = None
+        self._client_opened_at: float = 0.0
+        self._client_max_age = int(os.environ.get("DANCELIGHT_CLIENT_MAX_AGE_SECONDS", "1800"))
         import asyncio as _asyncio
         self._client_lock = _asyncio.Lock()
         # 熱門問題快取：同一問題在 TTL 內只查 NotebookLM 一次，之後秒回
@@ -157,8 +161,24 @@ class DancelightService:
         log.info("cache cleared")
 
     async def _ensure_client(self) -> NotebookLMClient:
-        """惰性建立並 cache NotebookLMClient；遇到 auth 失敗會被 ask() reset."""
+        """惰性建立並 cache NotebookLMClient。
+
+        - 第一次 ask 時建立
+        - 超過 max_age 時自動重建（吃磁碟上更新後的 cookie）
+        - 遇到 auth 失敗會被 ask() reset
+        """
         async with self._client_lock:
+            # 超齡的 client 強制重建，這樣當磁碟 cookie 被外部腳本更新後能吃到新值
+            if self._client is not None and self._client_max_age > 0:
+                age = time.time() - self._client_opened_at
+                if age > self._client_max_age:
+                    log.info("client aged out (%.0fs > %ds), recreating", age, self._client_max_age)
+                    try:
+                        await self._client.__aexit__(None, None, None)
+                    except Exception:
+                        pass
+                    self._client = None
+
             if self._client is None:
                 log.info("opening new NotebookLMClient (storage=%s)", self.storage_path)
                 client = await NotebookLMClient.from_storage(self.storage_path)
@@ -177,6 +197,7 @@ class DancelightService:
                 else:
                     log.info("authuser hook skipped (DANCELIGHT_AUTHUSER empty or 0)")
                 self._client = client
+                self._client_opened_at = time.time()
             return self._client
 
     async def _reset_client(self) -> None:
