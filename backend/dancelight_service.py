@@ -55,7 +55,45 @@ class DancelightService:
     ):
         self.storage_path = storage_path
         self.notebook_id = notebook_id
+        # 持久化 client：連線、TLS 握手、cookie 解析只在第一次跑，省每次 1-3 秒
+        self._client: NotebookLMClient | None = None
+        import asyncio as _asyncio
+        self._client_lock = _asyncio.Lock()
         log.info("DancelightService init: notebook=%s storage=%s", notebook_id, storage_path)
+
+    async def _ensure_client(self) -> NotebookLMClient:
+        """惰性建立並 cache NotebookLMClient；遇到 auth 失敗會被 ask() reset."""
+        async with self._client_lock:
+            if self._client is None:
+                log.info("opening new NotebookLMClient (storage=%s)", self.storage_path)
+                client = await NotebookLMClient.from_storage(self.storage_path)
+                await client.__aenter__()
+                # 註冊 authuser hook（多帳號修正）
+                try:
+                    http = client._core._http_client
+                    if http is not None:
+                        hooks = http.event_hooks.setdefault("request", [])
+                        if _force_authuser_hook not in hooks:
+                            hooks.append(_force_authuser_hook)
+                            log.info("authuser hook registered: authuser=%s", AUTHUSER)
+                except Exception as e:
+                    log.warning("authuser hook registration failed: %s", e)
+                self._client = client
+            return self._client
+
+    async def _reset_client(self) -> None:
+        """強制丟掉現有 client（auth 失敗或已被 Google 踢登後呼叫）."""
+        async with self._client_lock:
+            if self._client is not None:
+                try:
+                    await self._client.__aexit__(None, None, None)
+                except Exception:
+                    pass
+                self._client = None
+
+    async def close(self) -> None:
+        """app shutdown 時呼叫，釋放 httpx 連線."""
+        await self._reset_client()
 
     @retry(
         stop=stop_after_attempt(3),
@@ -81,20 +119,17 @@ class DancelightService:
             else question
         )
 
-        async with await NotebookLMClient.from_storage(self.storage_path) as client:
-            # 對內部 httpx client 註冊 authuser hook（多帳號修正）
-            try:
-                http = client._core._http_client
-                if http is not None:
-                    hooks = http.event_hooks.setdefault("request", [])
-                    if _force_authuser_hook not in hooks:
-                        hooks.append(_force_authuser_hook)
-                        log.info("authuser hook registered: authuser=%s", AUTHUSER)
-            except Exception as e:
-                log.warning("authuser hook registration failed: %s", e)
-
+        client = await self._ensure_client()
+        try:
             answer = await client.chat.ask(self.notebook_id, prompt)
             return getattr(answer, "answer", "") or ""
+        except Exception as e:
+            # 若是 auth 相關錯誤，丟掉舊 client，下次 ask 會重新建（拿新 cookie）
+            msg = str(e).lower()
+            if "auth" in msg or "401" in msg or "expired" in msg or "signin" in msg:
+                log.warning("auth error, resetting client: %s", e)
+                await self._reset_client()
+            raise
 
 
 def verify_secret(authorization_header) -> bool:

@@ -11,6 +11,7 @@
 from __future__ import annotations
 
 import logging
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException, Header
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -20,7 +21,17 @@ from dancelight_service import DancelightService, verify_secret
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 log = logging.getLogger(__name__)
 
-app = FastAPI(title="舞光戰將 AI 助教")
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # startup：什麼都不做，client 會在第一次 ask 時惰性建立（避免冷啟動阻塞）
+    yield
+    # shutdown：關掉持久化的 NotebookLMClient
+    log.info("shutting down — closing NotebookLM client")
+    await dancelight.close()
+
+
+app = FastAPI(title="舞光戰將 AI 助教", lifespan=lifespan)
 
 # CORS：訓練網站（GitHub Pages）+ 本機開發
 app.add_middleware(

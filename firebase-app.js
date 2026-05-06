@@ -1106,23 +1106,37 @@ export async function injectAIHelper() {
     u.textContent = text;
     list.appendChild(u);
     history.push({ role: 'user', content: text });
-    // 思考中（不暴露後端技術名詞，純動畫）
+    // 思考中：多階段提示，不暴露後端技術名詞
     const cfg = await getAIConfig().catch(() => ({}));
     const isRag = cfg.provider === 'notebooklm';
     const thinking = document.createElement('div');
     thinking.className = 'ai-chat-bubble ai thinking';
-    thinking.textContent = '思考中⋯';
+    thinking.textContent = '舞妞收到問題⋯';
     list.appendChild(thinking);
     list.scrollTop = list.scrollHeight;
     input.value = ''; input.style.height = 'auto';
     sendBtn.disabled = true;
 
-    // 久等也不暴露 NotebookLM/RAG 字眼，只用「思考中」+ 計時暗示
+    // 多階段文案 — 每秒推進，營造「在動腦」的觀感
+    const stages = [
+      { at: 0,  text: '舞妞收到問題⋯' },
+      { at: 2,  text: '正在翻訓練手冊⋯' },
+      { at: 6,  text: '找到相關段落，正在讀⋯' },
+      { at: 11, text: '幫你整理重點⋯' },
+      { at: 18, text: '差不多寫完了⋯' },
+      { at: 25, text: '快好了，再等一下⋯' },
+      { at: 35, text: '今天舞妞有點忙，再等等⋯' }
+    ];
     let elapsed = 0;
-    const tick = isRag ? setInterval(() => {
-      elapsed += 5;
-      thinking.textContent = `思考中⋯ ${elapsed}s`;
-    }, 5000) : null;
+    const tick = setInterval(() => {
+      elapsed += 1;
+      // 找到目前對應的階段（取 at <= elapsed 的最後一個）
+      let cur = stages[0];
+      for (const s of stages) {
+        if (s.at <= elapsed) cur = s; else break;
+      }
+      thinking.textContent = cur.text;
+    }, 1000);
 
     try {
       const reply = await callAI({
