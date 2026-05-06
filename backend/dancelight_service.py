@@ -25,9 +25,10 @@ STORAGE_PATH = os.environ.get(
     "/app/credentials/notebooklm_storage.json",
 )
 # 多 Google 帳號修正：notebooklm-py 預設只認第 1 個帳號（authuser=0）。
-# 若你的 notebook 不在第 1 個帳號（URL ?authuser=N），把 N 設到此 env var，
-# 後端會在所有 notebooklm.google.com 請求自動補 authuser 參數 + header，
-# 你 manual_login.py 時就不必把其他 Google 帳號全部登出。
+# DANCELIGHT_AUTHUSER 可以填：
+#   - 帳號 email（例如 "yourname@gmail.com"）— 推薦，順位變動也不會壞
+#   - 數字順位（例如 "4"）— 同一個 Chrome session 順位會變
+# 後端會在所有 notebooklm.google.com 請求自動覆蓋 authuser 參數 + header。
 AUTHUSER = os.environ.get("DANCELIGHT_AUTHUSER", "0")
 
 
@@ -36,9 +37,11 @@ async def _force_authuser_hook(request: httpx.Request) -> None:
 
     notebooklm-py 內部部分 URL 寫死 authuser=0（_sources.py），會選錯帳號；
     這個 hook 在 request 即將送出前覆蓋成正確的 AUTHUSER 值。
+    Google 服務同時接受 authuser=N（數字）與 authuser=email（推薦）。
     """
     if request.url.host == "notebooklm.google.com":
         # 用 copy_set_param 覆蓋既有 authuser；既有值不對也直接被替換
+        # （httpx 會自動處理 email 中 @ 的 URL encoding）
         request.url = request.url.copy_set_param("authuser", AUTHUSER)
         # 同步覆蓋 x-goog-authuser header
         request.headers["x-goog-authuser"] = AUTHUSER
