@@ -69,6 +69,23 @@ def health():
     return {"ok": True}
 
 
+@app.get("/cache/stats")
+def cache_stats(authorization: str | None = Header(None)):
+    """看快取命中率（只給帶 shared secret 的呼叫看）."""
+    if not verify_secret(authorization):
+        raise HTTPException(401, "unauthorized")
+    return dancelight.cache_stats()
+
+
+@app.post("/cache/clear")
+def cache_clear(authorization: str | None = Header(None)):
+    """清空快取（KB 更新後可呼叫；只給帶 shared secret 的呼叫）."""
+    if not verify_secret(authorization):
+        raise HTTPException(401, "unauthorized")
+    dancelight.cache_clear()
+    return {"ok": True, "stats": dancelight.cache_stats()}
+
+
 @app.post("/api/dancelight/ask", response_model=AskResponse)
 async def dancelight_ask(body: AskRequest, authorization: str | None = Header(None)):
     """舞光戰將訓練 AI 助教 — RAG 走 NotebookLM 固定筆記本."""

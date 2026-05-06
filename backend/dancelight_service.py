@@ -6,7 +6,11 @@
 from __future__ import annotations
 
 import os
+import re
+import time
+import hashlib
 import logging
+from collections import OrderedDict
 import httpx
 from notebooklm import NotebookLMClient
 from tenacity import (
@@ -30,6 +34,83 @@ STORAGE_PATH = os.environ.get(
 #   - 數字順位（例如 "4"）— 同一個 Chrome session 順位會變
 # 後端會在所有 notebooklm.google.com 請求自動覆蓋 authuser 參數 + header。
 AUTHUSER = os.environ.get("DANCELIGHT_AUTHUSER", "0")
+
+# 熱門問題快取設定
+CACHE_TTL_SECONDS = int(os.environ.get("DANCELIGHT_CACHE_TTL_SECONDS", "21600"))  # 6 小時
+CACHE_MAX_ENTRIES = int(os.environ.get("DANCELIGHT_CACHE_MAX_ENTRIES", "500"))
+
+
+class _TTLCache:
+    """簡易 TTL + LRU cache（不引入額外依賴）。
+
+    LRU：超過 maxsize 時丟最久沒用的；TTL：到期自動失效。
+    """
+
+    def __init__(self, maxsize: int, ttl: int):
+        self.maxsize = maxsize
+        self.ttl = ttl
+        self._store: "OrderedDict[str, tuple[str, float]]" = OrderedDict()
+        self.hits = 0
+        self.misses = 0
+
+    def get(self, key: str) -> str | None:
+        item = self._store.get(key)
+        if not item:
+            self.misses += 1
+            return None
+        value, expire_at = item
+        if time.time() > expire_at:
+            del self._store[key]
+            self.misses += 1
+            return None
+        self._store.move_to_end(key)  # LRU 計次：最近用過放最尾
+        self.hits += 1
+        return value
+
+    def set(self, key: str, value: str) -> None:
+        if key in self._store:
+            self._store.move_to_end(key)
+        self._store[key] = (value, time.time() + self.ttl)
+        while len(self._store) > self.maxsize:
+            self._store.popitem(last=False)  # 丟最舊
+
+    def clear(self) -> None:
+        self._store.clear()
+        self.hits = 0
+        self.misses = 0
+
+    def stats(self) -> dict:
+        total = self.hits + self.misses
+        hit_rate = (self.hits / total) if total else 0.0
+        return {
+            "size": len(self._store),
+            "maxsize": self.maxsize,
+            "ttl_seconds": self.ttl,
+            "hits": self.hits,
+            "misses": self.misses,
+            "hit_rate": round(hit_rate, 3),
+        }
+
+
+def _normalize_question(q: str) -> str:
+    """把問題標準化以提高快取命中率：
+    - 去前後空白
+    - 多個空白合併成 1 個
+    - 移除尾端標點（？！。.,，）
+    - 全部轉小寫（中文無大小寫，主要影響英數）
+    """
+    q = re.sub(r"\s+", " ", q).strip().lower()
+    q = re.sub(r"[？！。\.,，?!]+$", "", q)
+    return q
+
+
+def _make_cache_key(question: str, system_prompt: str) -> str:
+    """快取 key：normalized question + system prompt 的 SHA-256。
+
+    包含 system prompt：admin 換人格時所有舊答自動失效。
+    """
+    payload = f"{_normalize_question(question)}|||{system_prompt or ''}"
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
 
 async def _force_authuser_hook(request: httpx.Request) -> None:
@@ -59,7 +140,19 @@ class DancelightService:
         self._client: NotebookLMClient | None = None
         import asyncio as _asyncio
         self._client_lock = _asyncio.Lock()
-        log.info("DancelightService init: notebook=%s storage=%s", notebook_id, storage_path)
+        # 熱門問題快取：同一問題在 TTL 內只查 NotebookLM 一次，之後秒回
+        self._cache = _TTLCache(maxsize=CACHE_MAX_ENTRIES, ttl=CACHE_TTL_SECONDS)
+        log.info(
+            "DancelightService init: notebook=%s storage=%s cache=ttl=%ds max=%d",
+            notebook_id, storage_path, CACHE_TTL_SECONDS, CACHE_MAX_ENTRIES,
+        )
+
+    def cache_stats(self) -> dict:
+        return self._cache.stats()
+
+    def cache_clear(self) -> None:
+        self._cache.clear()
+        log.info("cache cleared")
 
     async def _ensure_client(self) -> NotebookLMClient:
         """惰性建立並 cache NotebookLMClient；遇到 auth 失敗會被 ask() reset."""
@@ -112,7 +205,16 @@ class DancelightService:
         if not question:
             raise ValueError("question is empty")
 
-        # NotebookLM chat 沒有獨立 system role，把 system 跟 question 合併成一則 user message
+        # 1. 先查快取（同問題 + 同 system prompt 在 TTL 內直接秒回）
+        cache_key = _make_cache_key(question, system_prompt)
+        cached = self._cache.get(cache_key)
+        if cached is not None:
+            log.info("cache HIT: %s (ans=%d chars)", question[:50], len(cached))
+            return cached
+
+        log.info("cache MISS: %s", question[:50])
+
+        # 2. NotebookLM chat 沒有獨立 system role，把 system 跟 question 合併成一則 user message
         prompt = (
             f"【角色設定】\n{system_prompt}\n\n【使用者問題】\n{question}"
             if system_prompt
@@ -121,8 +223,8 @@ class DancelightService:
 
         client = await self._ensure_client()
         try:
-            answer = await client.chat.ask(self.notebook_id, prompt)
-            return getattr(answer, "answer", "") or ""
+            response = await client.chat.ask(self.notebook_id, prompt)
+            answer = getattr(response, "answer", "") or ""
         except Exception as e:
             # 若是 auth 相關錯誤，丟掉舊 client，下次 ask 會重新建（拿新 cookie）
             msg = str(e).lower()
@@ -130,6 +232,11 @@ class DancelightService:
                 log.warning("auth error, resetting client: %s", e)
                 await self._reset_client()
             raise
+
+        # 3. 寫進快取（只有有實際內容才存，避免快取空答覆）
+        if answer.strip():
+            self._cache.set(cache_key, answer)
+        return answer
 
 
 def verify_secret(authorization_header) -> bool:
