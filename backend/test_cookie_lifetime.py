@@ -28,10 +28,15 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parent))
+_HERE = Path(__file__).parent
+sys.path.insert(0, str(_HERE))
+# 本機跑 → 本機 cookie 路徑（DancelightService 預設指向 /app/...，那是 fly 容器內路徑）
+import os as _os
+_os.environ.setdefault("NOTEBOOKLM_STORAGE", str(_HERE / "credentials" / "notebooklm_storage.json"))
+
 from dancelight_service import DancelightService
 
-LOG_PATH = Path(__file__).parent / "cookie_lifetime_log.csv"
+LOG_PATH = _HERE / "cookie_lifetime_log.csv"
 TEST_QUESTION = "舞光的核心理念是什麼？"  # 任何 KB 裡找得到的問題
 
 # 排程：開始 5 分鐘間隔，連續 12 次成功後改 30 分鐘
