@@ -30,10 +30,12 @@ STORAGE_PATH = os.environ.get(
 )
 # 多 Google 帳號修正：notebooklm-py 預設只認第 1 個帳號（authuser=0）。
 # DANCELIGHT_AUTHUSER 可以填：
-#   - 帳號 email（例如 "yourname@gmail.com"）— 推薦，順位變動也不會壞
-#   - 數字順位（例如 "4"）— 同一個 Chrome session 順位會變
-# 後端會在所有 notebooklm.google.com 請求自動覆蓋 authuser 參數 + header。
-AUTHUSER = os.environ.get("DANCELIGHT_AUTHUSER", "0")
+#   - 留空 或 "0" → 不掛 hook，用 notebooklm-py 預設（單一帳號 / 第 1 個帳號就用這）
+#   - 帳號 email（"yourname@gmail.com"）— 推薦，順位變動不會壞
+#   - 數字順位（"4"）— 同一個 Chrome session 順位會變、容易出錯
+AUTHUSER = os.environ.get("DANCELIGHT_AUTHUSER", "").strip()
+# 只有非空且非 "0" 時才需要強制覆蓋。"0" = notebooklm-py 預設行為，掛 hook 反而可能跟單一帳號 cookie 衝突
+NEED_AUTHUSER_HOOK = bool(AUTHUSER) and AUTHUSER != "0"
 
 # 熱門問題快取設定
 CACHE_TTL_SECONDS = int(os.environ.get("DANCELIGHT_CACHE_TTL_SECONDS", "21600"))  # 6 小時
@@ -161,16 +163,19 @@ class DancelightService:
                 log.info("opening new NotebookLMClient (storage=%s)", self.storage_path)
                 client = await NotebookLMClient.from_storage(self.storage_path)
                 await client.__aenter__()
-                # 註冊 authuser hook（多帳號修正）
-                try:
-                    http = client._core._http_client
-                    if http is not None:
-                        hooks = http.event_hooks.setdefault("request", [])
-                        if _force_authuser_hook not in hooks:
-                            hooks.append(_force_authuser_hook)
-                            log.info("authuser hook registered: authuser=%s", AUTHUSER)
-                except Exception as e:
-                    log.warning("authuser hook registration failed: %s", e)
+                # 註冊 authuser hook（多帳號才需要；單一帳號掛了會反而選錯）
+                if NEED_AUTHUSER_HOOK:
+                    try:
+                        http = client._core._http_client
+                        if http is not None:
+                            hooks = http.event_hooks.setdefault("request", [])
+                            if _force_authuser_hook not in hooks:
+                                hooks.append(_force_authuser_hook)
+                                log.info("authuser hook registered: authuser=%s", AUTHUSER)
+                    except Exception as e:
+                        log.warning("authuser hook registration failed: %s", e)
+                else:
+                    log.info("authuser hook skipped (DANCELIGHT_AUTHUSER empty or 0)")
                 self._client = client
             return self._client
 
