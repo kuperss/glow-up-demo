@@ -731,7 +731,7 @@ export const DEFAULT_FLAGSHIP_PRODUCTS = {
       ]
     },
     {
-      sku: 'D-15DOO12NR3', categories: ['居家', '商業'],
+      sku: 'D-15DOO12NR3', categories: ['商業'],
       tag: '商業．COMMERCIAL', eyebrow: 'ODIN DOWNLIGHT',
       title: '奧丁<br>極簡崁燈', shortName: '奧丁 極簡崁燈',
       blurb: '7.5 / 9 / 11 / 15 公分極簡無框。隱形等級設計，連接縫都看不到，商空、精品店、設計師最愛。',
@@ -770,7 +770,7 @@ export const DEFAULT_FLAGSHIP_PRODUCTS = {
       ]
     },
     {
-      sku: 'E-FLDB100D/2R2', categories: ['戶外', '工廠'],
+      sku: 'E-FLDB100D/2R2', categories: ['工廠'],
       tag: '重型．INDUSTRIAL', eyebrow: 'APOLLO INDUSTRIAL',
       title: '阿波羅<br>大瓦數泛光燈', shortName: '阿波羅 大瓦數泛光燈',
       blurb: '100 / 150 / 200W 大瓦數泛光，廠房、停車場、球場、大型外牆投射的主力。',
@@ -783,7 +783,7 @@ export const DEFAULT_FLAGSHIP_PRODUCTS = {
       ]
     },
     {
-      sku: 'D-35NA24V-RGBDW', categories: ['互聯', '商業'],
+      sku: 'D-35NA24V-RGBDW', categories: ['商業'],
       tag: '氛圍．AMBIENCE', eyebrow: 'DANCE COLOR',
       title: '舞色<br>幻彩軟條燈', shortName: '舞色 幻彩軟條燈',
       blurb: '5 米 RGB+DW 全彩，2700~6500K 調色，遙控+APP 雙控。網美店、餐酒館、咖啡廳氛圍救星。',
@@ -795,7 +795,7 @@ export const DEFAULT_FLAGSHIP_PRODUCTS = {
       ]
     },
     {
-      sku: 'D-PD40NR7', categories: ['辦公', '學校'],
+      sku: 'D-PD40NR7', categories: ['辦公'],
       tag: '辦公．OFFICE', eyebrow: 'PANEL LIGHT',
       title: '柔光平板燈<br>2×2 尺', shortName: '柔光平板燈 2×2 尺',
       blurb: '辦公室、會議室、學校、診所主力光源。一片光均勻，不刺眼。多瓦數可選。',
@@ -808,7 +808,7 @@ export const DEFAULT_FLAGSHIP_PRODUCTS = {
       ]
     },
     {
-      sku: 'D-T5BA1-NR10', categories: ['辦公', '居家'],
+      sku: 'D-T5BA1-NR10', categories: ['居家'],
       tag: '支架．BRACKET', eyebrow: 'T5 STRIP',
       title: 'T5 一體式<br>支架燈', shortName: 'T5 一體式 支架燈',
       blurb: '1 / 2 / 3 / 4 尺四種長度，廚房、工作檯、層板、櫥櫃下最好施工的補光神器。',

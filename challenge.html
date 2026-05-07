@@ -1214,7 +1214,7 @@
         <span class="text-orange-300">一眼配對</span>
       </h2>
       <p class="text-gray-400 max-w-xl mx-auto leading-relaxed mt-4">
-        把 9 張主打產品分到對的應用場域。產品可同時適用多個場域，放任一個正確場域都算對。<br>
+        把 9 張主打產品分到對的應用場域。每張產品都有最契合的場景，業務必須一眼認出產品定位。<br>
         <span class="text-orange-300">全部配對正確 +30 光點 · 解鎖「配對達人」徽章</span>
       </p>
     </div>
@@ -1236,19 +1236,11 @@
           <div class="match-zone-slot"></div>
         </div>
         <div class="match-zone" data-zone="辦公">
-          <div class="match-zone-head"><span class="match-zone-name">辦公空間</span><span class="match-zone-en">OFFICE</span></div>
-          <div class="match-zone-slot"></div>
-        </div>
-        <div class="match-zone" data-zone="學校">
-          <div class="match-zone-head"><span class="match-zone-name">學校照明</span><span class="match-zone-en">SCHOOL</span></div>
+          <div class="match-zone-head"><span class="match-zone-name">辦公會議</span><span class="match-zone-en">OFFICE</span></div>
           <div class="match-zone-slot"></div>
         </div>
         <div class="match-zone" data-zone="工廠">
           <div class="match-zone-head"><span class="match-zone-name">工廠照明</span><span class="match-zone-en">INDUSTRIAL</span></div>
-          <div class="match-zone-slot"></div>
-        </div>
-        <div class="match-zone" data-zone="互聯">
-          <div class="match-zone-head"><span class="match-zone-name">互聯數位</span><span class="match-zone-en">DIGITAL</span></div>
           <div class="match-zone-slot"></div>
         </div>
         <div class="match-zone" data-zone="戶外">
@@ -2083,8 +2075,8 @@
         elStatus.className = 'match-status-bar partial';
         elStatus.textContent = `配對結果：${correct} / ${total} 正確 · 紅色卡片位置錯誤`;
         elResult.innerHTML = `
-          <strong>提示：</strong>每張產品上都有「正確場域」標示在其原始定義中（在 admin 的「主打產品」可看完整 categories）。<br>
-          <span class="text-gray-400">產品可以同時適用多個場域（如奧丁崁燈：居家+商業），放任一個正確場域都算對。再試試？</span>
+          <strong>提示：</strong>每張產品都有最契合的應用場景。<br>
+          <span class="text-gray-400">磁吸軌道是給設計師商空用的、阿波羅大瓦數打廠房、宙斯戶外 IP66、柔光平板燈是辦公主力——再想想？</span>
         `;
         elResult.classList.add('show');
         // 再試一次：等使用者按重新配對
