@@ -6,6 +6,7 @@
 
 # Re-allow project meta
 !README.md
+!robots.txt
 
 # Re-allow demo HTML files (explicit list, not wildcard)
 !index.html
