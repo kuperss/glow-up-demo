@@ -733,9 +733,9 @@ export const DEFAULT_FLAGSHIP_PRODUCTS = {
     {
       sku: 'D-15DOO12NR3', categories: ['商業'],
       tag: '商業．COMMERCIAL', eyebrow: 'ODIN DOWNLIGHT',
-      title: '奧丁<br>極簡崁燈', shortName: '奧丁 極簡崁燈',
-      blurb: '7.5 / 9 / 11 / 15 公分極簡無框。隱形等級設計，連接縫都看不到，商空、精品店、設計師最愛。',
-      pillText: '極簡無邊框', pitch: '「天花板上看不到燈，只看到光」',
+      title: '奧丁<br>崁燈', shortName: '奧丁崁燈',
+      blurb: '7.5 / 9 / 11 / 15 公分多尺寸、窄邊框設計。隱形等級安裝，連接縫都看不到，商空、精品店、設計師最愛。',
+      pillText: '窄邊框設計', pitch: '「天花板上看不到燈，只看到光」',
       specs: [
         { label: '瓦數', value: '12W' }, { label: '色溫', value: '4000K' },
         { label: '光通量', value: '1200 lm' }, { label: '演色性 Ra', value: '80' },
