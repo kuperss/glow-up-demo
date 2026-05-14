@@ -825,7 +825,12 @@
 
             <div>
               <label class="text-xs text-gray-500 tracking-wider mb-2 block">模型名稱（空白使用預設）</label>
-              <input type="text" id="aiModelInput" class="form-input" placeholder="">
+              <div class="grid sm:grid-cols-[minmax(0,1fr)_12rem] gap-2">
+                <input type="text" id="aiModelInput" class="form-input" placeholder="">
+                <select id="aiModelPresetSelect" class="form-input" aria-label="常用模型">
+                  <option value="">常用模型</option>
+                </select>
+              </div>
               <div class="text-[11px] text-gray-500 mt-2" id="aiModelHint"></div>
             </div>
           </div>
@@ -2192,10 +2197,41 @@
     // ===== AI 設定 =====
     const providerDefaults = fb.getProviderDefaults();
     const providerHints = {
-      backend: '建議模型：gpt-4o-mini（快、便宜） / gpt-4o（強）。實際 OpenAI API Key 設在後端環境變數，不存在 Firestore。',
+      backend: '建議模型：gpt-5-nano（最快、省） / gpt-5-mini（平衡） / gpt-5（強）。實際 OpenAI API Key 設在後端環境變數，不存在 Firestore。',
       gemini: '建議模型：gemini-flash-latest（穩定別名、自動跟最新版） / gemini-2.5-flash（指定版本） / gemini-2.5-pro（強）',
-      claude: '建議模型：claude-haiku-4-5-20251001（快） / claude-sonnet-4-6（強）/ claude-opus-4-7（最強）',
-      openai: '建議模型：gpt-4o-mini（快、便宜） / gpt-4o（強） / gpt-4-turbo（穩定）'
+      claude: '建議模型：claude-3-5-haiku-20241022（快） / claude-sonnet-4-20250514（強） / claude-opus-4-1-20250805（最強）',
+      openai: '建議模型：gpt-5-nano（最快、省） / gpt-5-mini（平衡） / gpt-5（強） / gpt-4.1-mini（穩定）'
+    };
+    const modelPresets = {
+      backend: [
+        { value: 'gpt-5-nano', label: 'gpt-5-nano（最快、省）' },
+        { value: 'gpt-5-mini', label: 'gpt-5-mini（平衡）' },
+        { value: 'gpt-5', label: 'gpt-5（強）' },
+        { value: 'gpt-4o-mini', label: 'gpt-4o-mini（舊版便宜）' },
+        { value: 'gpt-4o', label: 'gpt-4o（舊版通用）' }
+      ],
+      openai: [
+        { value: 'gpt-5.2', label: 'gpt-5.2（最新旗艦）' },
+        { value: 'gpt-5', label: 'gpt-5（強）' },
+        { value: 'gpt-5-mini', label: 'gpt-5-mini（平衡）' },
+        { value: 'gpt-5-nano', label: 'gpt-5-nano（最快、省）' },
+        { value: 'gpt-4.1', label: 'gpt-4.1（穩定）' },
+        { value: 'gpt-4.1-mini', label: 'gpt-4.1-mini（快、省）' },
+        { value: 'gpt-4o-mini', label: 'gpt-4o-mini（舊版便宜）' },
+        { value: 'gpt-4o', label: 'gpt-4o（舊版通用）' }
+      ],
+      gemini: [
+        { value: 'gemini-flash-latest', label: 'gemini-flash-latest（自動最新版）' },
+        { value: 'gemini-2.5-flash', label: 'gemini-2.5-flash（穩定快）' },
+        { value: 'gemini-2.5-pro', label: 'gemini-2.5-pro（強）' }
+      ],
+      claude: [
+        { value: 'claude-3-5-haiku-20241022', label: 'claude-3-5-haiku-20241022（快）' },
+        { value: 'claude-sonnet-4-20250514', label: 'claude-sonnet-4-20250514（強）' },
+        { value: 'claude-opus-4-20250514', label: 'claude-opus-4-20250514（更強）' },
+        { value: 'claude-opus-4-1-20250805', label: 'claude-opus-4-1-20250805（最強）' }
+      ],
+      notebooklm: []
     };
     const keyHints = {
       backend: '不需要在這裡填 OpenAI API Key。請把 key 設在後端環境變數 <code class="text-orange-300 text-[11px]">OPENAI_API_KEY</code>。',
@@ -2207,6 +2243,7 @@
 
     const elProvider = document.getElementById('aiProviderSelect');
     const elModel = document.getElementById('aiModelInput');
+    const elModelPreset = document.getElementById('aiModelPresetSelect');
     const elKey = document.getElementById('aiKeyInput');
     const elKeyToggle = document.getElementById('aiKeyToggleBtn');
     const elKeyBlock = document.getElementById('aiKeyBlock');
@@ -2225,6 +2262,17 @@
     const elUpdatedAt = document.getElementById('aiUpdatedAt');
     const elTestChat = document.getElementById('aiTestChat');
 
+    function renderModelPresets(provider) {
+      if (!elModelPreset) return;
+      const presets = modelPresets[provider] || [];
+      const currentModel = (elModel.value || '').trim();
+      elModelPreset.innerHTML = '<option value="">常用模型</option>' + presets.map((item) =>
+        `<option value="${escapeHtml(item.value)}">${escapeHtml(item.label)}</option>`
+      ).join('');
+      elModelPreset.value = presets.some((item) => item.value === currentModel) ? currentModel : '';
+      elModelPreset.disabled = !presets.length || provider === 'notebooklm';
+    }
+
     function updateProviderHints(provider) {
       const def = providerDefaults[provider];
       elProviderHint.textContent = def ? `預設模型：${def.model}` : '';
@@ -2239,9 +2287,17 @@
       // model 欄位 NotebookLM 沒意義；自有後端 OpenAI 仍可指定模型
       elModel.disabled = isNb;
       if (isNb) elModel.placeholder = '（NotebookLM 模式不需指定 model）';
+      renderModelPresets(provider);
     }
 
     elProvider.addEventListener('change', () => updateProviderHints(elProvider.value));
+    if (elModelPreset) {
+      elModelPreset.addEventListener('change', () => {
+        if (!elModelPreset.value) return;
+        elModel.value = elModelPreset.value;
+      });
+    }
+    elModel.addEventListener('input', () => renderModelPresets(elProvider.value));
 
     let keyVisible = false;
     elKeyToggle.addEventListener('click', () => {
