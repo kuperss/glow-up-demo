@@ -1,6 +1,6 @@
 """舞光戰將訓練系統的 backend AI service.
 
-接收前端問題 → 查後端私有產品 RAG → 交給 OpenAI（建議）或 NotebookLM 回答。
+接收前端問題 → 查後端知識庫與私有產品 RAG → 交給 OpenAI（建議）或 NotebookLM 回答。
 """
 from __future__ import annotations
 
@@ -18,6 +18,7 @@ from tenacity import (
     wait_exponential,
     retry_if_exception_type,
 )
+from kb_rag import KnowledgeRAG
 from product_rag import ProductRAG
 
 log = logging.getLogger(__name__)
@@ -159,6 +160,8 @@ class DancelightService:
         self._cache = _TTLCache(maxsize=CACHE_MAX_ENTRIES, ttl=CACHE_TTL_SECONDS)
         # 後端私有產品 RAG：產品 JSON / 向量索引只在 server 端讀取，不給瀏覽器整包下載
         self.product_rag = ProductRAG()
+        # 後端一般知識庫 RAG：公司、品牌、規章、福利、業務技巧與網站內容
+        self.kb_rag = KnowledgeRAG()
         log.info(
             "DancelightService init: notebook=%s storage=%s cache=ttl=%ds max=%d",
             notebook_id, storage_path, CACHE_TTL_SECONDS, CACHE_MAX_ENTRIES,
@@ -249,13 +252,15 @@ class DancelightService:
         if not question:
             raise ValueError("question is empty")
 
-        # 1. 產品問題先查後端私有產品庫，只注入少量相關產品，不把整包 catalog 給前端
+        # 1. 先查後端知識庫與私有產品庫，只注入少量相關片段，不把整包資料給前端
+        knowledge_context = await self.kb_rag.build_context(question)
         product_context = await self.product_rag.build_context(question)
         llm_provider = (provider or DEFAULT_LLM_PROVIDER or "openai").strip().lower()
         selected_model = (model or OPENAI_MODEL or "").strip()
         cache_salt = (
             f"provider={llm_provider}|model={selected_model}\n"
             + system_prompt
+            + ("\n\n" + knowledge_context if knowledge_context else "")
             + ("\n\n" + product_context if product_context else "")
         )
 
@@ -272,12 +277,13 @@ class DancelightService:
             answer = await self._ask_openai(
                 question=question,
                 system_prompt=system_prompt,
+                knowledge_context=knowledge_context,
                 product_context=product_context,
                 messages=messages or [],
                 model=model,
             )
         elif llm_provider == "notebooklm":
-            answer = await self._ask_notebooklm(question, system_prompt, product_context)
+            answer = await self._ask_notebooklm(question, system_prompt, knowledge_context, product_context)
         else:
             raise ValueError(f"unknown LLM provider: {llm_provider}")
 
@@ -286,11 +292,19 @@ class DancelightService:
             self._cache.set(cache_key, answer)
         return answer
 
-    async def _ask_notebooklm(self, question: str, system_prompt: str, product_context: str) -> str:
-        # NotebookLM chat 沒有獨立 system role，把 system / 私有產品查詢結果 / question 合併成一則 user message
+    async def _ask_notebooklm(
+        self,
+        question: str,
+        system_prompt: str,
+        knowledge_context: str,
+        product_context: str,
+    ) -> str:
+        # NotebookLM chat 沒有獨立 system role，把 system / 知識庫 / 私有產品查詢結果 / question 合併成一則 user message
         prompt_parts = []
         if system_prompt:
             prompt_parts.append(f"【角色設定】\n{system_prompt}")
+        if knowledge_context:
+            prompt_parts.append(knowledge_context)
         if product_context:
             prompt_parts.append(product_context)
         prompt_parts.append(f"【使用者問題】\n{question}")
@@ -312,6 +326,7 @@ class DancelightService:
         self,
         question: str,
         system_prompt: str,
+        knowledge_context: str,
         product_context: str,
         messages: list[dict],
         model: str = "",
@@ -323,11 +338,13 @@ class DancelightService:
         system_parts = []
         if system_prompt:
             system_parts.append(system_prompt)
+        if knowledge_context:
+            system_parts.append(knowledge_context)
         if product_context:
             system_parts.append(product_context)
         system_parts.append(
-            "回答時只能把後端提供的產品查詢結果當作產品規格依據；"
-            "若資料不足，請明確說不確定，不要自行編造型號或規格。"
+            "回答時只能根據後端提供的內部知識庫與產品查詢結果；"
+            "若資料不足，請明確說不確定，不要自行編造公司制度、福利、型號、價格、庫存或規格。"
         )
 
         chat_messages: list[dict[str, str]] = [

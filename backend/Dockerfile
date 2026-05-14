@@ -12,8 +12,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# 程式碼 + 後端私有產品資料
-COPY app.py dancelight_service.py product_rag.py start.sh ./
+# 程式碼 + 後端知識庫 / 私有產品資料
+COPY app.py dancelight_service.py product_rag.py kb_rag.py start.sh ./
 COPY data ./data
 
 RUN chmod +x start.sh

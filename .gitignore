@@ -59,6 +59,7 @@ backend/.venv/
 backend/__pycache__/
 backend/.env
 backend/data/products_private.json
+backend/data/kb_chunks.json
 backend/data/*.npz
 !backend/data/.gitkeep
 

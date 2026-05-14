@@ -1,2 +1,2 @@
-# Private product data lives here locally for backend deploys.
-# Do not commit products_private.json or *.npz; they are ignored.
+# Backend data lives here locally for Fly deploys.
+# Do not commit products_private.json, generated KB chunks, or *.npz; they are ignored.

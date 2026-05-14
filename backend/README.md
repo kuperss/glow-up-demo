@@ -1,4 +1,4 @@
-# 舞光戰將 AI 助教 · Backend (OpenAI + 產品 RAG)
+# 舞光戰將 AI 助教 · Backend (OpenAI + 知識庫 / 產品 RAG)
 
 跟 frontend（這個 repo 根目錄上的 HTML 檔案）**部署到不同地方**：
 
@@ -9,8 +9,11 @@
 └─ backend/                           ← 部署到 fly.io（這個 backend）
      ├─ app.py
      ├─ dancelight_service.py
+     ├─ kb_rag.py
      ├─ product_rag.py
      ├─ data/
+     │  ├─ kb_chunks.json
+     │  ├─ kb_ai_embeddings.npz
      │  ├─ products_private.json
      │  └─ product_ai_embeddings.npz
      ├─ manual_login.py
@@ -20,7 +23,7 @@
 ```
 
 GitHub Pages 不會跑 backend 的 Python 檔，fly.io 也不會碰前端 HTML。完全互不干擾。
-正式建議使用「自有後端（OpenAI + 產品知識庫）」模式：OpenAI API Key、產品 JSON、產品向量索引都只留在後端。
+正式建議使用「自有後端（OpenAI + 產品知識庫）」模式：OpenAI API Key、網站知識庫、產品 JSON、產品向量索引都只留在後端。
 
 ---
 
@@ -76,6 +79,9 @@ fly secrets set DANCELIGHT_SHARED_SECRET=$secret
 fly secrets set DANCELIGHT_LLM_PROVIDER=openai
 fly secrets set OPENAI_API_KEY=你的-openai-api-key
 fly secrets set DANCELIGHT_OPENAI_MODEL=gpt-4o-mini
+
+# 5. Embedding key（產品 / 網站知識庫語意搜尋用）
+fly secrets set GEMINI_API_KEY=你的-gemini-api-key
 ```
 
 ### 4. 部署
@@ -142,11 +148,35 @@ $json = Get-Content credentials\notebooklm_storage.json -Raw
 fly secrets set NOTEBOOKLM_STORAGE_JSON="$json"  # 自動觸發 redeploy
 ```
 
-### 更新 KB 內容（產品手冊／規章版本變動）
+### 更新網站知識庫 / AI KB 向量
 
-直接到 [notebooklm.google.com](https://notebooklm.google.com) 那本筆記本（ID `1af7e026-a5e0-443e-81e7-87c09ba07a6d`）裡：
+`kb/*.md` 與主要網站頁面更新後，重建一般知識庫向量：
+
+```powershell
+$env:GEMINI_API_KEY="你的 Gemini Embedding API key"
+python backend\build_kb_ai_index.py
+```
+
+會產生：
+
+```text
+backend/data/kb_chunks.json
+backend/data/kb_ai_embeddings.npz
+```
+
+後端回答公司制度、福利、品牌、業務技巧與網站內容時，會先查這份 KB RAG，再把少量相關片段注入 OpenAI prompt。
+
+完成後從本機 `backend/` 跑：
+
+```powershell
+fly deploy -a dancelight-ai --depot=false --remote-only
+```
+
+### NotebookLM KB 更新（僅 NotebookLM 模式）
+
+若後端 `DANCELIGHT_LLM_PROVIDER=notebooklm`，才需要到 [notebooklm.google.com](https://notebooklm.google.com) 那本筆記本（ID `1af7e026-a5e0-443e-81e7-87c09ba07a6d`）裡：
 - 加新 source / 移除舊版
-- **不需要重新部署** — 下次前端問問題就會用新 source
+- NotebookLM 模式不需要重建本地 KB index；OpenAI 模式以本地 `backend/data/kb_*.npz/json` 為準
 
 ### 換 KB 筆記本
 
@@ -168,7 +198,9 @@ fly secrets set DANCELIGHT_NOTEBOOK_ID=新的-uuid
 | `DANCELIGHT_LLM_PROVIDER` | 建議 | `openai` 或 `notebooklm`；設 `OPENAI_API_KEY` 時預設會走 `openai` |
 | `OPENAI_API_KEY` | OpenAI 模式必填 | 後端呼叫 OpenAI 的 key，不會進 Firestore 或瀏覽器 |
 | `DANCELIGHT_OPENAI_MODEL` | ✗ | 後端 OpenAI 預設模型，預設 `gpt-4o-mini` |
-| `GEMINI_API_KEY` / `DANCELIGHT_EMBEDDING_API_KEY` | 建議 | 產品 RAG 查詢用 embedding key；沒設時退回關鍵字搜尋 |
+| `GEMINI_API_KEY` / `DANCELIGHT_EMBEDDING_API_KEY` | 建議 | 產品 RAG / 知識庫 RAG 查詢用 embedding key；沒設時退回關鍵字搜尋 |
+| `DANCELIGHT_KB_CHUNKS_PATH` | ✗ | 一般知識庫 chunks JSON 路徑，預設 `/app/data/kb_chunks.json` |
+| `DANCELIGHT_KB_INDEX_PATH` | ✗ | 一般知識庫向量索引路徑，預設 `/app/data/kb_ai_embeddings.npz` |
 | `DANCELIGHT_PRODUCT_CATALOG_PATH` | ✗ | 私有產品 JSON 路徑，預設 `/app/data/products_private.json` |
 | `DANCELIGHT_PRODUCT_INDEX_PATH` | ✗ | 私有產品向量索引路徑，預設 `/app/data/product_ai_embeddings.npz` |
 | `PORT` | ✗ | 預設 8000，fly.io 會自動帶 |

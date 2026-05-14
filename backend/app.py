@@ -6,7 +6,7 @@
     Body:   { question: str, system?: str, messages?: list }
     Resp:   { answer: str }
 
-內部可呼叫 OpenAI（建議）或 NotebookLM，並會先查後端私有產品 RAG。
+內部可呼叫 OpenAI（建議）或 NotebookLM，並會先查後端知識庫與私有產品 RAG。
 """
 from __future__ import annotations
 
@@ -85,7 +85,11 @@ def cache_stats(authorization: str | None = Header(None)):
     """看快取命中率（只給帶 shared secret 的呼叫看）."""
     if not verify_secret(authorization):
         raise HTTPException(401, "unauthorized")
-    return {"answer_cache": dancelight.cache_stats(), "product_rag": dancelight.product_rag.stats()}
+    return {
+        "answer_cache": dancelight.cache_stats(),
+        "knowledge_rag": dancelight.kb_rag.stats(),
+        "product_rag": dancelight.product_rag.stats(),
+    }
 
 
 @app.post("/cache/clear")
