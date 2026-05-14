@@ -1,0 +1,2 @@
+# Private product data lives here locally for backend deploys.
+# Do not commit products_private.json or *.npz; they are ignored.

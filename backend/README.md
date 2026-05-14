@@ -1,4 +1,4 @@
-# 舞光戰將 AI 助教 · Backend (NotebookLM RAG)
+# 舞光戰將 AI 助教 · Backend (OpenAI + 產品 RAG)
 
 跟 frontend（這個 repo 根目錄上的 HTML 檔案）**部署到不同地方**：
 
@@ -9,6 +9,10 @@
 └─ backend/                           ← 部署到 fly.io（這個 backend）
      ├─ app.py
      ├─ dancelight_service.py
+     ├─ product_rag.py
+     ├─ data/
+     │  ├─ products_private.json
+     │  └─ product_ai_embeddings.npz
      ├─ manual_login.py
      ├─ fly.toml
      ├─ Dockerfile
@@ -16,6 +20,7 @@
 ```
 
 GitHub Pages 不會跑 backend 的 Python 檔，fly.io 也不會碰前端 HTML。完全互不干擾。
+正式建議使用「自有後端（OpenAI + 產品知識庫）」模式：OpenAI API Key、產品 JSON、產品向量索引都只留在後端。
 
 ---
 
@@ -66,6 +71,11 @@ $secret = ([Guid]::NewGuid().ToString() + [Guid]::NewGuid().ToString()).Replace(
 Write-Host "===== SHARED SECRET（複製貼到訓練網站 admin）=====" -ForegroundColor Yellow
 Write-Host $secret -ForegroundColor Cyan
 fly secrets set DANCELIGHT_SHARED_SECRET=$secret
+
+# 4. OpenAI（正式建議）
+fly secrets set DANCELIGHT_LLM_PROVIDER=openai
+fly secrets set OPENAI_API_KEY=你的-openai-api-key
+fly secrets set DANCELIGHT_OPENAI_MODEL=gpt-4o-mini
 ```
 
 ### 4. 部署
@@ -93,15 +103,30 @@ Invoke-RestMethod -Uri "https://dancelight-ai.fly.dev/api/dancelight/ask" `
 ### 6. 在訓練網站填設定
 
 [admin → AI 設定](https://kuperss.github.io/glow-up-demo/admin.html)：
-- AI 提供者：**NotebookLM（RAG · 知識庫）**
+- AI 提供者：**自有後端（OpenAI + 產品知識庫）**
 - 後端 Endpoint URL：`https://dancelight-ai.fly.dev`
 - Shared Secret Token：剛產的那串
 - 啟用 AI 功能 ✓
 - 儲存設定 → 測試呼叫
 
+若仍要使用 NotebookLM，把後端 `DANCELIGHT_LLM_PROVIDER` 設為 `notebooklm`，前端 Provider 選 NotebookLM。
+
 ---
 
 ## 平常維護
+
+### 更新後端產品資料庫 / AI 產品向量
+
+產品資料已改為後端私有載入，不再放在前端根目錄給瀏覽器下載。
+
+```powershell
+# products_private.json 更新後，重建 AI 助理用產品向量
+$env:GEMINI_API_KEY="你的 Gemini Embedding API key"
+python backend\build_product_ai_index.py
+```
+
+後端回答產品問題時會自動查 `backend/data/product_ai_embeddings.npz`，
+再用型號回查 `backend/data/products_private.json` 的完整規格，只把少量相關產品注入 AI prompt。
 
 ### Cookie 過期（通常數週）
 
@@ -140,6 +165,12 @@ fly secrets set DANCELIGHT_NOTEBOOK_ID=新的-uuid
 | `DANCELIGHT_SHARED_SECRET` | ✓ | 前後端共享 token，前端 admin 要填同一個 |
 | `NOTEBOOKLM_STORAGE_JSON` | ✓ | cookie JSON 內容（從 storage_state.json 讀進來） |
 | `NOTEBOOKLM_STORAGE` | ✗ | cookie 檔案路徑，預設 `/app/credentials/notebooklm_storage.json` |
+| `DANCELIGHT_LLM_PROVIDER` | 建議 | `openai` 或 `notebooklm`；設 `OPENAI_API_KEY` 時預設會走 `openai` |
+| `OPENAI_API_KEY` | OpenAI 模式必填 | 後端呼叫 OpenAI 的 key，不會進 Firestore 或瀏覽器 |
+| `DANCELIGHT_OPENAI_MODEL` | ✗ | 後端 OpenAI 預設模型，預設 `gpt-4o-mini` |
+| `GEMINI_API_KEY` / `DANCELIGHT_EMBEDDING_API_KEY` | 建議 | 產品 RAG 查詢用 embedding key；沒設時退回關鍵字搜尋 |
+| `DANCELIGHT_PRODUCT_CATALOG_PATH` | ✗ | 私有產品 JSON 路徑，預設 `/app/data/products_private.json` |
+| `DANCELIGHT_PRODUCT_INDEX_PATH` | ✗ | 私有產品向量索引路徑，預設 `/app/data/product_ai_embeddings.npz` |
 | `PORT` | ✗ | 預設 8000，fly.io 會自動帶 |
 
 ---
@@ -151,6 +182,13 @@ fly secrets set DANCELIGHT_NOTEBOOK_ID=新的-uuid
 
 ### `GET /health`
 fly.io health check 用。
+
+### `POST /api/dancelight/products/search`
+主管後台 SKU 搜尋用；需 `Authorization: Bearer <DANCELIGHT_SHARED_SECRET>`。
+只回少量候選產品，不回整包 catalog。
+
+### `POST /api/dancelight/products/lookup`
+依 SKU 查單筆產品完整資料；需 `Authorization: Bearer <DANCELIGHT_SHARED_SECRET>`。
 
 ### `POST /api/dancelight/ask`
 

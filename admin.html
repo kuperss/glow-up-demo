@@ -800,8 +800,8 @@
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FFB450" stroke-width="2" class="flex-shrink-0 mt-0.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
             <div class="text-sm leading-relaxed">
               <div class="font-semibold mb-1" style="color: #FFB450;">安全性說明（必讀）</div>
-              <p class="text-gray-300 mb-2">本系統使用瀏覽器直接呼叫 AI API，<strong class="text-orange-300">API Key 會儲存於 Firestore，所有登入用戶（含學員）都讀得到</strong>。最壞情況：員工複製 key 自用。</p>
-              <p class="text-gray-400 text-xs">緩解措施：(1) 在 API 提供商後台設使用上限與額度警示 (2) 定期更換 key (3) Production 環境建議升級為 Cloudflare Worker 代理（可隨時請工程師補上，key 將完全鎖在後端）</p>
+              <p class="text-gray-300 mb-2">正式環境建議使用<strong class="text-orange-300">自有後端模式</strong>：OpenAI API Key 與產品向量庫都留在後端，學員瀏覽器只拿到回答。</p>
+              <p class="text-gray-400 text-xs">若改用 Gemini / Claude / OpenAI 直連模式，API Key 仍會儲存於 Firestore，所有登入用戶（含學員）都讀得到；只建議測試或 demo 使用。</p>
             </div>
           </div>
         </div>
@@ -817,6 +817,7 @@
                 <option value="gemini">Google Gemini</option>
                 <option value="claude">Anthropic Claude</option>
                 <option value="openai">OpenAI GPT</option>
+                <option value="backend">自有後端（OpenAI + 產品知識庫）</option>
                 <option value="notebooklm">NotebookLM（RAG · 知識庫）</option>
               </select>
               <div class="text-[11px] text-gray-500 mt-2" id="aiProviderHint"></div>
@@ -838,11 +839,11 @@
             <div class="text-[11px] text-gray-500 mt-2" id="aiKeyHint"></div>
           </div>
 
-          <!-- NotebookLM 專用：後端 endpoint 與共享密鑰 -->
+          <!-- 自有後端專用：endpoint 與共享密鑰 -->
           <div class="mt-5 hidden" id="aiNbBlock">
             <div class="p-3 rounded-lg bg-orange-500/5 border border-orange-500/15 text-xs text-gray-400 leading-relaxed mb-4">
-              <strong class="text-orange-300">NotebookLM 模式：</strong>由你的 fly.io 後端代理呼叫 NotebookLM。請填寫後端 endpoint URL 與 shared secret。
-              <br>後端會用固定的 NotebookLM 筆記本（事先上傳產品手冊／規章／訓練教材）來回答。
+              <strong class="text-orange-300">自有後端模式：</strong>由後端代理呼叫 OpenAI 或 NotebookLM。OpenAI API Key、產品 JSON、產品向量庫都留在後端。
+              <br>學員端只呼叫這個 endpoint，不會下載整包產品資料，也不會看到 OpenAI API Key。
             </div>
             <div class="grid md:grid-cols-2 gap-5">
               <div>
@@ -2191,11 +2192,13 @@
     // ===== AI 設定 =====
     const providerDefaults = fb.getProviderDefaults();
     const providerHints = {
+      backend: '建議模型：gpt-4o-mini（快、便宜） / gpt-4o（強）。實際 OpenAI API Key 設在後端環境變數，不存在 Firestore。',
       gemini: '建議模型：gemini-flash-latest（穩定別名、自動跟最新版） / gemini-2.5-flash（指定版本） / gemini-2.5-pro（強）',
       claude: '建議模型：claude-haiku-4-5-20251001（快） / claude-sonnet-4-6（強）/ claude-opus-4-7（最強）',
       openai: '建議模型：gpt-4o-mini（快、便宜） / gpt-4o（強） / gpt-4-turbo（穩定）'
     };
     const keyHints = {
+      backend: '不需要在這裡填 OpenAI API Key。請把 key 設在後端環境變數 <code class="text-orange-300 text-[11px]">OPENAI_API_KEY</code>。',
       gemini: '取得位置：<a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-orange-300 hover:underline">aistudio.google.com/app/apikey</a>（免費額度生成式 AI Studio）',
       claude: '取得位置：<a href="https://console.anthropic.com/" target="_blank" class="text-orange-300 hover:underline">console.anthropic.com</a> → Settings → API Keys',
       openai: '取得位置：<a href="https://platform.openai.com/api-keys" target="_blank" class="text-orange-300 hover:underline">platform.openai.com/api-keys</a>',
@@ -2228,11 +2231,12 @@
       elModel.placeholder = def ? def.model : '';
       elModelHint.textContent = providerHints[provider] || '';
       elKeyHint.innerHTML = keyHints[provider] || '';
-      // notebooklm：隱藏 API Key + Model 區，顯示後端 endpoint/secret
+      // 自有後端 / NotebookLM：隱藏前端 API Key，顯示後端 endpoint/secret
+      const isBackend = provider === 'backend' || provider === 'notebooklm';
       const isNb = provider === 'notebooklm';
-      if (elKeyBlock) elKeyBlock.classList.toggle('hidden', isNb);
-      if (elNbBlock) elNbBlock.classList.toggle('hidden', !isNb);
-      // model 欄位 NotebookLM 沒意義，停用顯示提示
+      if (elKeyBlock) elKeyBlock.classList.toggle('hidden', isBackend);
+      if (elNbBlock) elNbBlock.classList.toggle('hidden', !isBackend);
+      // model 欄位 NotebookLM 沒意義；自有後端 OpenAI 仍可指定模型
       elModel.disabled = isNb;
       if (isNb) elModel.placeholder = '（NotebookLM 模式不需指定 model）';
     }
@@ -2298,14 +2302,14 @@
       const orig = elTestBtn.innerHTML;
       elTestBtn.innerHTML = '<span class="inline-block animate-pulse">呼叫中…</span>';
       const userPrompt = '你好，請用 1 句話介紹舞光 LED。';
-      const isNbProvider = elProvider.value === 'notebooklm';
+      const isBackendProvider = elProvider.value === 'notebooklm' || elProvider.value === 'backend';
       elTestChat.innerHTML = `
         <div class="flex justify-end"><div class="max-w-[80%] px-4 py-2.5 rounded-2xl rounded-br-sm bg-orange-500/15 border border-orange-500/30 text-sm">${escapeHtml(userPrompt)}</div></div>
         <div class="flex justify-start"><div class="max-w-[80%] px-4 py-2.5 rounded-2xl rounded-bl-sm bg-gray-800/50 border border-gray-700 text-sm text-gray-400 animate-pulse" id="aiTestThinking">思考中…</div></div>
       `;
       // 久等不暴露後端技術名詞，只顯示秒數
       let _tick = null, _elapsed = 0;
-      if (isNbProvider) {
+      if (isBackendProvider) {
         _tick = setInterval(() => {
           _elapsed += 5;
           const t = document.getElementById('aiTestThinking');
@@ -2326,9 +2330,9 @@
             systemPrompt: elSystem.value
           }
         });
-        const isNb = elProvider.value === 'notebooklm';
-        const providerLabel = isNb ? '舞光知識庫' : elProvider.value;
-        const modelLabel = isNb
+        const isBackend = elProvider.value === 'backend' || elProvider.value === 'notebooklm';
+        const providerLabel = elProvider.value === 'backend' ? '自有後端 OpenAI + 產品知識庫' : (elProvider.value === 'notebooklm' ? '舞光知識庫' : elProvider.value);
+        const modelLabel = isBackend
           ? '自有後端 · ' + ((elNbEndpoint && elNbEndpoint.value) || '(no endpoint)')
           : (elModel.value || providerDefaults[elProvider.value].model);
         elTestChat.innerHTML = `
@@ -2337,9 +2341,9 @@
           <div class="text-[11px] text-green-300 text-center pt-2">✓ 連線正常 · ${escapeHtml(providerLabel)} · ${escapeHtml(modelLabel)}</div>
         `;
       } catch (e) {
-        const isNb = elProvider.value === 'notebooklm';
-        const hint = isNb
-          ? '常見原因：(1) Endpoint URL 錯誤或後端未部署 (2) Shared Secret Token 不對 (3) 後端 NotebookLM cookie 過期 (4) DANCELIGHT_NOTEBOOK_ID 未設'
+        const isBackend = elProvider.value === 'backend' || elProvider.value === 'notebooklm';
+        const hint = isBackend
+          ? '常見原因：(1) Endpoint URL 錯誤或後端未部署 (2) Shared Secret Token 不對 (3) 後端 OPENAI_API_KEY / DANCELIGHT_LLM_PROVIDER 未設 (4) NotebookLM cookie 過期（若使用 NotebookLM）'
           : '常見原因：(1) API Key 錯誤 (2) 模型名稱錯誤 (3) 帳戶額度用完 (4) Anthropic Claude 需要在請求時帶 dangerous-direct-browser-access header（已自動處理）';
         elTestChat.innerHTML = `
           <div class="flex justify-end"><div class="max-w-[80%] px-4 py-2.5 rounded-2xl rounded-br-sm bg-orange-500/15 border border-orange-500/30 text-sm">${escapeHtml(userPrompt)}</div></div>
@@ -2592,21 +2596,53 @@
 
     let flagState = null;
     let flagBaseline = null;
-    let allProducts = []; // products.json
-    let productsLoadPromise = null;
-
-    function loadAllProducts() {
-      if (productsLoadPromise) return productsLoadPromise;
-      productsLoadPromise = fetch('./products.json', { cache: 'force-cache' })
-        .then(r => r.ok ? r.json() : [])
-        .then(d => { allProducts = Array.isArray(d) ? d : []; return allProducts; })
-        .catch(e => { console.warn('products.json load failed', e); return []; });
-      return productsLoadPromise;
-    }
+    const productCache = new Map(); // sku -> product，僅快取後端回傳過的少量產品
+    let productSearchSeq = 0;
 
     function findProductBySku(sku) {
       if (!sku) return null;
-      return allProducts.find(p => (p['產品型號'] || '').toString().trim() === sku.toString().trim()) || null;
+      return productCache.get(sku.toString().trim()) || null;
+    }
+
+    function rememberProduct(product) {
+      const sku = product && (product['產品型號'] || '').toString().trim();
+      if (sku) productCache.set(sku, product);
+      return product;
+    }
+
+    async function getProductForSku(sku) {
+      const key = (sku || '').toString().trim();
+      if (!key) return null;
+      if (productCache.has(key)) return productCache.get(key);
+      const product = await fb.getProductBySku(key);
+      return product ? rememberProduct(product) : null;
+    }
+
+    function updateLinkedProductName(idx, product) {
+      const nameEl = elFlagCards.querySelector(`[data-flag-product-name="${idx}"]`);
+      if (!nameEl) return;
+      nameEl.innerHTML = product
+        ? `<span class="text-orange-300">✓ ${escapeHtml(product['商品名稱'] || '')}</span> · ${escapeHtml(product['類型'] || '')}`
+        : '<span class="text-yellow-400">⚠ 未對應到產品庫的 SKU</span>';
+    }
+
+    async function refreshLinkedProductName(idx, sku) {
+      const nameEl = elFlagCards.querySelector(`[data-flag-product-name="${idx}"]`);
+      if (!nameEl || !sku) return;
+      const cached = findProductBySku(sku);
+      if (cached) {
+        updateLinkedProductName(idx, cached);
+        return;
+      }
+      nameEl.innerHTML = '<span class="text-gray-500">查詢產品庫中…</span>';
+      const product = await getProductForSku(sku);
+      updateLinkedProductName(idx, product);
+    }
+
+    function refreshAllLinkedProductNames() {
+      (flagState?.cards || []).forEach((card, idx) => {
+        if (card.sku) refreshLinkedProductName(idx, card.sku);
+      });
     }
 
     function flagDeepClone(o) { return JSON.parse(JSON.stringify(o)); }
@@ -2626,7 +2662,7 @@
             <div class="flag-sku-results" data-idx="${idx}" style="display:none;"></div>
           </div>
           <div class="text-[11px] text-gray-400 mt-1" data-flag-product-name="${idx}">
-            ${linked ? `<span class="text-orange-300">✓ ${escapeHtml(linked['商品名稱'] || '')}</span> · ${escapeHtml(linked['類型'] || '')}` : '<span class="text-yellow-400">⚠ 未對應到產品庫的 SKU</span>'}
+            ${linked ? `<span class="text-orange-300">✓ ${escapeHtml(linked['商品名稱'] || '')}</span> · ${escapeHtml(linked['類型'] || '')}` : '<span class="text-gray-500">尚未查詢產品庫</span>'}
           </div>
         </div>`;
     }
@@ -2728,6 +2764,7 @@
         </div>`).join('');
 
       bindFlagEvents();
+      refreshAllLinkedProductNames();
       flagCheckDirty();
     }
 
@@ -2842,15 +2879,16 @@
         btn.addEventListener('click', async (e) => {
           const idx = +e.currentTarget.dataset.idx;
           const sku = flagState.cards[idx].sku;
-          const prod = findProductBySku(sku);
-          if (!prod) {
-            alert('請先選好對應到產品庫的 SKU 再生成 AI 內容');
-            return;
-          }
           const orig = btn.innerHTML;
           btn.disabled = true;
-          btn.innerHTML = '<span class="animate-pulse">生成中…</span>';
+          btn.innerHTML = '<span class="animate-pulse">查詢產品…</span>';
           try {
+            const prod = await getProductForSku(sku);
+            if (!prod) {
+              alert('請先選好對應到產品庫的 SKU 再生成 AI 內容');
+              return;
+            }
+            btn.innerHTML = '<span class="animate-pulse">生成中…</span>';
             const generated = await fb.generateFlagshipCard(prod);
             // Merge — 保留 sku，覆蓋其他欄位
             const card = flagState.cards[idx];
@@ -2879,7 +2917,7 @@
             setTimeout(() => { elFlagSaveMsg.textContent = ''; }, 4000);
           } catch (err) {
             console.error(err);
-            alert('AI 生成失敗：' + (err.message || err) + '\n（請確認 AI 設定已啟用且填入有效憑證；若用 NotebookLM 知識庫但 SKU 不在主打 9 必懂列表，建議改用 Gemini/Claude/OpenAI 生成）');
+            alert('AI 生成失敗：' + (err.message || err) + '\n（請確認 AI 設定已啟用、後端 Endpoint/Shared Secret 正確，且後端已設定 OPENAI_API_KEY）');
           } finally {
             btn.disabled = false;
             btn.innerHTML = orig;
@@ -2888,7 +2926,7 @@
       });
     }
 
-    function showSkuSuggestions(idx, q) {
+    async function showSkuSuggestions(idx, q) {
       const wrap = elFlagCards.querySelector(`.flag-sku-results[data-idx="${idx}"]`);
       const nameEl = elFlagCards.querySelector(`[data-flag-product-name="${idx}"]`);
       if (!wrap) return;
@@ -2897,15 +2935,15 @@
         const linked = findProductBySku(flagState.cards[idx].sku);
         if (nameEl) nameEl.innerHTML = linked
           ? `<span class="text-orange-300">✓ ${escapeHtml(linked['商品名稱'] || '')}</span> · ${escapeHtml(linked['類型'] || '')}`
-          : '<span class="text-yellow-400">⚠ 未對應到產品庫的 SKU</span>';
+          : '<span class="text-gray-500">輸入 2 個字以上搜尋後端產品庫</span>';
         return;
       }
-      const ql = q.toLowerCase();
-      const matches = allProducts.filter(p => {
-        const m = (p['產品型號'] || '').toString().toLowerCase();
-        const n = (p['商品名稱'] || '').toString().toLowerCase();
-        return m.includes(ql) || n.includes(ql);
-      }).slice(0, 8);
+      const seq = ++productSearchSeq;
+      wrap.innerHTML = '<div class="flag-sku-empty">搜尋後端產品庫中…</div>';
+      wrap.style.display = 'block';
+      const matches = await fb.searchProducts(q, 8);
+      if (seq !== productSearchSeq) return;
+      matches.forEach(rememberProduct);
       if (matches.length === 0) {
         wrap.innerHTML = '<div class="flag-sku-empty">沒有符合的產品</div>';
         wrap.style.display = 'block';
@@ -2924,6 +2962,8 @@
           const i = +el.dataset.idx;
           const sku = el.dataset.sku;
           flagState.cards[i].sku = sku;
+          const product = findProductBySku(sku);
+          if (product) rememberProduct(product);
           renderFlagEditor();
         });
       });
@@ -2965,8 +3005,7 @@
       renderFlagEditor();
     });
 
-    // 載入 products.json + 訂閱 Firestore
-    loadAllProducts();
+    // SKU 搜尋改走後端 API，只回少量候選；不再讓瀏覽器下載 products.json
     fb.onFlagshipProductsUpdate((data) => {
       const fresh = (data && Array.isArray(data.cards) && data.cards.length) ? { cards: data.cards } : flagDeepClone(DEFAULT_FLAGSHIP);
       flagState = flagDeepClone(fresh);

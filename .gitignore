@@ -26,8 +26,6 @@
 !.firebaserc
 !package.json
 !package-lock.json
-!舞光_產品資料.json
-!products.json
 
 # Re-allow assets folder and contents
 !assets/
@@ -60,6 +58,9 @@ backend/credentials/*.json
 backend/.venv/
 backend/__pycache__/
 backend/.env
+backend/data/products_private.json
+backend/data/*.npz
+!backend/data/.gitkeep
 
 # Generated system prompt (KB + persona) — 重新生成即可，不需進 git
 backend/kb_full_system_prompt.txt

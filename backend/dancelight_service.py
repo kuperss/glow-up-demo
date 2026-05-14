@@ -1,7 +1,6 @@
-"""舞光戰將訓練系統的 NotebookLM RAG service.
+"""舞光戰將訓練系統的 backend AI service.
 
-接收前端問題 → 用固定 NotebookLM 筆記本（DANCELIGHT_NOTEBOOK_ID）回答。
-不建立／不刪除任何 notebook，只 chat.ask。
+接收前端問題 → 查後端私有產品 RAG → 交給 OpenAI（建議）或 NotebookLM 回答。
 """
 from __future__ import annotations
 
@@ -19,6 +18,7 @@ from tenacity import (
     wait_exponential,
     retry_if_exception_type,
 )
+from product_rag import ProductRAG
 
 log = logging.getLogger(__name__)
 
@@ -40,6 +40,15 @@ NEED_AUTHUSER_HOOK = bool(AUTHUSER) and AUTHUSER != "0"
 # 熱門問題快取設定
 CACHE_TTL_SECONDS = int(os.environ.get("DANCELIGHT_CACHE_TTL_SECONDS", "21600"))  # 6 小時
 CACHE_MAX_ENTRIES = int(os.environ.get("DANCELIGHT_CACHE_MAX_ENTRIES", "500"))
+
+OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", "").strip()
+OPENAI_MODEL = os.environ.get("DANCELIGHT_OPENAI_MODEL", os.environ.get("OPENAI_MODEL", "gpt-4o-mini")).strip()
+OPENAI_BASE_URL = os.environ.get("OPENAI_BASE_URL", "https://api.openai.com/v1").rstrip("/")
+OPENAI_TIMEOUT_SECONDS = float(os.environ.get("DANCELIGHT_OPENAI_TIMEOUT_SECONDS", "60"))
+DEFAULT_LLM_PROVIDER = os.environ.get(
+    "DANCELIGHT_LLM_PROVIDER",
+    "openai" if OPENAI_API_KEY else "notebooklm",
+).strip().lower()
 
 
 class _TTLCache:
@@ -148,6 +157,8 @@ class DancelightService:
         self._client_lock = _asyncio.Lock()
         # 熱門問題快取：同一問題在 TTL 內只查 NotebookLM 一次，之後秒回
         self._cache = _TTLCache(maxsize=CACHE_MAX_ENTRIES, ttl=CACHE_TTL_SECONDS)
+        # 後端私有產品 RAG：產品 JSON / 向量索引只在 server 端讀取，不給瀏覽器整包下載
+        self.product_rag = ProductRAG()
         log.info(
             "DancelightService init: notebook=%s storage=%s cache=ttl=%ds max=%d",
             notebook_id, storage_path, CACHE_TTL_SECONDS, CACHE_MAX_ENTRIES,
@@ -220,8 +231,15 @@ class DancelightService:
         retry=retry_if_exception_type((ConnectionError, OSError, TimeoutError)),
         reraise=True,
     )
-    async def ask(self, question: str, system_prompt: str = "") -> str:
-        """呼叫 NotebookLM chat 取回答.
+    async def ask(
+        self,
+        question: str,
+        system_prompt: str = "",
+        messages: list[dict] | None = None,
+        model: str = "",
+        provider: str = "",
+    ) -> str:
+        """呼叫設定的 LLM 取回答.
 
         question: 使用者的問題
         system_prompt: 角色設定（會 prepend 到問題前面）
@@ -231,8 +249,18 @@ class DancelightService:
         if not question:
             raise ValueError("question is empty")
 
-        # 1. 先查快取（同問題 + 同 system prompt 在 TTL 內直接秒回）
-        cache_key = _make_cache_key(question, system_prompt)
+        # 1. 產品問題先查後端私有產品庫，只注入少量相關產品，不把整包 catalog 給前端
+        product_context = await self.product_rag.build_context(question)
+        llm_provider = (provider or DEFAULT_LLM_PROVIDER or "openai").strip().lower()
+        selected_model = (model or OPENAI_MODEL or "").strip()
+        cache_salt = (
+            f"provider={llm_provider}|model={selected_model}\n"
+            + system_prompt
+            + ("\n\n" + product_context if product_context else "")
+        )
+
+        # 2. 先查快取（同問題 + 同 system prompt + 同產品上下文 在 TTL 內直接秒回）
+        cache_key = _make_cache_key(question, cache_salt)
         cached = self._cache.get(cache_key)
         if cached is not None:
             log.info("cache HIT: %s (ans=%d chars)", question[:50], len(cached))
@@ -240,17 +268,38 @@ class DancelightService:
 
         log.info("cache MISS: %s", question[:50])
 
-        # 2. NotebookLM chat 沒有獨立 system role，把 system 跟 question 合併成一則 user message
-        prompt = (
-            f"【角色設定】\n{system_prompt}\n\n【使用者問題】\n{question}"
-            if system_prompt
-            else question
-        )
+        if llm_provider in {"backend", "backend_openai", "openai"}:
+            answer = await self._ask_openai(
+                question=question,
+                system_prompt=system_prompt,
+                product_context=product_context,
+                messages=messages or [],
+                model=model,
+            )
+        elif llm_provider == "notebooklm":
+            answer = await self._ask_notebooklm(question, system_prompt, product_context)
+        else:
+            raise ValueError(f"unknown LLM provider: {llm_provider}")
+
+        # 3. 寫進快取（只有有實際內容才存，避免快取空答覆）
+        if answer.strip():
+            self._cache.set(cache_key, answer)
+        return answer
+
+    async def _ask_notebooklm(self, question: str, system_prompt: str, product_context: str) -> str:
+        # NotebookLM chat 沒有獨立 system role，把 system / 私有產品查詢結果 / question 合併成一則 user message
+        prompt_parts = []
+        if system_prompt:
+            prompt_parts.append(f"【角色設定】\n{system_prompt}")
+        if product_context:
+            prompt_parts.append(product_context)
+        prompt_parts.append(f"【使用者問題】\n{question}")
+        prompt = "\n\n".join(prompt_parts)
 
         client = await self._ensure_client()
         try:
             response = await client.chat.ask(self.notebook_id, prompt)
-            answer = getattr(response, "answer", "") or ""
+            return getattr(response, "answer", "") or ""
         except Exception as e:
             # 若是 auth 相關錯誤，丟掉舊 client，下次 ask 會重新建（拿新 cookie）
             msg = str(e).lower()
@@ -259,9 +308,59 @@ class DancelightService:
                 await self._reset_client()
             raise
 
-        # 3. 寫進快取（只有有實際內容才存，避免快取空答覆）
-        if answer.strip():
-            self._cache.set(cache_key, answer)
+    async def _ask_openai(
+        self,
+        question: str,
+        system_prompt: str,
+        product_context: str,
+        messages: list[dict],
+        model: str = "",
+    ) -> str:
+        """Use OpenAI from the backend so API key and product context stay private."""
+        if not OPENAI_API_KEY:
+            raise RuntimeError("OPENAI_API_KEY is not set on backend")
+
+        system_parts = []
+        if system_prompt:
+            system_parts.append(system_prompt)
+        if product_context:
+            system_parts.append(product_context)
+        system_parts.append(
+            "回答時只能把後端提供的產品查詢結果當作產品規格依據；"
+            "若資料不足，請明確說不確定，不要自行編造型號或規格。"
+        )
+
+        chat_messages: list[dict[str, str]] = [
+            {"role": "system", "content": "\n\n".join(system_parts)}
+        ]
+
+        for item in (messages or [])[-10:]:
+            role = item.get("role")
+            content = str(item.get("content") or "").strip()
+            if role in {"user", "assistant"} and content:
+                chat_messages.append({"role": role, "content": content})
+
+        if not chat_messages or chat_messages[-1].get("role") != "user" or chat_messages[-1].get("content") != question:
+            chat_messages.append({"role": "user", "content": question})
+
+        payload = {
+            "model": (model or OPENAI_MODEL or "gpt-4o-mini").strip(),
+            "messages": chat_messages,
+            "temperature": float(os.environ.get("DANCELIGHT_OPENAI_TEMPERATURE", "0.3")),
+        }
+
+        headers = {
+            "Authorization": f"Bearer {OPENAI_API_KEY}",
+            "Content-Type": "application/json",
+        }
+        async with httpx.AsyncClient(timeout=OPENAI_TIMEOUT_SECONDS) as client:
+            resp = await client.post(f"{OPENAI_BASE_URL}/chat/completions", headers=headers, json=payload)
+        if resp.status_code >= 400:
+            raise RuntimeError(f"OpenAI {resp.status_code}: {resp.text[:500]}")
+        data = resp.json()
+        answer = (((data.get("choices") or [{}])[0].get("message") or {}).get("content") or "").strip()
+        if not answer:
+            raise RuntimeError("OpenAI response is empty")
         return answer
 
 
