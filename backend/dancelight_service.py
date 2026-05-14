@@ -363,8 +363,10 @@ class DancelightService:
         payload = {
             "model": (model or OPENAI_MODEL or "gpt-4o-mini").strip(),
             "messages": chat_messages,
-            "temperature": float(os.environ.get("DANCELIGHT_OPENAI_TEMPERATURE", "0.3")),
         }
+        temperature = os.environ.get("DANCELIGHT_OPENAI_TEMPERATURE", "").strip()
+        if temperature:
+            payload["temperature"] = float(temperature)
 
         headers = {
             "Authorization": f"Bearer {OPENAI_API_KEY}",

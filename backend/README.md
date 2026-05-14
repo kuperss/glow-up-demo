@@ -198,6 +198,7 @@ fly secrets set DANCELIGHT_NOTEBOOK_ID=新的-uuid
 | `DANCELIGHT_LLM_PROVIDER` | 建議 | `openai` 或 `notebooklm`；設 `OPENAI_API_KEY` 時預設會走 `openai` |
 | `OPENAI_API_KEY` | OpenAI 模式必填 | 後端呼叫 OpenAI 的 key，不會進 Firestore 或瀏覽器 |
 | `DANCELIGHT_OPENAI_MODEL` | ✗ | 後端 OpenAI 預設模型，預設 `gpt-4o-mini` |
+| `DANCELIGHT_OPENAI_TEMPERATURE` | ✗ | OpenAI temperature；預設不送，避免 `gpt-5-nano` 等模型拒絕非預設值 |
 | `GEMINI_API_KEY` / `DANCELIGHT_EMBEDDING_API_KEY` | 建議 | 產品 RAG / 知識庫 RAG 查詢用 embedding key；沒設時退回關鍵字搜尋 |
 | `DANCELIGHT_KB_CHUNKS_PATH` | ✗ | 一般知識庫 chunks JSON 路徑，預設 `/app/data/kb_chunks.json` |
 | `DANCELIGHT_KB_INDEX_PATH` | ✗ | 一般知識庫向量索引路徑，預設 `/app/data/kb_ai_embeddings.npz` |
