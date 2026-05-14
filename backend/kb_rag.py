@@ -158,6 +158,9 @@ class KnowledgeRAG:
         self._query_vec_cache[cache_key] = vec
         return vec
 
+    async def embed_query(self, text: str) -> np.ndarray | None:
+        return await self._embed_query(text)
+
     def _keyword_scores(self, query: str) -> dict[str, float]:
         terms = _tokenize(query)
         terms += [term.lower() for term in DOMAIN_TERMS if term.lower() in (query or "").lower()]
@@ -176,7 +179,13 @@ class KnowledgeRAG:
                 scores[chunk_id] = score
         return scores
 
-    async def retrieve(self, query: str, limit: int = KB_CONTEXT_TOP_K) -> list[dict[str, Any]]:
+    async def retrieve(
+        self,
+        query: str,
+        limit: int = KB_CONTEXT_TOP_K,
+        query_vec: np.ndarray | None = None,
+        allow_embedding: bool = True,
+    ) -> list[dict[str, Any]]:
         self._ensure_loaded()
         if not self._chunks:
             return []
@@ -198,7 +207,9 @@ class KnowledgeRAG:
             add_score(chunk_id, score, "keyword")
 
         if self._vecs is not None and self._chunk_ids:
-            q_vec = await self._embed_query(query)
+            q_vec = query_vec
+            if q_vec is None and allow_embedding:
+                q_vec = await self._embed_query(query)
             if q_vec is not None:
                 sims = self._vecs @ q_vec.reshape(-1)
                 top_n = np.argsort(-sims)[: max(limit * 4, 20)]
@@ -249,8 +260,19 @@ class KnowledgeRAG:
             + "\n\n---\n\n".join(blocks)
         )
 
-    async def build_context(self, query: str, limit: int = KB_CONTEXT_TOP_K) -> str:
-        chunks = await self.retrieve(query, limit=limit)
+    async def build_context(
+        self,
+        query: str,
+        limit: int = KB_CONTEXT_TOP_K,
+        query_vec: np.ndarray | None = None,
+        allow_embedding: bool = True,
+    ) -> str:
+        chunks = await self.retrieve(
+            query,
+            limit=limit,
+            query_vec=query_vec,
+            allow_embedding=allow_embedding,
+        )
         return self.format_context(chunks)
 
     def stats(self) -> dict[str, Any]:

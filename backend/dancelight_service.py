@@ -253,8 +253,17 @@ class DancelightService:
             raise ValueError("question is empty")
 
         # 1. 先查後端知識庫與私有產品庫，只注入少量相關片段，不把整包資料給前端
-        knowledge_context = await self.kb_rag.build_context(question)
-        product_context = await self.product_rag.build_context(question)
+        query_vec = await self.kb_rag.embed_query(question)
+        knowledge_context = await self.kb_rag.build_context(
+            question,
+            query_vec=query_vec,
+            allow_embedding=False,
+        )
+        product_context = await self.product_rag.build_context(
+            question,
+            query_vec=query_vec,
+            allow_embedding=False,
+        )
         llm_provider = (provider or DEFAULT_LLM_PROVIDER or "openai").strip().lower()
         selected_model = (model or OPENAI_MODEL or "").strip()
         cache_salt = (
