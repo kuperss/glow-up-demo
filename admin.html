@@ -367,11 +367,18 @@
   .save-toast.show { transform: translateY(0); opacity: 1; }
 
   /* AI 測試對話框 markdown render（與前端 ai-chat-bubble 一致） */
-  .ai-chat-bubble strong { color: #FFD27A; font-weight: 600; }
+  .ai-chat-bubble strong {
+    color: #FFE8B3; font-weight: 700;
+    background: rgba(245,130,32,0.16);
+    border: 1px solid rgba(245,130,32,0.22);
+    border-radius: 5px; padding: 0 0.18em;
+    box-decoration-break: clone; -webkit-box-decoration-break: clone;
+  }
   .ai-chat-bubble .md-h { font-weight: 700; color: #FFD27A; margin: 6px 0 2px; font-size: 13.5px; }
   .ai-chat-bubble .md-li { padding-left: 14px; position: relative; margin: 2px 0; }
   .ai-chat-bubble .md-li::before { content: '·'; position: absolute; left: 4px; color: #F58220; font-weight: 700; }
   .ai-chat-bubble .md-num { padding-left: 14px; margin: 2px 0; }
+  .ai-chat-bubble .md-num strong { color: #FFD27A; background: none; border: 0; padding: 0; }
   .ai-chat-bubble .md-cite { color: #6B6B75; font-size: 10px; margin: 0 1px; vertical-align: super; }
 </style>
 </head>

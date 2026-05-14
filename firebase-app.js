@@ -1000,11 +1000,18 @@ function injectAIHelperCSS() {
     }
     .ai-helper-suggestion:hover { background: rgba(245,130,32,0.15); border-color: rgba(245,130,32,0.4); }
     /* Markdown rendering inside chat bubbles */
-    .ai-chat-bubble strong { color: #FFD27A; font-weight: 600; }
+    .ai-chat-bubble strong {
+      color: #FFE8B3; font-weight: 700;
+      background: rgba(245,130,32,0.16);
+      border: 1px solid rgba(245,130,32,0.22);
+      border-radius: 5px; padding: 0 0.18em;
+      box-decoration-break: clone; -webkit-box-decoration-break: clone;
+    }
     .ai-chat-bubble .md-h { font-weight: 700; color: #FFD27A; margin: 6px 0 2px; font-size: 13.5px; }
     .ai-chat-bubble .md-li { padding-left: 14px; position: relative; margin: 2px 0; }
     .ai-chat-bubble .md-li::before { content: '·'; position: absolute; left: 4px; color: #F58220; font-weight: 700; }
     .ai-chat-bubble .md-num { padding-left: 14px; margin: 2px 0; }
+    .ai-chat-bubble .md-num strong { color: #FFD27A; background: none; border: 0; padding: 0; }
     .ai-chat-bubble .md-cite { color: #6B6B75; font-size: 10px; margin: 0 1px; vertical-align: super; }
     @media (max-width: 480px) {
       .ai-helper-panel { width: calc(100vw - 16px); right: 8px; bottom: 80px; height: 70vh; }
@@ -1033,6 +1040,52 @@ export function renderChatMarkdown(text) {
   // 7. 換行：兩個換行 → 段落間距，單一換行 → <br>
   h = h.replace(/\n{2,}/g, '<div style="height:6px"></div>').replace(/\n/g, '<br>');
   return h;
+}
+
+const AI_HELPER_HISTORY_MAX = 30;
+const AI_HELPER_HISTORY_PREFIX = 'glow-ai-helper-history-v1';
+const AI_HELPER_GREETING_HTML = '嗨～我是舞妞，你的 AI 學長姐。<br>產品、客戶、規章、福利，遇到搞不懂的隨時問我，不用客氣。<br><br>不知道從哪開始？點下面的建議試試看。';
+const AI_HELPER_FORMATTING_RULES = `【前端顯示格式】
+- 這段規則優先於上方任何「不用粗體」的限制。
+- 每次回答請用 Markdown 粗體 **...** 標出 1 到 3 個真正重點詞或短句，例如制度名稱、結論、注意事項或下一步。
+- 不要整句或整段都粗體；只標最值得學員一眼看到的部分。`;
+
+function getAIHelperHistoryKey() {
+  const me = getCurrentUser();
+  const uid = me?.auth?.uid || me?.doc?.uid || me?.auth?.email || me?.doc?.email || 'guest';
+  return `${AI_HELPER_HISTORY_PREFIX}:${uid}`;
+}
+
+function normalizeAIHelperHistory(value) {
+  if (!Array.isArray(value)) return [];
+  return value
+    .filter((item) => item && (item.role === 'user' || item.role === 'assistant') && typeof item.content === 'string' && item.content.trim())
+    .map((item) => ({ role: item.role, content: item.content.trim() }))
+    .slice(-AI_HELPER_HISTORY_MAX);
+}
+
+function loadAIHelperHistory() {
+  try {
+    return normalizeAIHelperHistory(JSON.parse(localStorage.getItem(getAIHelperHistoryKey()) || '[]'));
+  } catch (e) {
+    return [];
+  }
+}
+
+function saveAIHelperHistory(history) {
+  try {
+    const cleaned = normalizeAIHelperHistory(history);
+    history.splice(0, history.length, ...cleaned);
+    localStorage.setItem(getAIHelperHistoryKey(), JSON.stringify(cleaned));
+  } catch (e) {
+    // localStorage 可能被瀏覽器阻擋；不影響當次對話。
+  }
+}
+
+function withAIHelperFormattingRules(systemPrompt = '') {
+  const base = String(systemPrompt || '').trim();
+  if (base.includes('【前端顯示格式】')) return base;
+  return [base, AI_HELPER_FORMATTING_RULES].filter(Boolean).join('\n\n');
 }
 
 export async function injectAIHelper() {
@@ -1070,9 +1123,7 @@ export async function injectAIHelper() {
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
-    <div class="ai-chat-list" id="aiChatList">
-      <div class="ai-chat-bubble ai">嗨～我是舞妞，你的 AI 學長姐。<br>產品、客戶、規章、福利，遇到搞不懂的隨時問我，不用客氣。<br><br>不知道從哪開始？點下面的建議試試看。</div>
-    </div>
+    <div class="ai-chat-list" id="aiChatList"></div>
     <div class="ai-helper-suggestions" id="aiSuggestions">
       <button class="ai-helper-suggestion" data-q="Ra90 跟 Ra80 差在哪？">Ra90 跟 Ra80 差在哪？</button>
       <button class="ai-helper-suggestion" data-q="客戶嫌我們貴怎麼回？">客戶嫌我們貴怎麼回？</button>
@@ -1090,11 +1141,41 @@ export async function injectAIHelper() {
   const sendBtn = document.getElementById('aiHelperSendBtn');
   const closeBtn = document.getElementById('aiPanelCloseBtn');
   const suggestionsEl = document.getElementById('aiSuggestions');
-  const history = [];
+  const history = loadAIHelperHistory();
+
+  function appendChatBubble(role, content) {
+    const bubble = document.createElement('div');
+    bubble.className = `ai-chat-bubble ${role === 'user' ? 'user' : 'ai'}`;
+    if (role === 'assistant') {
+      bubble.innerHTML = renderChatMarkdown(content);
+    } else {
+      bubble.textContent = content;
+    }
+    list.appendChild(bubble);
+    return bubble;
+  }
+
+  function renderSavedChat() {
+    list.innerHTML = '';
+    const greeting = document.createElement('div');
+    greeting.className = 'ai-chat-bubble ai';
+    greeting.innerHTML = AI_HELPER_GREETING_HTML;
+    list.appendChild(greeting);
+    history.forEach((item) => appendChatBubble(item.role, item.content));
+    if (suggestionsEl) suggestionsEl.style.display = history.length ? 'none' : 'flex';
+    requestAnimationFrame(() => { list.scrollTop = list.scrollHeight; });
+  }
+
+  renderSavedChat();
 
   fab.addEventListener('click', () => {
     panel.classList.toggle('open');
-    if (panel.classList.contains('open')) setTimeout(() => input.focus(), 300);
+    if (panel.classList.contains('open')) {
+      setTimeout(() => {
+        list.scrollTop = list.scrollHeight;
+        input.focus();
+      }, 300);
+    }
   });
   closeBtn.addEventListener('click', () => panel.classList.remove('open'));
 
@@ -1104,11 +1185,9 @@ export async function injectAIHelper() {
     // 隱藏建議區
     if (suggestionsEl) suggestionsEl.style.display = 'none';
     // 用戶氣泡
-    const u = document.createElement('div');
-    u.className = 'ai-chat-bubble user';
-    u.textContent = text;
-    list.appendChild(u);
+    appendChatBubble('user', text);
     history.push({ role: 'user', content: text });
+    saveAIHelperHistory(history);
     // 思考中：多階段提示，不暴露後端技術名詞
     const cfg = await getAIConfig().catch(() => ({}));
     const isRag = cfg.provider === 'backend' || cfg.provider === 'notebooklm';
@@ -1144,15 +1223,13 @@ export async function injectAIHelper() {
     try {
       const reply = await callAI({
         messages: history,
-        // system 由 aiConfig 提供
+        system: withAIHelperFormattingRules(cfg.systemPrompt || '')
       });
       if (tick) clearInterval(tick);
       thinking.remove();
-      const a = document.createElement('div');
-      a.className = 'ai-chat-bubble ai';
-      a.innerHTML = renderChatMarkdown(reply);
-      list.appendChild(a);
+      appendChatBubble('assistant', reply);
       history.push({ role: 'assistant', content: reply });
+      saveAIHelperHistory(history);
     } catch (e) {
       if (tick) clearInterval(tick);
       thinking.remove();
@@ -1174,10 +1251,7 @@ export async function injectAIHelper() {
       } else {
         friendly = '舞妞剛剛恍神了一下，再問一次試試看～';
       }
-      const err = document.createElement('div');
-      err.className = 'ai-chat-bubble ai';
-      err.textContent = friendly;
-      list.appendChild(err);
+      appendChatBubble('assistant', friendly);
     } finally {
       list.scrollTop = list.scrollHeight;
       sendBtn.disabled = false;
@@ -1230,7 +1304,7 @@ const DEFAULT_AI_CONFIG = {
 【回答風格】
 - 像真人對話，自然、簡潔，不要像條文。
 - 每次最多 200 字，能用一兩句話說完就不要分點。
-- 盡量用完整句子。整段最多 1 個粗體強調，沒有更好。
+- 盡量用完整句子。請用 Markdown 粗體 **...** 標出 1 到 3 個真正重點詞或短句，不要整句或整段都粗體。
 - 不要硬塞「第一點 / 第二點 / 1. 2. 3.」標號，除非真的是 SOP 步驟。
 - 不要寫標題（# ## ###）。
 - 引用知識庫時自然帶過（例如「規章上是寫…」），不要列來源條目。
