@@ -1248,7 +1248,7 @@ const DEFAULT_AI_CONFIG = {
 const PROVIDER_DEFAULTS = {
   backend: { model: 'gpt-4o-mini', label: '自有後端（OpenAI + 產品知識庫）', testEndpoint: '' },
   gemini: { model: 'gemini-flash-latest', label: 'Google Gemini', testEndpoint: 'https://generativelanguage.googleapis.com/' },
-  claude: { model: 'claude-haiku-4-5-20251001', label: 'Anthropic Claude', testEndpoint: 'https://api.anthropic.com/' },
+  claude: { model: 'claude-3-5-haiku-20241022', label: 'Anthropic Claude', testEndpoint: 'https://api.anthropic.com/' },
   openai: { model: 'gpt-4o-mini', label: 'OpenAI GPT', testEndpoint: 'https://api.openai.com/' },
   notebooklm: { model: '(自有後端)', label: '舞光知識庫（自有後端）', testEndpoint: '' }
 };
