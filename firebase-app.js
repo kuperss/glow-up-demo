@@ -964,7 +964,15 @@ function injectAIHelperCSS() {
     }
     .ai-panel-title { font-weight: 700; font-size: 15px; color: #F5F5F7; }
     .ai-panel-subtitle { font-size: 11px; color: #6B6B75; }
-    .ai-panel-close { margin-left: auto; padding: 6px; border-radius: 6px; color: #6B6B75; cursor: pointer; transition: all 0.2s; }
+    .ai-panel-actions { margin-left: auto; display: flex; align-items: center; gap: 4px; }
+    .ai-panel-clear {
+      padding: 5px 10px; border-radius: 999px;
+      background: transparent; border: 1px solid rgba(255,255,255,0.08);
+      color: #A0A0AB; font-size: 11px; cursor: pointer; transition: all 0.2s;
+      font-family: 'Noto Sans TC', sans-serif; white-space: nowrap;
+    }
+    .ai-panel-clear:hover { color: #F58220; border-color: rgba(245,130,32,0.4); background: rgba(245,130,32,0.08); }
+    .ai-panel-close { padding: 6px; border-radius: 6px; color: #6B6B75; cursor: pointer; transition: all 0.2s; background: transparent; border: none; }
     .ai-panel-close:hover { color: #F58220; background: rgba(245,130,32,0.1); }
     .ai-chat-list { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
     .ai-chat-bubble {
@@ -1119,9 +1127,12 @@ export async function injectAIHelper() {
         <div class="ai-panel-title">舞光戰將的 AI 助教</div>
         <div class="ai-panel-subtitle">隨時問訓練內容相關的問題</div>
       </div>
-      <button class="ai-panel-close" id="aiPanelCloseBtn" title="關閉">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>
+      <div class="ai-panel-actions">
+        <button class="ai-panel-clear" id="aiPanelClearBtn" title="清除這段對話紀錄">清除對話</button>
+        <button class="ai-panel-close" id="aiPanelCloseBtn" title="關閉">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
     </div>
     <div class="ai-chat-list" id="aiChatList"></div>
     <div class="ai-helper-suggestions" id="aiSuggestions">
@@ -1140,6 +1151,7 @@ export async function injectAIHelper() {
   const input = document.getElementById('aiHelperInput');
   const sendBtn = document.getElementById('aiHelperSendBtn');
   const closeBtn = document.getElementById('aiPanelCloseBtn');
+  const clearBtn = document.getElementById('aiPanelClearBtn');
   const suggestionsEl = document.getElementById('aiSuggestions');
   const history = loadAIHelperHistory();
 
@@ -1178,6 +1190,14 @@ export async function injectAIHelper() {
     }
   });
   closeBtn.addEventListener('click', () => panel.classList.remove('open'));
+  clearBtn.addEventListener('click', () => {
+    if (!history.length) return;
+    if (!window.confirm('確定要清除這段對話紀錄嗎？')) return;
+    history.splice(0, history.length);
+    saveAIHelperHistory(history);
+    renderSavedChat();
+    input.focus();
+  });
 
   async function send(text) {
     text = (text || '').trim();
