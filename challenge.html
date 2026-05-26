@@ -2103,5 +2103,30 @@
   injectUserPill();
 </script>
 
+<script>
+  // 處理 #quiz-qN hash 跳轉（從 admin「最常卡關」卡片進來時用）
+  (function scrollToQuizFromHash() {
+    function go() {
+      const m = (location.hash || '').match(/^#quiz-(q\d+)$/i);
+      if (!m) return;
+      const el = document.querySelector(`[data-quiz="${m[1]}"]`);
+      if (!el) return;
+      // 等內容渲染完再捲，避開 navbar 高度
+      setTimeout(() => {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        el.style.transition = 'box-shadow 0.4s ease';
+        el.style.boxShadow = '0 0 0 2px rgba(245,130,32,0.6)';
+        setTimeout(() => { el.style.boxShadow = ''; }, 2500);
+      }, 400);
+    }
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', go);
+    } else {
+      go();
+    }
+    window.addEventListener('hashchange', go);
+  })();
+</script>
+
 </body>
 </html>

@@ -515,11 +515,11 @@
             <div class="stat-num" id="dashAvgScore">—</div>
             <div class="stat-trend text-gray-500">每位學員</div>
           </div>
-          <div class="stat-card">
-            <div class="stat-label">最常卡關</div>
+          <a class="stat-card" id="dashTopStuckCard" href="challenge.html" style="display:block; text-decoration:none; color:inherit;" title="點擊跳到該題">
+            <div class="stat-label">最常卡關 <span class="text-xs text-orange-400/70 ml-1">↗</span></div>
             <div class="stat-num text-2xl mt-1" id="dashTopStuck" style="font-size:1.25rem;">—</div>
             <div class="stat-trend stat-down" id="dashTopStuckRate">—</div>
-          </div>
+          </a>
         </div>
 
         <div class="grid lg:grid-cols-[1.5fr_1fr] gap-6 mb-6">
@@ -1986,6 +1986,9 @@
         const meta1 = QUIZ_META[top1.quizId] || { label: top1.quizId, desc: '' };
         document.getElementById('dashTopStuck').textContent = meta1.label;
         document.getElementById('dashTopStuckRate').textContent = Math.round(top1.wrongRate * 100) + '% 答錯率';
+        // 讓「最常卡關」卡片可以點擊跳到該題
+        const stuckCard = document.getElementById('dashTopStuckCard');
+        if (stuckCard) stuckCard.setAttribute('href', `challenge.html#quiz-${top1.quizId}`);
         stuckList.innerHTML = top5.map(s => {
           const meta = QUIZ_META[s.quizId] || { label: s.quizId, desc: '' };
           const rate = Math.round(s.wrongRate * 100);
