@@ -595,7 +595,7 @@ export const CAT_ICONS = {
 export const CAT_ICON_LABELS = {
   'circle-target':'崁燈／同心圓','circle-cross':'吸頂十字','circle-line':'環形橫線',
   'circle-double':'筒燈雙圓','circle-half':'半圓分割','shield-curve':'防眩崁燈',
-  'shield-check':'盾牌打勾／防爆','lines-vertical':'軟條／格柵','house':'住家／壁燈',
+  'shield-check':'盾牌打勾／認證','lines-vertical':'軟條／格柵','house':'住家／壁燈',
   'wall-light':'壁燈含燈頭','bulb':'燈泡','track':'軌道條','spotlight':'投射錐光',
   'square-grid':'方格／線條燈','rect-grid':'輕鋼架','rect-lines':'格柵橫線',
   'rect-board':'黑板／看板燈','tube':'日光管','desk-lamp':'檯燈／太陽',
@@ -654,7 +654,7 @@ export const DEFAULT_CATEGORY_MAP = {
     { code:'INDUSTRIAL', label:'工廠照明', cards: [
       { icon:'factory',      title:'高天井燈',  subtitle:'廠房 · 倉儲' },
       { icon:'damp-box',     title:'防潮燈',    subtitle:'食品廠 · 停車場' },
-      { icon:'shield-check', title:'防爆燈',    subtitle:'化工 · 油氣區' },
+      { icon:'bolt',         title:'緊急照明',  subtitle:'出口 · 法規必備' },
       { icon:'uv',           title:'殺菌燈',    subtitle:'UV 紫外線' },
       { icon:'x-circle',     title:'滅蚊燈',    subtitle:'餐廳 · 廚房' }
     ]},
