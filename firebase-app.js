@@ -163,7 +163,7 @@ export function requireAuth(opts = {}) {
         async loadProgress() {
           return {
             score: guestProgress.score,
-            completed: guestProgress.quizIds.size + guestProgress.scenarios.size,
+            completed: guestProgress.quizIds.size + Array.from(guestProgress.scenarios).filter(k => k !== 'match_v1').length,
             quizIds: Array.from(guestProgress.quizIds),
             scenarios: Array.from(guestProgress.scenarios)
           };
@@ -181,7 +181,8 @@ export function requireAuth(opts = {}) {
         async removeFromAllowlist() { alert('訪客模式：無法移除授權'); },
         async listAllUsers() { return [guestDoc]; },
         async getUserProgressDetail() {
-          return { progress: [], scenarios: [], score: guestProgress.score, totalCompleted: guestProgress.quizIds.size + guestProgress.scenarios.size };
+          const coreScen = Array.from(guestProgress.scenarios).filter(k => k !== 'match_v1').length;
+          return { progress: [], scenarios: [], score: guestProgress.score, totalCompleted: guestProgress.quizIds.size + coreScen };
         },
         onUsersUpdate(cb) { cb([guestDoc]); return () => {}; },
         onAllowlistUpdate(cb) { cb([]); return () => {}; },
@@ -334,9 +335,11 @@ export async function loadProgress() {
     scenarios.push(data.scenarioKey);
     score += data.points || 0;
   });
+  // match_v1（Stage 7 配對挑戰）是徽章加碼關，不計入 30 必修
+  const coreScenarios = scenarios.filter(k => k !== 'match_v1');
   return {
     score,
-    completed: quizIds.length + scenarios.length,
+    completed: quizIds.length + coreScenarios.length,
     quizIds,
     scenarios
   };
@@ -494,11 +497,13 @@ export async function getUserProgressDetail(uid) {
   progSnap.forEach(d => { progress.push(d.data()); score += d.data().points || 0; });
   const scenarios = [];
   scenSnap.forEach(d => { scenarios.push(d.data()); score += d.data().points || 0; });
+  // match_v1（Stage 7 配對挑戰）是徽章加碼關，不計入 30 必修（avoid 31/30 = 103%）
+  const coreScenarioCount = scenarios.filter(s => (s.scenarioKey || '') !== 'match_v1').length;
   return {
     progress, scenarios, score,
     quizCompleted: progress.length,
-    scenariosCompleted: scenarios.length,
-    totalCompleted: progress.length + scenarios.length
+    scenariosCompleted: coreScenarioCount,
+    totalCompleted: progress.length + coreScenarioCount
   };
 }
 

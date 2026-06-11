@@ -508,7 +508,7 @@
           <div class="stat-card">
             <div class="stat-label">平均完成率</div>
             <div class="stat-num"><span id="dashAvgPct">—</span><span class="text-lg text-gray-500">%</span></div>
-            <div class="stat-trend text-gray-500">基於 22 關卡</div>
+            <div class="stat-trend text-gray-500">基於 30 必修關卡</div>
           </div>
           <div class="stat-card">
             <div class="stat-label">平均光點</div>
@@ -1891,7 +1891,7 @@
       let sumPct = 0, sumScore = 0;
       trainees.forEach(u => {
         const p = progressByUid[u.uid] || { totalCompleted: 0, score: 0 };
-        sumPct += (p.totalCompleted / TOTAL) * 100;
+        sumPct += Math.min(100, (p.totalCompleted / TOTAL) * 100);
         sumScore += p.score || 0;
       });
       const avgPct = trainees.length ? Math.round(sumPct / trainees.length) : 0;
@@ -1904,9 +1904,10 @@
         1: { label: 'STAGE 1', ids: ['q1','q2','q3','q4','q5'] },
         2: { label: 'STAGE 2', ids: ['q6','q7','q8','q9'] },
         3: { label: 'STAGE 3', ids: ['q10','q11','q12'] },
-        4: { label: 'STAGE 4', ids: null }, // scenarios (8 個)
+        4: { label: 'STAGE 4', ids: null, type: 'scenarios' }, // 8 個 AI 客戶情境
         5: { label: 'STAGE 5', ids: ['q13','q14','q15','q16','q17'] },
-        6: { label: 'STAGE 6', ids: ['q18','q19','q20','q21','q22'] }
+        6: { label: 'STAGE 6', ids: ['q18','q19','q20','q21','q22'] },
+        7: { label: 'STAGE 7', ids: null, type: 'match' } // 配對挑戰（徽章加碼關，不計入 30 必修）
       };
       const stagePcts = {};
       Object.entries(stages).forEach(([k, s]) => {
@@ -1918,8 +1919,10 @@
             const ids = new Set((p.progress || []).map(d => d.quizId));
             const done = s.ids.filter(id => ids.has(id)).length;
             total += done / s.ids.length;
+          } else if (s.type === 'match') {
+            total += (p.scenarios || []).some(sc => (sc.scenarioKey || '') === 'match_v1') ? 1 : 0;
           } else {
-            total += (p.scenariosCompleted || 0) / 8;  // STAGE 4 共 8 個場景
+            total += (p.scenariosCompleted || 0) / 8;  // STAGE 4 共 8 個場景（已排除 match_v1）
           }
         });
         stagePcts[k] = Math.round((total / trainees.length) * 100);
