@@ -4,9 +4,14 @@
 # Re-allow this gitignore itself
 !.gitignore
 
-# Re-allow project meta
+# Re-allow project meta / handoff docs
 !README.md
+!DEPLOYMENT.md
 !robots.txt
+
+# Re-allow intranet deployment helpers
+!deploy/
+!deploy/**
 
 # Re-allow demo HTML files (explicit list, not wildcard)
 !index.html
@@ -31,15 +36,13 @@
 !assets/
 !assets/**
 
-# Re-allow backend folder (deploys to fly.io, not GitHub Pages)
+# Re-allow backend folder
 !backend/
 !backend/**
 
-# Re-allow knowledge base markdown for NotebookLM upload
+# Re-allow knowledge base and model evaluation docs
 !kb/
 !kb/**
-
-# Re-allow model evaluation docs (測試題集、評分表、性價比試算)
 !model_eval/
 !model_eval/**
 
@@ -63,7 +66,7 @@ backend/data/kb_chunks.json
 backend/data/*.npz
 !backend/data/.gitkeep
 
-# Generated system prompt (KB + persona) — 重新生成即可，不需進 git
+# Generated runtime files
 backend/kb_full_system_prompt.txt
 backend/cookie_lifetime_log*.csv
 backend/test_stdout.log
